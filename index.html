@@ -1,27 +1,101 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="./support.js?v=20260909a"></script>
-</head>
-<body>
-<x-dc>
-<helmet>
+<title>Cresce Forte — Catálogo digital e CRM para lojistas</title>
+<meta name="description" content="Catálogo digital profissional e CRM integrado à IA para lojistas venderem online sem depender de programador.">
+<meta name="theme-color" content="#0a2035">
+<link rel="icon" href="assets/cresce-forte-icon.webp?v=1" type="image/webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
-<script src="./image-slot.js?v=20260909a"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="image" href="assets/wallpaper-desktop.webp?v=1" media="(min-width:861px)">
+<link rel="preload" as="image" href="assets/wallpaper-mobile.webp?v=1" media="(max-width:860px)">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
 <style>
-@keyframes fadeInUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+body{margin:0;background:#eff4f5;font-family:Inter,system-ui,sans-serif;color:#3d5768;-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+h1,h2,h3{font-family:'Space Grotesk',Inter,sans-serif;font-weight:700;color:#0d2b3e;margin:0}
+a{text-decoration:none}
+.wrap{max-width:1180px;margin:0 auto;padding-left:clamp(20px,4vw,56px);padding-right:clamp(20px,4vw,56px)}
+
+/* ---------- botoes ---------- */
+.btn{display:inline-flex;align-items:center;gap:8px;font-size:14.5px;font-weight:700;min-height:48px;padding:0 26px;border-radius:999px;transition:background .2s ease,border-color .2s ease}
+.btn-wa{background:#7cb602;color:#0a2536;box-shadow:0 1px 2px rgba(13,43,62,.06)}
+.btn-wa:hover{background:#8dc90a}
+.btn-ghost{background:transparent;border:1px solid rgba(13,43,62,.2);color:#0d2b3e}
+.btn-ghost:hover{border-color:rgba(13,43,62,.4)}
+.btn-sm{font-size:14px;min-height:46px;padding:0 24px}
+.btn-lg{padding:0 28px}
+.btn-cat{background:#7cb602;color:#0a2536;box-shadow:0 4px 12px -4px rgba(79,138,0,.4)}
+.btn-cat:hover{background:#8dc90a}
+.btn-crm{background:#0f7c8c;color:#fff;box-shadow:0 4px 12px -4px rgba(15,124,150,.45)}
+.btn-crm:hover{background:#0b6b80}
+
+/* ---------- header ---------- */
+.hdr{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px clamp(20px,4vw,56px);background:#0a2035;border-bottom:1px solid rgba(255,255,255,.08)}
+.hdr-logo{display:flex;align-items:center;gap:10px}
+.hdr-mark{width:32px;height:32px;border-radius:8px;flex-shrink:0;background:#fff;border:1px solid rgba(13,43,62,.1);display:flex;align-items:center;justify-content:center;padding:4px;box-shadow:0 1px 2px rgba(13,43,62,.06)}
+.hdr-mark img{width:100%;height:100%;object-fit:contain}
+.hdr-brand{font-family:'Space Grotesk',Inter,sans-serif;font-weight:600;font-size:17px;letter-spacing:-.01em;white-space:nowrap;flex-shrink:0;color:#fff}
+.hdr-actions{display:flex;align-items:center;gap:12px}
+.hdr-login{font-size:14px;font-weight:600;color:rgba(255,255,255,.78);white-space:nowrap;transition:color .2s ease}
+.hdr-login:hover{color:#fff}
+.hdr-wa{font-size:14px;min-height:40px;padding:0 20px;white-space:nowrap}
+.hdr-sm{display:none}
+@media (max-width:620px){
+  .hdr{gap:10px;padding:11px 16px}
+  .hdr-brand{font-size:15.5px}
+  .hdr-actions{gap:10px}
+  .hdr-login{font-size:13.5px}
+  .hdr-wa{font-size:13.5px;min-height:38px;padding:0 16px}
+  .hdr-lg{display:none}
+  .hdr-sm{display:inline}
+}
+@media (max-width:359px){.hdr-brand{display:none}}
+
+/* ---------- papel de parede do topo ---------- */
+.hero-wall{
+  background-color:#0a2035;
+  background-image:linear-gradient(180deg,rgba(239,244,245,0) 84%,rgba(239,244,245,.85) 96%,#eff4f5 100%),url(assets/wallpaper-desktop.webp?v=1);
+  background-size:100% 100%,cover;
+  background-position:center top,center center;
+  background-repeat:no-repeat
+}
+@media (max-width:860px){
+  .hero-wall{background-image:linear-gradient(180deg,rgba(239,244,245,0) 82%,rgba(239,244,245,.85) 95%,#eff4f5 100%),url(assets/wallpaper-mobile.webp?v=1)}
+}
+
+/* ---------- hero ---------- */
+.hero{display:flex;flex-direction:column;align-items:center;text-align:center;padding-top:clamp(56px,9vw,108px);padding-bottom:clamp(40px,6vw,56px)}
+.hero-rule{width:44px;height:4px;border-radius:2px;background:#7cb602;margin-bottom:22px}
+.hero-title{font-size:clamp(38px,6vw,58px);line-height:1.08;letter-spacing:-.025em;max-width:720px;color:#fff}
+.hero-title span{background-image:linear-gradient(rgba(124,182,2,.65),rgba(124,182,2,.65));background-repeat:no-repeat;background-size:100% .16em;background-position:0 90%}
+.hero-sub{font-size:clamp(15px,1.6vw,17px);line-height:1.6;color:rgba(255,255,255,.74);max-width:56ch;margin:20px 0 0;text-wrap:pretty}
+.hero-cta{display:flex;gap:14px;margin-top:30px;flex-wrap:wrap;justify-content:center}
+.hero-cta .btn-ghost{color:#fff;border-color:rgba(255,255,255,.35)}
+.hero-cta .btn-ghost:hover{border-color:rgba(255,255,255,.6)}
+
+/* ---------- notebook ---------- */
+.nb-sec{max-width:1080px;margin:0 auto;padding:0 clamp(20px,4vw,56px) clamp(56px,8vw,96px)}
 .nb{max-width:900px;margin:0 auto}
-.nb-lid{position:relative;width:92%;margin:0 auto;background:linear-gradient(180deg,#1d2c34 0%,#111d24 100%);border:1px solid rgba(255,255,255,0.13);border-radius:16px 16px 4px 4px;padding:clamp(14px,1.8vw,20px) clamp(10px,1.3vw,14px) clamp(16px,2.1vw,24px);box-shadow:inset 0 1px 0 rgba(255,255,255,0.09)}
-.nb-cam{position:absolute;top:clamp(6px,0.75vw,8px);left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:#40596a;box-shadow:0 0 0 2px rgba(255,255,255,0.05)}
-.nb-screen{border-radius:3px;overflow:hidden;aspect-ratio:1888/936;background:#08141a}
+.nb-lid{position:relative;width:92%;margin:0 auto;background:linear-gradient(180deg,#1d2c34 0%,#111d24 100%);border:1px solid rgba(255,255,255,.2);border-radius:16px 16px 4px 4px;padding:clamp(14px,1.8vw,20px) clamp(10px,1.3vw,14px) clamp(16px,2.1vw,24px);box-shadow:inset 0 1px 0 rgba(255,255,255,.09)}
+.nb-cam{position:absolute;top:clamp(6px,.75vw,8px);left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:#40596a;box-shadow:0 0 0 2px rgba(255,255,255,.05)}
+.nb-screen{border-radius:3px;overflow:hidden;aspect-ratio:1660/823;background:#08141a}
+.nb-screen img{width:100%;height:100%;object-fit:contain}
 .nb-base{position:relative;height:clamp(12px,1.5vw,16px);background:linear-gradient(180deg,#3a4f5a 0%,#22343d 28%,#0e1c23 100%);border-radius:0 0 12px 12px}
-.nb-lip{position:absolute;left:50%;top:0;transform:translateX(-50%);width:clamp(62px,8vw,96px);height:clamp(4px,0.5vw,6px);background:rgba(0,0,0,0.4);border-radius:0 0 7px 7px}
-.nb-shadow{width:84%;height:clamp(16px,2.4vw,26px);margin:0 auto;background:radial-gradient(ellipse at center,rgba(13,43,62,0.30) 0%,rgba(13,43,62,0.12) 45%,rgba(13,43,62,0) 72%)}
-.pilar{display:grid;grid-template-columns:1fr;grid-template-areas:"head" "media" "body";gap:clamp(18px,2.4vw,24px);background:#fff;border:1px solid rgba(13,43,62,0.09);border-radius:26px;padding:clamp(22px,3vw,40px);box-shadow:0 18px 40px -26px rgba(13,43,62,0.32)}
+.nb-lip{position:absolute;left:50%;top:0;transform:translateX(-50%);width:clamp(62px,8vw,96px);height:clamp(4px,.5vw,6px);background:rgba(0,0,0,.4);border-radius:0 0 7px 7px}
+.nb-shadow{width:84%;height:clamp(16px,2.4vw,26px);margin:0 auto;background:radial-gradient(ellipse at center,rgba(0,0,0,.45) 0%,rgba(0,0,0,.18) 45%,rgba(0,0,0,0) 72%)}
+
+/* ---------- blocos de secao ---------- */
+.sec-head{text-align:center;max-width:640px;margin:0 auto 56px}
+.eyebrow{display:inline-flex;align-items:center;font-family:'Space Grotesk',Inter,sans-serif;font-weight:700;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:#4f8a00;background:rgba(124,182,2,.14);padding:6px 14px;border-radius:999px;margin-bottom:18px}
+.sec-head h2{font-size:clamp(28px,3.6vw,38px);line-height:1.15;letter-spacing:-.02em}
+.sec-head p{font-size:15.5px;line-height:1.65;color:#56707e;margin:14px 0 0;text-wrap:pretty}
+
+/* ---------- pilares ---------- */
+.pilares{padding-bottom:clamp(56px,8vw,96px)}
+.pilar{display:grid;grid-template-columns:1fr;grid-template-areas:"head" "media" "body";gap:clamp(18px,2.4vw,24px);background:#fff;border:1px solid rgba(13,43,62,.09);border-radius:26px;padding:clamp(22px,3vw,40px);box-shadow:0 18px 40px -26px rgba(13,43,62,.32)}
 .pilar+.pilar{margin-top:clamp(24px,4vw,40px)}
 .pilar-head{grid-area:head}
 .pilar-media{grid-area:media;align-self:center;display:flex;justify-content:center;width:100%}
@@ -30,211 +104,300 @@
   .pilar{grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr;grid-template-areas:"head media" "body media";column-gap:clamp(30px,4vw,56px);row-gap:0}
   .pilar-rev{grid-template-areas:"media head" "media body"}
 }
-/* Papel de parede do topo — desktop (padrão) e mobile (troca só a imagem) */
-.hero-wall{
-  background-color:#0a2035;
-  background-image:linear-gradient(180deg,rgba(239,244,245,0) 84%,rgba(239,244,245,0.85) 96%,#eff4f5 100%),url(assets/wallpaper-desktop.jpg?v=20260909c);
-  background-size:100% 100%,cover;
-  background-position:center top,center center;
-  background-repeat:no-repeat,no-repeat
-}
-@media (max-width:860px){
-  .hero-wall{background-image:linear-gradient(180deg,rgba(239,244,245,0) 82%,rgba(239,244,245,0.85) 95%,#eff4f5 100%),url(assets/wallpaper-mobile.jpg?v=20260909b)}
-}
-.hero-title{color:#fff!important}
-.hero-title mark,.hero-title span{background-image:linear-gradient(rgba(124,182,2,0.65),rgba(124,182,2,0.65))!important}
-.hero-sub{color:rgba(255,255,255,0.74)!important}
-.hero-btn2{color:#fff!important;border-color:rgba(255,255,255,0.35)!important}
-.hero-wall .nb-shadow{background:radial-gradient(ellipse at center,rgba(0,0,0,0.45) 0%,rgba(0,0,0,0.18) 45%,rgba(0,0,0,0) 72%)}
-.hero-wall .nb-lid{border-color:rgba(255,255,255,0.2)}
-/* Header escuro só na home, para casar com o topo do papel de parede */
-.hdr{background:#0a2035!important;border-bottom-color:rgba(255,255,255,0.08)!important}
-.hdr-brand{color:#fff!important}
-.hdr-login{color:rgba(255,255,255,0.78)!important}
+.pilar-tag{display:inline-flex;align-items:center;gap:8px;font-family:'Space Grotesk',Inter,sans-serif;font-weight:700;font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:#4f8a00;margin-bottom:14px}
+.pilar-tag i{width:22px;height:2px;background:#7cb602;border-radius:2px}
+.pilar-rev .pilar-tag{color:#0b6b80}
+.pilar-rev .pilar-tag i{background:#0f7c8c}
+.pilar-head h3{font-size:clamp(23px,2.6vw,29px);line-height:1.2;letter-spacing:-.015em;margin-bottom:12px}
+.pilar-body p{font-size:15px;line-height:1.65;margin:0 0 22px;max-width:46ch;text-wrap:pretty}
+.feats{list-style:none;padding:0;margin:0 0 24px;display:flex;flex-direction:column;gap:12px}
+.feats li{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;line-height:1.55}
+.feats svg{width:17px;height:17px;flex-shrink:0;margin-top:2px;color:#4f8a00}
+.pilar-rev .feats svg{color:#0b6b80}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:26px}
+.tags span{font-size:12.5px;font-weight:600;color:#3f6f00;background:rgba(124,182,2,.13);padding:6px 12px;border-radius:999px}
+.pilar-rev .tags span{color:#0b6b80;background:rgba(15,124,150,.12)}
+
+/* mockup do celular */
+.phone{position:relative;width:100%;max-width:296px;background:linear-gradient(160deg,#12354a,#0a2536);border-radius:42px;padding:11px;box-shadow:0 26px 54px -24px rgba(13,43,62,.55),inset 0 0 0 1px rgba(255,255,255,.12)}
+.phone i{position:absolute;top:19px;left:50%;transform:translateX(-50%);width:56px;height:5px;border-radius:3px;background:rgba(255,255,255,.22);z-index:2}
+.phone-screen{border-radius:32px;overflow:hidden;aspect-ratio:394/786;background:#f6f9fa}
+.phone-screen img{width:100%;height:100%;object-fit:contain}
+
+/* caixa do CRM (ainda sem imagem) */
+.crm-box{width:100%;max-width:520px;background:linear-gradient(150deg,rgba(15,124,150,.16),rgba(13,43,62,.06));border:1px solid rgba(13,43,62,.09);border-radius:24px;padding:14px;box-shadow:0 18px 40px -22px rgba(13,43,62,.35)}
+.crm-empty{position:relative;border-radius:14px;aspect-ratio:4/3;background:#fff}
+.crm-inner{position:absolute;inset:12px;border:1px dashed rgba(13,43,62,.28);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center}
+.crm-inner svg{width:26px;height:26px;color:#8ea3ae}
+.crm-inner span{font-size:13px;line-height:1.3;color:#56707e;max-width:22ch}
+
+/* ---------- como funciona ---------- */
+.how{background:linear-gradient(180deg,#f4f8f9 0%,#eaf1ee 100%);padding-top:clamp(64px,9vw,100px);padding-bottom:clamp(64px,9vw,100px)}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:36px 24px}
+.step{background:#fff;border:1px solid rgba(13,43,62,.08);border-radius:20px;padding:36px 22px 26px;position:relative;box-shadow:0 1px 3px rgba(13,43,62,.05);transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;animation:fadeInUp .6s ease backwards}
+.step:nth-child(2){animation-delay:.08s}
+.step:nth-child(3){animation-delay:.16s}
+.step:nth-child(4){animation-delay:.24s}
+.step:hover{transform:translateY(-6px);box-shadow:0 16px 32px -12px rgba(13,43,62,.18);border-color:rgba(124,182,2,.35)}
+.step-n{position:absolute;top:-18px;left:22px;width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#8dc90a,#4f8a00);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',Inter,sans-serif;font-weight:700;font-size:14px;box-shadow:0 6px 14px -4px rgba(79,138,0,.55)}
+.step-ico{width:52px;height:52px;border-radius:14px;background:rgba(124,182,2,.14);color:#4f8a00;display:flex;align-items:center;justify-content:center;margin-bottom:20px}
+.step h3{font-weight:600;font-size:17px;margin-bottom:8px}
+.step p{font-size:14px;line-height:1.6;color:#56707e;margin:0}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@media (prefers-reduced-motion:reduce){.step{animation:none}}
+
+/* ---------- depoimentos ---------- */
+.deps{padding-top:clamp(56px,8vw,88px);padding-bottom:clamp(56px,8vw,88px)}
+.deps h2{text-align:center;font-size:clamp(26px,3vw,34px)}
+.quotes{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;margin-top:40px}
+.quote{background:#fff;border:1px solid rgba(13,43,62,.1);border-radius:22px;padding:26px;display:flex;flex-direction:column;gap:16px;box-shadow:0 1px 2px rgba(13,43,62,.06)}
+.quote p{font-size:14.5px;line-height:1.65;margin:0}
+.who{display:flex;align-items:center;gap:12px}
+.who img{width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.who b{display:block;font-size:13.5px;font-weight:700;color:#0d2b3e}
+.who small{font-size:12.5px;color:#56707e}
+
+/* ---------- cta final ---------- */
+.cta{background:#0a2536;padding:clamp(56px,8vw,80px) clamp(20px,4vw,56px);text-align:center}
+.cta h2{font-size:clamp(26px,3vw,36px);color:#fff;margin-bottom:16px}
+.cta p{color:rgba(255,255,255,.65);font-size:15.5px;max-width:52ch;margin:0 auto 28px}
+
+/* ---------- rodape ---------- */
+.ftr{background:#0a2536;color:rgba(255,255,255,.72);padding:64px clamp(20px,4vw,56px) 28px}
+.ftr-grid{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:40px}
+.ftr-logo{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.ftr-logo img{width:28px;height:28px;border-radius:7px;background:#fff;padding:3px;object-fit:contain}
+.ftr-logo b{font-family:'Space Grotesk',Inter,sans-serif;font-weight:600;font-size:16px;color:#fff}
+.ftr p{font-size:14px;line-height:1.7;color:rgba(255,255,255,.6);max-width:32ch;margin:0}
+.ftr h4{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.4);margin:0 0 16px;font-family:Inter,sans-serif}
+.ftr-col{display:flex;flex-direction:column;gap:10px;font-size:14px}
+.ftr-col a{color:rgba(255,255,255,.75);transition:color .2s ease}
+.ftr-col a:hover{color:#fff}
+.ftr-end{max-width:1180px;margin:44px auto 0;padding-top:24px;border-top:1px solid rgba(255,255,255,.12);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:12.5px;color:rgba(255,255,255,.45)}
 </style>
-</helmet>
-<dc-import name="Header" hint-size="100%,64px"></dc-import>
-<main style="background:#eff4f5;font-family:Inter,sans-serif">
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-chk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
+</defs></svg>
+
+<header class="hdr">
+  <a class="hdr-logo" href="index.html">
+    <span class="hdr-mark"><img src="assets/cresce-forte-icon.webp?v=1" alt="Cresce Forte" width="72" height="72"></span>
+    <span class="hdr-brand">Cresce Forte</span>
+  </a>
+  <div class="hdr-actions">
+    <a class="hdr-login" href="Login.dc.html"><span class="hdr-lg">Fazer login</span><span class="hdr-sm">Entrar</span></a>
+    <a class="btn btn-wa hdr-wa" href="https://wa.me/5511940001234?text=Olá!%20Quero%20saber%20mais%20sobre%20a%20Cresce%20Forte." target="_blank" rel="noopener"><span class="hdr-lg">Falar no WhatsApp</span><span class="hdr-sm">WhatsApp</span></a>
+  </div>
+</header>
+
+<main>
 
   <div class="hero-wall">
-
-  <section style="max-width:1180px;margin:0 auto;padding:clamp(56px,9vw,108px) clamp(20px,4vw,56px) clamp(40px,6vw,56px);display:flex;flex-direction:column;align-items:center;text-align:center">
-    <span style="width:44px;height:4px;border-radius:2px;background:#7cb602;margin-bottom:22px"></span>
-    <h1 class="hero-title" style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(38px,6vw,58px);line-height:1.08;letter-spacing:-0.025em;margin:0;max-width:720px;color:#0d2b3e">Sua loja pronta para crescer&nbsp;<span style="font-style: normal; background-image: linear-gradient(rgba(124, 182, 2, 0.5), rgba(124, 182, 2, 0.5)); background-repeat: no-repeat; background-size: 100% 0.16em; background-position: 0px 90%;">vendas no online</span>.</h1>
-    <p class="hero-sub" style="font-size:clamp(15px,1.6vw,17px);line-height:1.6;color:#3d5768;max-width:56ch;margin:20px 0 0;text-wrap:pretty">Melhore a experiência de compra dos seus clientes com um catálogo digital profissional e intuitivo. Gerencie o relacionamento com quem já comprou de você usando nosso CRM integrado à IA.</p>
-    <div style="display:flex;gap:14px;margin-top:30px;flex-wrap:wrap;justify-content:center">
-      <a href="https://wa.me/5511940001234?text=Olá!%20Quero%20saber%20mais%20sobre%20a%20Cresce%20Forte." target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;font-size:14.5px;font-weight:700;min-height:48px;padding:0 26px;border-radius:999px;background:#7cb602;color:#0a2536;text-decoration:none;box-shadow:0 1px 2px rgba(13,43,62,0.06)" style-hover="background:#8dc90a">Falar no WhatsApp</a>
-      <a class="hero-btn2" href="#servicos" style="display:inline-flex;align-items:center;gap:8px;font-size:14.5px;font-weight:700;min-height:48px;padding:0 26px;border-radius:999px;background:transparent;border:1px solid rgba(13,43,62,0.2);color:#0d2b3e;text-decoration:none" style-hover="border-color:rgba(13,43,62,0.4)">Ver serviços e planos</a>
-    </div>
-  </section>
-
-  <section style="max-width:1080px;margin:0 auto;padding:0 clamp(20px,4vw,56px) clamp(56px,8vw,96px)">
-    <div class="nb">
-      <div class="nb-lid">
-        <span class="nb-cam"></span>
-        <div class="nb-screen">
-          <image-slot id="hero-shot" shape="rect" fit="contain" placeholder="Screenshot do catálogo ou do painel" src="assets/admin-template-screenshot.png?v=20260909a"></image-slot>
-        </div>
+    <section class="wrap hero">
+      <span class="hero-rule"></span>
+      <h1 class="hero-title">Sua loja pronta para crescer&nbsp;<span>vendas no online</span>.</h1>
+      <p class="hero-sub">Melhore a experiência de compra dos seus clientes com um catálogo digital profissional e intuitivo. Gerencie o relacionamento com quem já comprou de você usando nosso CRM integrado à IA.</p>
+      <div class="hero-cta">
+        <a class="btn btn-wa" href="https://wa.me/5511940001234?text=Olá!%20Quero%20saber%20mais%20sobre%20a%20Cresce%20Forte." target="_blank" rel="noopener">Falar no WhatsApp</a>
+        <a class="btn btn-ghost" href="#servicos">Ver serviços e planos</a>
       </div>
-      <div class="nb-base"><span class="nb-lip"></span></div>
-      <div class="nb-shadow"></div>
-    </div>
-  </section>
+    </section>
 
+    <section class="nb-sec">
+      <div class="nb">
+        <div class="nb-lid">
+          <span class="nb-cam"></span>
+          <div class="nb-screen">
+            <img src="assets/admin-template-screenshot.webp?v=1" width="1660" height="823" fetchpriority="high" decoding="async" alt="Painel de controle da Cresce Forte com a edição de um catálogo digital">
+          </div>
+        </div>
+        <div class="nb-base"><span class="nb-lip"></span></div>
+        <div class="nb-shadow"></div>
+      </div>
+    </section>
   </div>
 
-  <section id="servicos" data-screen-label="Servicos" style="max-width:1180px;margin:0 auto;padding:0 clamp(20px,4vw,56px) clamp(56px,8vw,96px)">
-    <div style="text-align:center;max-width:640px;margin:0 auto 56px">
-      <span style="display:inline-flex;align-items:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12.5px;letter-spacing:0.08em;text-transform:uppercase;color:#4f8a00;background:rgba(124,182,2,0.14);padding:6px 14px;border-radius:999px;margin-bottom:18px">O que fazemos</span>
-      <h2 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(28px,3.6vw,38px);line-height:1.15;letter-spacing:-0.02em;color:#0d2b3e;margin:0">Dois pilares que fazem seu negócio girar</h2>
-      <p style="font-size:15.5px;line-height:1.65;color:#56707e;margin:14px 0 0;text-wrap:pretty">O catálogo digital coloca seus produtos na frente do cliente. O CRM cuida do relacionamento depois do primeiro contato.&nbsp;<br></p>
+  <section class="wrap pilares" id="servicos">
+    <div class="sec-head">
+      <span class="eyebrow">O que fazemos</span>
+      <h2>Dois pilares que fazem seu negócio girar</h2>
+      <p>O catálogo digital coloca seus produtos na frente do cliente. O CRM cuida do relacionamento depois do primeiro contato.</p>
     </div>
 
     <div class="pilar">
       <div class="pilar-head">
-        <span style="display:inline-flex;align-items:center;gap:8px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.09em;text-transform:uppercase;color:#4f8a00;margin-bottom:14px"><span style="width:22px;height:2px;background:#7cb602;border-radius:2px"></span>Pilar 01</span>
-        <h3 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(23px,2.6vw,29px);line-height:1.2;letter-spacing:-0.015em;color:#0d2b3e;margin:0 0 12px">Catálogo digital</h3>
+        <span class="pilar-tag"><i></i>Pilar 01</span>
+        <h3>Catálogo digital</h3>
       </div>
       <div class="pilar-media">
-        <div style="position:relative;width:100%;max-width:296px;background:linear-gradient(160deg,#12354a,#0a2536);border-radius:42px;padding:11px;box-shadow:0 26px 54px -24px rgba(13,43,62,0.55),inset 0 0 0 1px rgba(255,255,255,0.12)">
-          <span style="position:absolute;top:19px;left:50%;transform:translateX(-50%);width:56px;height:5px;border-radius:3px;background:rgba(255,255,255,0.22);z-index:2"></span>
-          <div style="border-radius:32px;overflow:hidden;aspect-ratio:394/786;background:#f6f9fa">
-            <image-slot id="pilar-catalogo" shape="rect" fit="contain" placeholder="Imagem do catálogo digital" src="assets/pilar-catalogo.png?v=20260909a"></image-slot>
+        <div class="phone">
+          <i></i>
+          <div class="phone-screen">
+            <img src="assets/pilar-catalogo.webp?v=1" width="394" height="786" loading="lazy" decoding="async" alt="Catálogo digital aberto no celular de um cliente">
           </div>
         </div>
       </div>
       <div class="pilar-body">
-        <p style="font-size:15px;line-height:1.65;color:#3d5768;margin:0 0 22px;max-width:46ch;text-wrap:pretty">Um catálogo profissional com a sua marca, aberto no celular do cliente com um link. Sem foto solta no WhatsApp, sem preço perdido na conversa.</p>
-        <ul style="list-style:none;padding:0;margin:0 0 24px;display:flex;flex-direction:column;gap:12px">
-          <li style="display:flex;gap:10px;align-items:flex-start;font-size:14.5px;line-height:1.55;color:#3d5768"><span style="color:#4f8a00;display:flex"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><path d="M20 6 9 17l-5-5"></path></svg></span><span>Modelos visuais prontos e personalizáveis com sua logo e cores</span></li>
-          <li style="display:flex;gap:10px;align-items:flex-start;font-size:14.5px;line-height:1.55;color:#3d5768"><span style="color:#4f8a00;display:flex"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><path d="M20 6 9 17l-5-5"></path></svg></span><span>Cadastro de produtos com fotos, preços e estoque</span></li>
-          <li style="display:flex;gap:10px;align-items:flex-start;font-size:14.5px;line-height:1.55;color:#3d5768"><span style="color:#4f8a00;display:flex"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><path d="M20 6 9 17l-5-5"></path></svg></span><span>Publicação imediata: o link fica pronto para compartilhar</span></li>
-          <li style="display:flex;gap:10px;align-items:flex-start;font-size:14.5px;line-height:1.55;color:#3d5768"><span style="color:#4f8a00;display:flex"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><path d="M20 6 9 17l-5-5"></path></svg></span><span>Pedidos chegam organizados, direto no seu WhatsApp</span></li>
+        <p>Um catálogo profissional com a sua marca, aberto no celular do cliente com um link. Sem foto solta no WhatsApp, sem preço perdido na conversa.</p>
+        <ul class="feats">
+          <li><svg><use href="#i-chk"/></svg><span>Modelos visuais prontos e personalizáveis com sua logo e cores</span></li>
+          <li><svg><use href="#i-chk"/></svg><span>Cadastro de produtos com fotos, preços e estoque</span></li>
+          <li><svg><use href="#i-chk"/></svg><span>Publicação imediata: o link fica pronto para compartilhar</span></li>
+          <li><svg><use href="#i-chk"/></svg><span>Pedidos chegam organizados, direto no seu WhatsApp</span></li>
         </ul>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:26px">
-          <span style="font-size:12.5px;font-weight:600;color:#3f6f00;background:rgba(124,182,2,0.13);padding:6px 12px;border-radius:999px">Visual profissional</span>
-          <span style="font-size:12.5px;font-weight:600;color:#3f6f00;background:rgba(124,182,2,0.13);padding:6px 12px;border-radius:999px">Feito para o celular</span>
-          <span style="font-size:12.5px;font-weight:600;color:#3f6f00;background:rgba(124,182,2,0.13);padding:6px 12px;border-radius:999px">Compartilhamento rápido</span>
+        <div class="tags">
+          <span>Visual profissional</span>
+          <span>Feito para o celular</span>
+          <span>Compartilhamento rápido</span>
         </div>
-        <a href="https://wa.me/5511940001234?text=Olá!%20Quero%20saber%20mais%20sobre%20o%20catálogo%20digital." target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;min-height:46px;padding:0 24px;border-radius:999px;background:#7cb602;color:#0a2536;text-decoration:none;box-shadow:0 4px 12px -4px rgba(79,138,0,0.4);transition:background 0.2s ease" style-hover="background:#8dc90a">Falar sobre o catálogo →</a>
+        <a class="btn btn-sm btn-cat" href="https://wa.me/5511940001234?text=Olá!%20Quero%20saber%20mais%20sobre%20o%20catálogo%20digital." target="_blank" rel="noopener">Falar sobre o catálogo →</a>
       </div>
     </div>
 
     <div class="pilar pilar-rev">
       <div class="pilar-head">
-        <span style="display:inline-flex;align-items:center;gap:8px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.09em;text-transform:uppercase;color:#0b6b80;margin-bottom:14px"><span style="width:22px;height:2px;background:#0f7c8c;border-radius:2px"></span>Pilar 02</span>
-        <h3 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(23px,2.6vw,29px);line-height:1.2;letter-spacing:-0.015em;color:#0d2b3e;margin:0 0 12px">CRM de clientes</h3>
+        <span class="pilar-tag"><i></i>Pilar 02</span>
+        <h3>CRM de clientes</h3>
       </div>
       <div class="pilar-media">
-        <div style="width:100%;max-width:520px;background:linear-gradient(150deg,rgba(15,124,150,0.16),rgba(13,43,62,0.06));border:1px solid rgba(13,43,62,0.09);border-radius:24px;padding:14px;box-shadow:0 18px 40px -22px rgba(13,43,62,0.35)">
-          <div style="border-radius:14px;overflow:hidden;aspect-ratio:4/3;background:#fff">
-            <image-slot id="pilar-crm" shape="rect" placeholder="Imagem do CRM — 4:3 (ex. 1600×1200px)"></image-slot>
+        <div class="crm-box">
+          <div class="crm-empty">
+            <div class="crm-inner">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+              <span>Imagem do CRM — 4:3 (ex. 1600×1200px)</span>
+            </div>
           </div>
         </div>
       </div>
       <div class="pilar-body">
-        <p style="font-size:15px;line-height:1.65;color:#3d5768;margin:0 0 22px;max-width:46ch;text-wrap:pretty">Cada pessoa que pediu um orçamento fica registrada, com histórico e próximo passo. O cliente volta a comprar porque você lembrou dele na hora certa.</p>
-        <ul style="list-style:none;padding:0;margin:0 0 24px;display:flex;flex-direction:column;gap:12px">
-          <li style="display:flex;gap:10px;align-items:flex-start;font-size:14.5px;line-height:1.55;color:#3d5768"><span style="color:#0b6b80;display:flex"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><path d="M20 6 9 17l-5-5"></path></svg></span><span>Todos os clientes organizados em um só lugar</span></li>
-          <li style="display:flex;gap:10px;align-items:flex-start;font-size:14.5px;line-height:1.55;color:#3d5768"><span style="color:#0b6b80;display:flex"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><path d="M20 6 9 17l-5-5"></path></svg></span><span>Acompanhamento das oportunidades em aberto</span></li>
-          <li style="display:flex;gap:10px;align-items:flex-start;font-size:14.5px;line-height:1.55;color:#3d5768"><span style="color:#0b6b80;display:flex"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><path d="M20 6 9 17l-5-5"></path></svg></span><span>Histórico de interações e de compras de cada cliente</span></li>
-          <li style="display:flex;gap:10px;align-items:flex-start;font-size:14.5px;line-height:1.55;color:#3d5768"><span style="color:#0b6b80;display:flex"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><path d="M20 6 9 17l-5-5"></path></svg></span><span>Follow-up automatizado, sem depender da memória</span></li>
+        <p>Cada pessoa que pediu um orçamento fica registrada, com histórico e próximo passo. O cliente volta a comprar porque você lembrou dele na hora certa.</p>
+        <ul class="feats">
+          <li><svg><use href="#i-chk"/></svg><span>Todos os clientes organizados em um só lugar</span></li>
+          <li><svg><use href="#i-chk"/></svg><span>Acompanhamento das oportunidades em aberto</span></li>
+          <li><svg><use href="#i-chk"/></svg><span>Histórico de interações e de compras de cada cliente</span></li>
+          <li><svg><use href="#i-chk"/></svg><span>Follow-up automatizado, sem depender da memória</span></li>
         </ul>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:26px">
-          <span style="font-size:12.5px;font-weight:600;color:#0b6b80;background:rgba(15,124,150,0.12);padding:6px 12px;border-radius:999px">Mais organização</span>
-          <span style="font-size:12.5px;font-weight:600;color:#0b6b80;background:rgba(15,124,150,0.12);padding:6px 12px;border-radius:999px">Melhor relacionamento</span>
-          <span style="font-size:12.5px;font-weight:600;color:#0b6b80;background:rgba(15,124,150,0.12);padding:6px 12px;border-radius:999px">Mais vendas</span>
+        <div class="tags">
+          <span>Mais organização</span>
+          <span>Melhor relacionamento</span>
+          <span>Mais vendas</span>
         </div>
-        <a href="https://wa.me/5511940001234?text=Olá!%20Quero%20saber%20mais%20sobre%20o%20CRM." target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;min-height:46px;padding:0 24px;border-radius:999px;background:#0f7c8c;color:#fff;text-decoration:none;box-shadow:0 4px 12px -4px rgba(15,124,150,0.45);transition:background 0.2s ease" style-hover="background:#0b6b80">Falar sobre o CRM →</a>
+        <a class="btn btn-sm btn-crm" href="https://wa.me/5511940001234?text=Olá!%20Quero%20saber%20mais%20sobre%20o%20CRM." target="_blank" rel="noopener">Falar sobre o CRM →</a>
       </div>
     </div>
   </section>
 
-  <section data-screen-label="Como funciona" style="background:linear-gradient(180deg,#f4f8f9 0%,#eaf1ee 100%);padding:clamp(64px,9vw,100px) clamp(20px,4vw,56px)">
-    <div style="max-width:1180px;margin:0 auto">
-      <div style="text-align:center;max-width:620px;margin:0 auto 52px">
-        <span style="display:inline-flex;align-items:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12.5px;letter-spacing:0.08em;text-transform:uppercase;color:#4f8a00;background:rgba(124,182,2,0.14);padding:6px 14px;border-radius:999px;margin-bottom:18px">Como funciona</span>
-        <h2 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(28px,3.6vw,38px);line-height:1.15;letter-spacing:-0.02em;color:#0d2b3e;margin:0">Do zero ao catálogo no ar em quatro passos</h2>
-        <p style="font-size:15.5px;line-height:1.6;color:#56707e;margin:14px 0 0;text-wrap:pretty">Sem programar, sem complicação. Escolha, personalize e compartilhe o link com seus clientes ainda hoje.</p>
+  <section class="how">
+    <div class="wrap">
+      <div class="sec-head" style="max-width:620px;margin-bottom:52px">
+        <span class="eyebrow">Como funciona</span>
+        <h2>Do zero ao catálogo no ar em quatro passos</h2>
+        <p>Sem programar, sem complicação. Escolha, personalize e compartilhe o link com seus clientes ainda hoje.</p>
       </div>
 
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:36px 24px">
-        <div style="background:#fff;border:1px solid rgba(13,43,62,0.08);border-radius:20px;padding:36px 22px 26px;position:relative;box-shadow:0 1px 3px rgba(13,43,62,0.05);transition:transform 0.25s ease,box-shadow 0.25s ease,border-color 0.25s ease;animation:fadeInUp 0.6s ease backwards" style-hover="transform:translateY(-6px);box-shadow:0 16px 32px -12px rgba(13,43,62,0.18);border-color:rgba(124,182,2,0.35)">
-          <span style="position:absolute;top:-18px;left:22px;width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#8dc90a,#4f8a00);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;box-shadow:0 6px 14px -4px rgba(79,138,0,0.55)">01</span>
-          <span style="width:52px;height:52px;border-radius:14px;background:rgba(124,182,2,0.14);color:#4f8a00;display:flex;align-items:center;justify-content:center;margin-bottom:20px"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg></span>
-          <h3 style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:17px;color:#0d2b3e;margin:0 0 8px">Escolha o modelo</h3>
-          <p style="font-size:14px;line-height:1.6;color:#56707e;margin:0">Veja os visuais disponíveis e escolha o que combina com a sua marca.</p>
+      <div class="steps">
+        <div class="step">
+          <span class="step-n">01</span>
+          <span class="step-ico"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>
+          <h3>Escolha o modelo</h3>
+          <p>Veja os visuais disponíveis e escolha o que combina com a sua marca.</p>
         </div>
-        <div style="background:#fff;border:1px solid rgba(13,43,62,0.08);border-radius:20px;padding:36px 22px 26px;position:relative;box-shadow:0 1px 3px rgba(13,43,62,0.05);transition:transform 0.25s ease,box-shadow 0.25s ease,border-color 0.25s ease;animation:fadeInUp 0.6s ease backwards;animation-delay:0.08s" style-hover="transform:translateY(-6px);box-shadow:0 16px 32px -12px rgba(13,43,62,0.18);border-color:rgba(124,182,2,0.35)">
-          <span style="position:absolute;top:-18px;left:22px;width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#8dc90a,#4f8a00);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;box-shadow:0 6px 14px -4px rgba(79,138,0,0.55)">02</span>
-          <span style="width:52px;height:52px;border-radius:14px;background:rgba(124,182,2,0.14);color:#4f8a00;display:flex;align-items:center;justify-content:center;margin-bottom:20px"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21a9 9 0 1 1 9-9c0 2-1 3-3 3h-2.5c-1 0-1.5.7-1.5 1.5 0 .8.5 1.3.5 2 0 1.4-1 2.5-2.5 2.5Z"></path><circle cx="7.5" cy="10.5" r="1.1" fill="currentColor" stroke="none"></circle><circle cx="11" cy="7" r="1.1" fill="currentColor" stroke="none"></circle><circle cx="15.5" cy="8.5" r="1.1" fill="currentColor" stroke="none"></circle></svg></span>
-          <h3 style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:17px;color:#0d2b3e;margin:0 0 8px">Personalize</h3>
-          <p style="font-size:14px;line-height:1.6;color:#56707e;margin:0">Suba sua logo, defina cores e organize as categorias.</p>
+        <div class="step">
+          <span class="step-n">02</span>
+          <span class="step-ico"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21a9 9 0 1 1 9-9c0 2-1 3-3 3h-2.5c-1 0-1.5.7-1.5 1.5 0 .8.5 1.3.5 2 0 1.4-1 2.5-2.5 2.5Z"/><circle cx="7.5" cy="10.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="11" cy="7" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="8.5" r="1.1" fill="currentColor" stroke="none"/></svg></span>
+          <h3>Personalize</h3>
+          <p>Suba sua logo, defina cores e organize as categorias.</p>
         </div>
-        <div style="background:#fff;border:1px solid rgba(13,43,62,0.08);border-radius:20px;padding:36px 22px 26px;position:relative;box-shadow:0 1px 3px rgba(13,43,62,0.05);transition:transform 0.25s ease,box-shadow 0.25s ease,border-color 0.25s ease;animation:fadeInUp 0.6s ease backwards;animation-delay:0.16s" style-hover="transform:translateY(-6px);box-shadow:0 16px 32px -12px rgba(13,43,62,0.18);border-color:rgba(124,182,2,0.35)">
-          <span style="position:absolute;top:-18px;left:22px;width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#8dc90a,#4f8a00);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;box-shadow:0 6px 14px -4px rgba(79,138,0,0.55)">03</span>
-          <span style="width:52px;height:52px;border-radius:14px;background:rgba(124,182,2,0.14);color:#4f8a00;display:flex;align-items:center;justify-content:center;margin-bottom:20px"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"></path><path d="M3 8l9 5 9-5"></path><path d="M12 13v8"></path></svg></span>
-          <h3 style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:17px;color:#0d2b3e;margin:0 0 8px">Cadastre os produtos</h3>
-          <p style="font-size:14px;line-height:1.6;color:#56707e;margin:0">Adicione fotos, preços e estoque pelo painel administrativo.</p>
+        <div class="step">
+          <span class="step-n">03</span>
+          <span class="step-ico"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg></span>
+          <h3>Cadastre os produtos</h3>
+          <p>Adicione fotos, preços e estoque pelo painel administrativo.</p>
         </div>
-        <div style="background:#fff;border:1px solid rgba(13,43,62,0.08);border-radius:20px;padding:36px 22px 26px;position:relative;box-shadow:0 1px 3px rgba(13,43,62,0.05);transition:transform 0.25s ease,box-shadow 0.25s ease,border-color 0.25s ease;animation:fadeInUp 0.6s ease backwards;animation-delay:0.24s" style-hover="transform:translateY(-6px);box-shadow:0 16px 32px -12px rgba(13,43,62,0.18);border-color:rgba(124,182,2,0.35)">
-          <span style="position:absolute;top:-18px;left:22px;width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#8dc90a,#4f8a00);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;box-shadow:0 6px 14px -4px rgba(79,138,0,0.55)">04</span>
-          <span style="width:52px;height:52px;border-radius:14px;background:rgba(124,182,2,0.14);color:#4f8a00;display:flex;align-items:center;justify-content:center;margin-bottom:20px"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"></path><path d="M22 2 15 22l-4-9-9-4 20-7Z"></path></svg></span>
-          <h3 style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:17px;color:#0d2b3e;margin:0 0 8px">Publique e venda</h3>
-          <p style="font-size:14px;line-height:1.6;color:#56707e;margin:0">Seu catálogo fica no ar, pronto para receber pedidos.</p>
+        <div class="step">
+          <span class="step-n">04</span>
+          <span class="step-ico"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7Z"/></svg></span>
+          <h3>Publique e venda</h3>
+          <p>Seu catálogo fica no ar, pronto para receber pedidos.</p>
         </div>
       </div>
 
       <div style="text-align:center;margin-top:52px">
-        <a href="https://wa.me/5511940001234?text=Olá!%20Quero%20saber%20mais%20sobre%20a%20Cresce%20Forte." target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;font-size:14.5px;font-weight:700;min-height:48px;padding:0 28px;border-radius:999px;background:#7cb602;color:#0a2536;text-decoration:none;box-shadow:0 4px 12px -4px rgba(79,138,0,0.4)" style-hover="background:#8dc90a">Criar meu catálogo agora →</a>
+        <a class="btn btn-lg btn-cat" href="https://wa.me/5511940001234?text=Olá!%20Quero%20saber%20mais%20sobre%20a%20Cresce%20Forte." target="_blank" rel="noopener">Criar meu catálogo agora →</a>
       </div>
     </div>
   </section>
 
-  <section style="max-width:1180px;margin:0 auto;padding:clamp(56px,8vw,88px) clamp(20px,4vw,56px)">
-    <h2 style="text-align:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(26px,3vw,34px);color:#0d2b3e;margin:0">O que os lojistas dizem</h2>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;margin-top:40px">
-      <div style="background:#fff;border:1px solid rgba(13,43,62,0.1);border-radius:22px;padding:26px;display:flex;flex-direction:column;gap:16px;box-shadow:0 1px 2px rgba(13,43,62,0.06)">
-        <p style="font-size:14.5px;line-height:1.65;color:#3d5768;margin:0">"Consegui organizar meu catálogo inteiro em uma tarde. Antes eu mandava as fotos separadas no WhatsApp."</p>
-        <div style="display:flex;align-items:center;gap:12px">
-          <image-slot id="avatar-1" shape="circle" style="width:44px;height:44px" placeholder="Foto" src="assets/avatar-marina.png?v=20260909a"></image-slot>
-          <div>
-            <div style="font-size:13.5px;font-weight:700;color:#0d2b3e">Marina Souza</div>
-            <div style="font-size:12.5px;color:#56707e">Loja Doce Trama</div>
-          </div>
+  <section class="wrap deps">
+    <h2>O que os lojistas dizem</h2>
+    <div class="quotes">
+      <div class="quote">
+        <p>"Consegui organizar meu catálogo inteiro em uma tarde. Antes eu mandava as fotos separadas no WhatsApp."</p>
+        <div class="who">
+          <img src="assets/avatar-marina.webp?v=1" width="44" height="44" loading="lazy" decoding="async" alt="">
+          <div><b>Marina Souza</b><small>Loja Doce Trama</small></div>
         </div>
       </div>
-      <div style="background:#fff;border:1px solid rgba(13,43,62,0.1);border-radius:22px;padding:26px;display:flex;flex-direction:column;gap:16px;box-shadow:0 1px 2px rgba(13,43,62,0.06)">
-        <p style="font-size:14.5px;line-height:1.65;color:#3d5768;margin:0">"O controle de estoque evitou que eu vendesse um produto que já tinha acabado."</p>
-        <div style="display:flex;align-items:center;gap:12px">
-          <image-slot id="avatar-2" shape="circle" style="width:44px;height:44px" placeholder="Foto" src="assets/avatar-renato.png?v=20260909a"></image-slot>
-          <div>
-            <div style="font-size:13.5px;font-weight:700;color:#0d2b3e">Renato Alves</div>
-            <div style="font-size:12.5px;color:#56707e">Calçados Bela Vista</div>
-          </div>
+      <div class="quote">
+        <p>"O controle de estoque evitou que eu vendesse um produto que já tinha acabado."</p>
+        <div class="who">
+          <img src="assets/avatar-renato.webp?v=1" width="44" height="44" loading="lazy" decoding="async" alt="">
+          <div><b>Renato Alves</b><small>Calçados Bela Vista</small></div>
         </div>
       </div>
-      <div style="background:#fff;border:1px solid rgba(13,43,62,0.1);border-radius:22px;padding:26px;display:flex;flex-direction:column;gap:16px;box-shadow:0 1px 2px rgba(13,43,62,0.06)">
-        <p style="font-size:14.5px;line-height:1.65;color:#3d5768;margin:0">"Troquei o visual do catálogo duas vezes e não perdi nenhum produto cadastrado."</p>
-        <div style="display:flex;align-items:center;gap:12px">
-          <image-slot id="avatar-3" shape="circle" style="width:44px;height:44px" placeholder="Foto" src="assets/avatar-juliana.png?v=20260909a"></image-slot>
-          <div>
-            <div style="font-size:13.5px;font-weight:700;color:#0d2b3e">Juliana Prado</div>
-            <div style="font-size:12.5px;color:#56707e">Studio JP Modas</div>
-          </div>
+      <div class="quote">
+        <p>"Troquei o visual do catálogo duas vezes e não perdi nenhum produto cadastrado."</p>
+        <div class="who">
+          <img src="assets/avatar-juliana.webp?v=1" width="44" height="44" loading="lazy" decoding="async" alt="">
+          <div><b>Juliana Prado</b><small>Studio JP Modas</small></div>
         </div>
       </div>
     </div>
   </section>
 
-  <section style="background:#0a2536;padding:clamp(56px,8vw,80px) clamp(20px,4vw,56px);text-align:center">
-    <h2 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(26px,3vw,36px);color:#fff;margin:0 0 16px">Pronto para colocar sua loja no ar?</h2>
-    <p style="color:rgba(255,255,255,0.65);font-size:15.5px;max-width:52ch;margin:0 auto 28px">Fale com a gente pelo WhatsApp e veja como fica o catálogo com a sua marca.</p>
-    <a href="https://wa.me/5511940001234?text=Olá!%20Quero%20saber%20mais%20sobre%20a%20Cresce%20Forte." target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;font-size:14.5px;font-weight:700;min-height:48px;padding:0 28px;border-radius:999px;background:#7cb602;color:#0a2536;text-decoration:none" style-hover="background:#8dc90a">Falar no WhatsApp</a>
+  <section class="cta">
+    <h2>Pronto para colocar sua loja no ar?</h2>
+    <p>Fale com a gente pelo WhatsApp e veja como fica o catálogo com a sua marca.</p>
+    <a class="btn btn-lg btn-wa" href="https://wa.me/5511940001234?text=Olá!%20Quero%20saber%20mais%20sobre%20a%20Cresce%20Forte." target="_blank" rel="noopener">Falar no WhatsApp</a>
   </section>
 
 </main>
-<dc-import name="Footer" hint-size="100%,420px"></dc-import>
-</x-dc>
+
+<footer class="ftr">
+  <div class="ftr-grid">
+    <div>
+      <div class="ftr-logo">
+        <img src="assets/cresce-forte-icon.webp?v=1" width="28" height="28" loading="lazy" decoding="async" alt="Cresce Forte">
+        <b>Cresce Forte</b>
+      </div>
+      <p>Catálogo digital e painel de gestão para lojistas venderem online sem depender de programador.</p>
+    </div>
+    <div>
+      <h4>Produto</h4>
+      <div class="ftr-col">
+        <a href="#servicos">Catálogo digital</a>
+        <a href="#servicos">Painel administrativo</a>
+        <a href="#servicos">Assistente de IA</a>
+        <a href="#servicos">CRM de clientes</a>
+      </div>
+    </div>
+    <div>
+      <h4>Contato</h4>
+      <div class="ftr-col">
+        <a href="https://wa.me/5511940001234" target="_blank" rel="noopener">(11) 94000-1234</a>
+        <a href="mailto:contato@cresceforte.com.br">contato@cresceforte.com.br</a>
+        <a href="https://instagram.com/cresceforte" target="_blank" rel="noopener">@cresceforte</a>
+      </div>
+    </div>
+  </div>
+  <div class="ftr-end">
+    <span>© 2026 Cresce Forte. Todos os direitos reservados.</span>
+    <span>Catálogo digital e gestão para lojistas</span>
+  </div>
+</footer>
+
 </body>
 </html>
