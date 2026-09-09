@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+</helmet>
+<header style="position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;padding:14px clamp(20px,4vw,56px);background:#f4f8f9;border-bottom:1px solid rgba(13,43,62,0.1);font-family:Inter,sans-serif">
+  <a href="Home.dc.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:#0d2b3e">
+    <span style="width:32px;height:32px;border-radius:8px;flex-shrink:0;background:#fff;border:1px solid rgba(13,43,62,0.1);display:flex;align-items:center;justify-content:center;padding:4px;box-shadow:0 1px 2px rgba(13,43,62,0.06)">
+      <img src="assets/cresce-forte-icon.png" alt="Cresce Forte" style="width:100%;height:100%;object-fit:contain">
+    </span>
+    <span style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:17px;letter-spacing:-0.01em;white-space:nowrap;flex-shrink:0">Cresce Forte</span>
+  </a>
+  <div style="display:flex;align-items:center;gap:12px">
+    <a href="Login.dc.html" style="font-size:14px;font-weight:600;color:#3d5768;text-decoration:none;white-space:nowrap" style-hover="color:#0d2b3e">Fazer login</a>
+    <a href="{{ waLink }}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;min-height:40px;padding:0 20px;border-radius:999px;background:#7cb602;color:#0a2536;text-decoration:none;box-shadow:0 1px 2px rgba(13,43,62,0.06);white-space:nowrap" style-hover="background:#8dc90a">Falar no WhatsApp</a>
+  </div>
+</header>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      waLink: 'https://wa.me/5511940001234?text=Olá!%20Quero%20saber%20mais%20sobre%20a%20Cresce%20Forte.'
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+</helmet>
+<div style="min-height:100vh;background:#eff4f5;font-family:Inter,sans-serif">
+
+  <header style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;padding:14px clamp(20px,4vw,56px);background:#f4f8f9;border-bottom:1px solid rgba(13,43,62,0.1)">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:32px;height:32px;border-radius:8px;flex-shrink:0;background:#fff;border:1px solid rgba(13,43,62,0.1);display:flex;align-items:center;justify-content:center;padding:4px;box-shadow:0 1px 2px rgba(13,43,62,0.06)">
+        <img src="assets/cresce-forte-icon.png" alt="Cresce Forte" style="width:100%;height:100%;object-fit:contain">
+      </span>
+      <span style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:17px;letter-spacing:-0.01em;color:#0d2b3e;white-space:nowrap;flex-shrink:0">Cresce Forte</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px">
+      <span style="font-size:13.5px;color:#56707e">{{ userEmail }}</span>
+      <a href="#" onClick="{{ onLogout }}" style="font-size:13.5px;font-weight:600;color:#3d5768;text-decoration:none;padding:8px 16px;border-radius:999px;border:1px solid rgba(13,43,62,0.15)" style-hover="border-color:rgba(13,43,62,0.35);color:#0d2b3e">Sair</a>
+    </div>
+  </header>
+
+  <main style="max-width:1180px;margin:0 auto;padding:clamp(40px,6vw,64px) clamp(20px,4vw,56px)">
+    <h1 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(24px,3vw,32px);color:#0d2b3e;margin:0 0 8px">Suas ferramentas</h1>
+    <p style="font-size:15px;color:#56707e;margin:0 0 36px">Escolha o que você quer acessar.</p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px">
+
+      <a href="Servicos.dc.html" style="text-decoration:none;background:#fff;border:1px solid rgba(13,43,62,0.1);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:12px;box-shadow:0 2px 6px -1px rgba(13,43,62,0.06),0 14px 32px -14px rgba(13,43,62,0.16)" style-hover="border-color:rgba(13,43,62,0.25)">
+        <span style="font-size:10.5px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#4f8a00;background:rgba(124,182,2,0.12);padding:4px 9px;border-radius:999px;width:fit-content">Disponível</span>
+        <h2 style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:17px;color:#0d2b3e;margin:0">Catálogo + painel de controle</h2>
+        <p style="font-size:13.5px;line-height:1.6;color:#56707e;margin:0">Gerencie produtos, estoque, banners, cupons e pedidos do seu catálogo digital.</p>
+        <span style="margin-top:auto;font-size:13.5px;font-weight:700;color:#4f8a00">Abrir →</span>
+      </a>
+
+      <div style="background:#fff;border:1px solid rgba(13,43,62,0.1);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:12px;opacity:0.7">
+        <span style="font-size:10.5px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#56707e;background:rgba(13,43,62,0.06);padding:4px 9px;border-radius:999px;width:fit-content">Em breve</span>
+        <h2 style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:17px;color:#0d2b3e;margin:0">CRM</h2>
+        <p style="font-size:13.5px;line-height:1.6;color:#56707e;margin:0">Acompanhe contatos, conversas e histórico de compra de cada cliente.</p>
+      </div>
+
+      <div style="background:#fff;border:1px solid rgba(13,43,62,0.1);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:12px;opacity:0.7">
+        <span style="font-size:10.5px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#56707e;background:rgba(13,43,62,0.06);padding:4px 9px;border-radius:999px;width:fit-content">Em breve</span>
+        <h2 style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:17px;color:#0d2b3e;margin:0">PDV</h2>
+        <p style="font-size:13.5px;line-height:1.6;color:#56707e;margin:0">Frente de caixa para vendas presenciais, integrada ao estoque.</p>
+      </div>
+
+      <div style="background:#fff;border:1px solid rgba(13,43,62,0.1);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:12px;opacity:0.7">
+        <span style="font-size:10.5px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#56707e;background:rgba(13,43,62,0.06);padding:4px 9px;border-radius:999px;width:fit-content">Em breve</span>
+        <h2 style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:17px;color:#0d2b3e;margin:0">RH / Setor pessoal</h2>
+        <p style="font-size:13.5px;line-height:1.6;color:#56707e;margin:0">Cadastro de funcionários, ponto e documentos do setor pessoal.</p>
+      </div>
+
+      <div style="background:#fff;border:1px solid rgba(13,43,62,0.1);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:12px;opacity:0.7">
+        <span style="font-size:10.5px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#56707e;background:rgba(13,43,62,0.06);padding:4px 9px;border-radius:999px;width:fit-content">Em breve</span>
+        <h2 style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:17px;color:#0d2b3e;margin:0">Resultados Google Ads</h2>
+        <p style="font-size:13.5px;line-height:1.6;color:#56707e;margin:0">Acompanhe o desempenho das suas campanhas em um só painel.</p>
+      </div>
+
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() {
+    var authed = '';
+    try { authed = localStorage.getItem('cf_auth_email') || ''; } catch (e) {}
+    if (!authed) {
+      window.location.href = 'Login.dc.html';
+    } else {
+      this.setState({ userEmail: authed });
+    }
+  }
+
+  onLogout(e) {
+    e.preventDefault();
+    try { localStorage.removeItem('cf_auth_email'); } catch (err) {}
+    window.location.href = 'Login.dc.html';
+  }
+
+  state = { userEmail: '' };
+
+  renderVals() {
+    return {
+      userEmail: this.state.userEmail,
+      onLogout: this.onLogout.bind(this)
+    };
+  }
+}
+</script>
+</body>
+</html>
