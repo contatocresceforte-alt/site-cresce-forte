@@ -30,18 +30,39 @@
   .pilar{grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr;grid-template-areas:"head media" "body media";column-gap:clamp(30px,4vw,56px);row-gap:0}
   .pilar-rev{grid-template-areas:"media head" "media body"}
 }
+/* Papel de parede — somente mobile */
+@media (max-width:860px){
+  .hero-wall{
+    background-image:linear-gradient(180deg,rgba(239,244,245,0) 82%,rgba(239,244,245,0.85) 95%,#eff4f5 100%),url(assets/wallpaper-mobile.jpg?v=20260909b);
+    background-size:100% 100%,cover;
+    background-position:center top,center center;
+    background-repeat:no-repeat,no-repeat
+  }
+  .hero-title{color:#fff!important}
+  .hero-title mark,.hero-title span{background-image:linear-gradient(rgba(124,182,2,0.65),rgba(124,182,2,0.65))!important}
+  .hero-sub{color:rgba(255,255,255,0.74)!important}
+  .hero-btn2{color:#fff!important;border-color:rgba(255,255,255,0.35)!important}
+  .hero-wall .nb-shadow{background:radial-gradient(ellipse at center,rgba(0,0,0,0.45) 0%,rgba(0,0,0,0.18) 45%,rgba(0,0,0,0) 72%)}
+  .hero-wall .nb-lid{border-color:rgba(255,255,255,0.2)}
+  /* Header escuro só na home, para casar com o topo do papel de parede */
+  .hdr{background:#0a2035!important;border-bottom-color:rgba(255,255,255,0.08)!important}
+  .hdr-brand{color:#fff!important}
+  .hdr-login{color:rgba(255,255,255,0.78)!important}
+}
 </style>
 </helmet>
 <dc-import name="Header" hint-size="100%,64px"></dc-import>
 <main style="background:#eff4f5;font-family:Inter,sans-serif">
 
+  <div class="hero-wall">
+
   <section style="max-width:1180px;margin:0 auto;padding:clamp(56px,9vw,108px) clamp(20px,4vw,56px) clamp(40px,6vw,56px);display:flex;flex-direction:column;align-items:center;text-align:center">
     <span style="width:44px;height:4px;border-radius:2px;background:#7cb602;margin-bottom:22px"></span>
-    <h1 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(38px,6vw,58px);line-height:1.08;letter-spacing:-0.025em;margin:0;max-width:720px;color:#0d2b3e">Sua loja pronta para crescer&nbsp;<span style="font-style: normal; background-image: linear-gradient(rgba(124, 182, 2, 0.5), rgba(124, 182, 2, 0.5)); background-repeat: no-repeat; background-size: 100% 0.16em; background-position: 0px 90%;">vendas no online</span>.</h1>
-    <p style="font-size:clamp(15px,1.6vw,17px);line-height:1.6;color:#3d5768;max-width:56ch;margin:20px 0 0;text-wrap:pretty">Melhore a experiência de compra dos seus clientes com um catálogo digital profissional e intuitivo. Gerencie o relacionamento com quem já comprou de você usando nosso CRM integrado à IA.</p>
+    <h1 class="hero-title" style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(38px,6vw,58px);line-height:1.08;letter-spacing:-0.025em;margin:0;max-width:720px;color:#0d2b3e">Sua loja pronta para crescer&nbsp;<span style="font-style: normal; background-image: linear-gradient(rgba(124, 182, 2, 0.5), rgba(124, 182, 2, 0.5)); background-repeat: no-repeat; background-size: 100% 0.16em; background-position: 0px 90%;">vendas no online</span>.</h1>
+    <p class="hero-sub" style="font-size:clamp(15px,1.6vw,17px);line-height:1.6;color:#3d5768;max-width:56ch;margin:20px 0 0;text-wrap:pretty">Melhore a experiência de compra dos seus clientes com um catálogo digital profissional e intuitivo. Gerencie o relacionamento com quem já comprou de você usando nosso CRM integrado à IA.</p>
     <div style="display:flex;gap:14px;margin-top:30px;flex-wrap:wrap;justify-content:center">
       <a href="https://wa.me/5511940001234?text=Olá!%20Quero%20saber%20mais%20sobre%20a%20Cresce%20Forte." target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;font-size:14.5px;font-weight:700;min-height:48px;padding:0 26px;border-radius:999px;background:#7cb602;color:#0a2536;text-decoration:none;box-shadow:0 1px 2px rgba(13,43,62,0.06)" style-hover="background:#8dc90a">Falar no WhatsApp</a>
-      <a href="#servicos" style="display:inline-flex;align-items:center;gap:8px;font-size:14.5px;font-weight:700;min-height:48px;padding:0 26px;border-radius:999px;background:transparent;border:1px solid rgba(13,43,62,0.2);color:#0d2b3e;text-decoration:none" style-hover="border-color:rgba(13,43,62,0.4)">Ver serviços e planos</a>
+      <a class="hero-btn2" href="#servicos" style="display:inline-flex;align-items:center;gap:8px;font-size:14.5px;font-weight:700;min-height:48px;padding:0 26px;border-radius:999px;background:transparent;border:1px solid rgba(13,43,62,0.2);color:#0d2b3e;text-decoration:none" style-hover="border-color:rgba(13,43,62,0.4)">Ver serviços e planos</a>
     </div>
   </section>
 
@@ -57,6 +78,8 @@
       <div class="nb-shadow"></div>
     </div>
   </section>
+
+  </div>
 
   <section id="servicos" data-screen-label="Servicos" style="max-width:1180px;margin:0 auto;padding:0 clamp(20px,4vw,56px) clamp(56px,8vw,96px)">
     <div style="text-align:center;max-width:640px;margin:0 auto 56px">
