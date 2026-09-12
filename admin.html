@@ -201,6 +201,85 @@
   .cf-toggle input:checked + .cf-toggle-track .cf-toggle-thumb { transform: translateX(18px); }
   .cf-toggle input:disabled { cursor: default; }
   .cf-toggle-loading .cf-toggle-track { opacity: 0.6; }
+
+  .cf-card + .cf-card { margin-top: 24px; }
+  .cf-card-head-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+  .cf-primary-btn {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    background: #0f7c8c;
+    border: none;
+    border-radius: 999px;
+    padding: 9px 18px;
+    cursor: pointer;
+    font-family: Inter, sans-serif;
+    white-space: nowrap;
+  }
+  .cf-primary-btn:hover { background: #0d6a78; }
+  .cf-primary-btn:disabled { opacity: 0.6; cursor: default; }
+  .cf-secondary-btn {
+    font-size: 13px;
+    font-weight: 600;
+    color: #3d5768;
+    background: none;
+    border: 1px solid rgba(13,43,62,0.15);
+    border-radius: 999px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-family: Inter, sans-serif;
+  }
+  .cf-secondary-btn:hover { border-color: rgba(13,43,62,0.35); color: #0d2b3e; }
+
+  .cf-form-panel { padding: 4px 28px 28px; border-top: 1px solid rgba(13,43,62,0.08); }
+  .cf-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px 18px;
+    margin: 16px 0 4px;
+  }
+  .cf-form-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: #56707e;
+    margin: 22px 0 0;
+  }
+  .cf-field { display: flex; flex-direction: column; gap: 6px; }
+  .cf-field label { font-size: 12.5px; font-weight: 600; color: #3d5768; }
+  .cf-field input {
+    font-family: Inter, sans-serif;
+    font-size: 13.5px;
+    color: #0d2b3e;
+    padding: 9px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(13,43,62,0.18);
+    background: #fff;
+  }
+  .cf-field input:focus { outline: 2px solid rgba(15,124,140,0.35); border-color: #0f7c8c; }
+  .cf-form-actions { display: flex; align-items: center; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
+  .cf-form-msg { font-size: 13px; margin: 0; }
+  .cf-form-msg-ok { color: #4f8a00; }
+  .cf-form-msg-error { color: #a13a2a; }
+
+  .cf-status-row { display: flex; align-items: center; gap: 8px; }
+  .cf-status-select {
+    font-family: Inter, sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #3d5768;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(13,43,62,0.18);
+    background: #fff;
+    cursor: pointer;
+  }
+  .cf-status-select:disabled { opacity: 0.6; cursor: default; }
+  .cf-status-msg { font-size: 11.5px; white-space: nowrap; }
+  .cf-status-msg-ok { color: #4f8a00; }
+  .cf-status-msg-error { color: #a13a2a; }
 </style>
 </head>
 <body>
@@ -223,6 +302,62 @@
     <h1>Painel do Super Admin</h1>
     <p class="cf-sub">Visão geral de todas as empresas na plataforma.</p>
 
+    <div class="cf-card" id="new-company-card">
+      <div class="cf-card-head cf-card-head-row">
+        <div>
+          <h2>Nova empresa</h2>
+          <p>Cadastra a empresa e já cria o acesso do administrador dela.</p>
+        </div>
+        <button type="button" class="cf-primary-btn" id="new-company-toggle">Cadastrar empresa</button>
+      </div>
+      <form class="cf-form-panel" id="new-company-form" hidden novalidate>
+        <div class="cf-form-grid">
+          <div class="cf-field">
+            <label for="nc-legal-name">Razão social *</label>
+            <input type="text" id="nc-legal-name" required maxlength="200" autocomplete="off">
+          </div>
+          <div class="cf-field">
+            <label for="nc-trade-name">Nome fantasia</label>
+            <input type="text" id="nc-trade-name" maxlength="200" autocomplete="off">
+          </div>
+          <div class="cf-field">
+            <label for="nc-document">CNPJ / documento</label>
+            <input type="text" id="nc-document" maxlength="32" autocomplete="off">
+          </div>
+          <div class="cf-field">
+            <label for="nc-email">E-mail da empresa</label>
+            <input type="email" id="nc-email" maxlength="200" autocomplete="off">
+          </div>
+          <div class="cf-field">
+            <label for="nc-phone">Telefone</label>
+            <input type="text" id="nc-phone" maxlength="32" autocomplete="off">
+          </div>
+        </div>
+
+        <p class="cf-form-section-title">Administrador da empresa</p>
+        <div class="cf-form-grid">
+          <div class="cf-field">
+            <label for="nc-admin-nome">Nome *</label>
+            <input type="text" id="nc-admin-nome" required maxlength="120" autocomplete="off">
+          </div>
+          <div class="cf-field">
+            <label for="nc-admin-email">E-mail de acesso *</label>
+            <input type="email" id="nc-admin-email" required maxlength="200" autocomplete="off">
+          </div>
+          <div class="cf-field">
+            <label for="nc-admin-senha">Senha temporária *</label>
+            <input type="text" id="nc-admin-senha" required minlength="8" maxlength="72" placeholder="mínimo 8 caracteres" autocomplete="off">
+          </div>
+        </div>
+
+        <div class="cf-form-actions">
+          <button type="submit" class="cf-primary-btn" id="new-company-submit">Criar empresa</button>
+          <button type="button" class="cf-secondary-btn" id="new-company-cancel">Cancelar</button>
+          <p class="cf-form-msg" id="new-company-msg" hidden></p>
+        </div>
+      </form>
+    </div>
+
     <div class="cf-card">
       <div class="cf-card-head">
         <h2>Empresas</h2>
@@ -242,12 +377,21 @@
   var supabase = CresceForteAuth.client;
   var companiesListEl = document.getElementById('companies-list');
 
+  // A API do CRM (apps/api) vive no mesmo host do front dele, atrás do
+  // Caddy que roteia /api/* pro container da api (ver infra/caddy/Caddyfile
+  // no repo do CRM) — mesmo domínio que app.html já usa para o card do CRM.
+  var PLATFORM_API_BASE = 'https://cresce-forte-web.jy8rvo.easypanel.host/api';
+
+  // Valores reais de companies.status (supabase/migrations/0015_companies.sql
+  // no repo do CRM) — sempre maiúsculo, check constraint no banco.
   var STATUS_LABELS = {
-    active: 'Ativa',
-    inactive: 'Inativa',
-    pending: 'Pendente',
-    suspended: 'Suspensa'
+    ACTIVE: 'Ativa',
+    TRIAL: 'Trial',
+    SUSPENDED: 'Suspensa',
+    CANCELLED: 'Cancelada',
+    INACTIVE: 'Inativa'
   };
+  var STATUS_OPTIONS = ['ACTIVE', 'TRIAL', 'SUSPENDED', 'CANCELLED', 'INACTIVE'];
 
   CresceForteAuth.requireRole('PLATFORM', { loginUrl: 'login.html', fallbackUrl: 'app.html' }).then(function (session) {
     if (!session) return; // already redirected to login.html or app.html
@@ -314,13 +458,64 @@
     }
     main.appendChild(info);
 
+    var statusRow = document.createElement('div');
+    statusRow.className = 'cf-status-row';
+
     var statusEl = document.createElement('span');
     statusEl.className = 'cf-status-badge';
-    if (company.status && company.status !== 'active') {
+    if (company.status && company.status !== 'ACTIVE') {
       statusEl.className += ' cf-status-muted';
     }
     statusEl.textContent = formatStatus(company.status);
-    main.appendChild(statusEl);
+    statusRow.appendChild(statusEl);
+
+    var statusSelect = document.createElement('select');
+    statusSelect.className = 'cf-status-select';
+    statusSelect.title = 'Alterar status da empresa';
+    STATUS_OPTIONS.forEach(function (value) {
+      var opt = document.createElement('option');
+      opt.value = value;
+      opt.textContent = formatStatus(value);
+      if (value === company.status) opt.selected = true;
+      statusSelect.appendChild(opt);
+    });
+
+    var statusMsg = document.createElement('span');
+    statusMsg.className = 'cf-status-msg';
+    statusMsg.hidden = true;
+
+    statusSelect.addEventListener('change', function () {
+      var novoStatus = statusSelect.value;
+      var statusAnterior = company.status;
+
+      statusSelect.disabled = true;
+      statusMsg.hidden = true;
+
+      supabase
+        .from('companies')
+        .update({ status: novoStatus })
+        .eq('id', company.id)
+        .then(function (result) {
+          if (result.error) {
+            console.error('Erro ao atualizar status da empresa:', result.error);
+            statusSelect.value = statusAnterior;
+            statusSelect.disabled = false;
+            statusMsg.textContent = 'Erro ao salvar. Tente novamente.';
+            statusMsg.className = 'cf-status-msg cf-status-msg-error';
+            statusMsg.hidden = false;
+            return;
+          }
+          company.status = novoStatus;
+          // Recarrega a lista inteira: é o jeito mais simples de manter o
+          // badge, o select e a ordenação (por trade_name) sempre
+          // consistentes com o que está no banco.
+          loadCompanies();
+        });
+    });
+
+    statusRow.appendChild(statusSelect);
+    statusRow.appendChild(statusMsg);
+    main.appendChild(statusRow);
 
     var manageBtn = document.createElement('button');
     manageBtn.type = 'button';
@@ -466,6 +661,112 @@
     row.appendChild(msgEl);
     return row;
   }
+
+  // ---------------------------------------------------------------------
+  // Nova empresa — a única ação desta tela que NÃO fala direto com o
+  // Supabase: criar um usuário no Supabase Auth exige a service_role key,
+  // que uma página estática nunca pode guardar. Por isso isto chama a rota
+  // nova do backend do CRM (POST /api/plataforma/empresas), passando o
+  // access_token da sessão atual — mesmo padrão de apps/web/src/lib/apiV1.js
+  // no repo do CRM.
+  // ---------------------------------------------------------------------
+  var newCompanyToggle = document.getElementById('new-company-toggle');
+  var newCompanyForm = document.getElementById('new-company-form');
+  var newCompanyCancel = document.getElementById('new-company-cancel');
+  var newCompanySubmit = document.getElementById('new-company-submit');
+  var newCompanyMsg = document.getElementById('new-company-msg');
+
+  var ncFields = {
+    legalName: document.getElementById('nc-legal-name'),
+    tradeName: document.getElementById('nc-trade-name'),
+    document: document.getElementById('nc-document'),
+    email: document.getElementById('nc-email'),
+    phone: document.getElementById('nc-phone'),
+    adminNome: document.getElementById('nc-admin-nome'),
+    adminEmail: document.getElementById('nc-admin-email'),
+    adminSenhaTemporaria: document.getElementById('nc-admin-senha')
+  };
+
+  function setNewCompanyFormOpen(open) {
+    newCompanyForm.hidden = !open;
+    newCompanyToggle.hidden = open;
+    if (!open) {
+      newCompanyForm.reset();
+      newCompanyMsg.hidden = true;
+    }
+  }
+
+  newCompanyToggle.addEventListener('click', function () { setNewCompanyFormOpen(true); });
+  newCompanyCancel.addEventListener('click', function () { setNewCompanyFormOpen(false); });
+
+  function showNewCompanyMsg(text, ok) {
+    newCompanyMsg.textContent = text;
+    newCompanyMsg.className = 'cf-form-msg ' + (ok ? 'cf-form-msg-ok' : 'cf-form-msg-error');
+    newCompanyMsg.hidden = false;
+  }
+
+  newCompanyForm.addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    if (!newCompanyForm.reportValidity()) return;
+
+    var payload = {
+      legalName: ncFields.legalName.value.trim(),
+      tradeName: ncFields.tradeName.value.trim() || undefined,
+      document: ncFields.document.value.trim() || undefined,
+      email: ncFields.email.value.trim() || undefined,
+      phone: ncFields.phone.value.trim() || undefined,
+      adminNome: ncFields.adminNome.value.trim(),
+      adminEmail: ncFields.adminEmail.value.trim(),
+      adminSenhaTemporaria: ncFields.adminSenhaTemporaria.value
+    };
+    // Remove os campos opcionais vazios em vez de mandar string vazia —
+    // a rota trata undefined como "não informado" (zod .optional()).
+    Object.keys(payload).forEach(function (key) {
+      if (payload[key] === undefined) delete payload[key];
+    });
+
+    newCompanySubmit.disabled = true;
+    newCompanyCancel.disabled = true;
+    newCompanyMsg.hidden = true;
+
+    supabase.auth.getSession()
+      .then(function (sessionResult) {
+        var token = sessionResult.data && sessionResult.data.session && sessionResult.data.session.access_token;
+        if (!token) throw new Error('Sessão expirada. Recarregue a página e faça login novamente.');
+
+        return fetch(PLATFORM_API_BASE + '/plataforma/empresas', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify(payload)
+        });
+      })
+      .then(function (res) {
+        return res.json().catch(function () { return {}; }).then(function (body) {
+          if (!res.ok) {
+            var mensagem = (body.erro && body.erro.mensagem) || ('Falha ao criar empresa (HTTP ' + res.status + ').');
+            throw new Error(mensagem);
+          }
+          return body.dados;
+        });
+      })
+      .then(function () {
+        showNewCompanyMsg('Empresa criada com sucesso.', true);
+        loadCompanies();
+        setTimeout(function () { setNewCompanyFormOpen(false); }, 1200);
+      })
+      .catch(function (erro) {
+        console.error('Erro ao criar empresa:', erro);
+        showNewCompanyMsg(erro.message || 'Não foi possível criar a empresa.', false);
+      })
+      .finally(function () {
+        newCompanySubmit.disabled = false;
+        newCompanyCancel.disabled = false;
+      });
+  });
 })();
 </script>
 </body>
