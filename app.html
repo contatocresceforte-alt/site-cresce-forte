@@ -204,8 +204,17 @@
     });
   }
 
-  CresceForteAuth.requireAuth('login.html').then(async function (session) {
-    if (!session) return; // already redirected to login.html
+  // validatedSession em vez de requireAuth: duas linhas abaixo, o
+  // app_metadata.company_id desta sessão vira o filtro dos módulos exibidos.
+  // Sessão lida só do localStorage é forjável pelo console do navegador —
+  // aqui ela é confirmada com o servidor do Supabase antes de virar decisão
+  // de tela. Quem de fato impede ler os módulos de outra empresa é a RLS de
+  // company_services; isto só evita a tela mentir.
+  CresceForteAuth.validatedSession().then(async function (session) {
+    if (!session) {
+      window.location.href = 'login.html';
+      return;
+    }
     var emailEl = document.getElementById('user-email');
     var name = session.user.user_metadata && session.user.user_metadata.full_name;
     emailEl.textContent = name || session.user.email || '';

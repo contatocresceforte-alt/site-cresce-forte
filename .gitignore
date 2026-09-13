@@ -1,0 +1,48 @@
+# Este repositório é PÚBLICO e é servido estaticamente em cresceforte.com —
+# tudo que entra aqui fica visível para qualquer pessoa, e continua visível no
+# histórico do git mesmo depois de apagado do HEAD. Daí a lista abaixo ser
+# mais paranoica que o normal para um site estático.
+
+# Segredos e configuração de ambiente
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*credencial*
+*CREDENCIAL*
+*senha*
+*SENHA*
+*secret*
+*SECRET*
+
+# Dumps e backups de banco
+*.sql
+*.dump
+*.bak
+*.sqlite
+*.sqlite3
+
+# Dependências e build (o site é estático hoje, mas isto evita um acidente
+# no dia em que alguém rodar npm install aqui dentro)
+node_modules/
+dist/
+build/
+.cache/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Lixo de sistema operacional e editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Arquivos temporários de edição
+*~
+*.swp
+*.tmp
