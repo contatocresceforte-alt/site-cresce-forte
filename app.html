@@ -163,13 +163,12 @@
 <script src="assets/auth.js"></script>
 <script>
 (function () {
-  // URL de cada módulo já publicado. "catalogo" ainda não tem endereço público
-  // (só roda local hoje) — por isso fica sem link, marcado "Em configuração".
+  // URL de cada módulo já publicado.
   // Login do CRM continua sendo o dele mesmo (ponte bcrypt, Fase 4 do plano
   // ainda não trocou isso) — abrir aqui não loga sozinho lá, é aba separada.
   var MODULE_INFO = {
-    crm: { url: 'https://cresce-forte-web.jy8rvo.easypanel.host/', desc: 'Converse com clientes, gerencie seu funil de vendas e seu catálogo de produtos.' },
-    catalogo: { url: null, desc: 'Monte e publique seu catálogo digital.' }
+    crm: { url: 'https://crm.cresceforte.com/', desc: 'Converse com clientes, gerencie seu funil de vendas e seu catálogo de produtos.' },
+    catalogo: { url: 'https://catalogo.cresceforte.com/', desc: 'Monte e publique seu catálogo digital.' }
   };
 
   function renderModules(rows) {
