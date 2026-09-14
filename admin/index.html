@@ -544,6 +544,7 @@
     var input = document.createElement('input');
     input.type = 'checkbox';
     input.checked = isActive;
+    input.setAttribute('aria-label', 'Ativar ' + service.name);
 
     var track = document.createElement('span');
     track.className = 'cf-toggle-track';
