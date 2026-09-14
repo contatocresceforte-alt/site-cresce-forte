@@ -698,6 +698,11 @@
             : 'Empresa criada com sucesso.',
           true
         );
+        // form.reset() só afeta os controles (input/select), não o <p> da
+        // mensagem — limpa os campos sem esconder o aviso da senha. Sem
+        // isso, clicar "Criar empresa" de novo por engano reenviaria os
+        // mesmos dados e criaria uma empresa duplicada.
+        newCompanyForm.reset();
         loadCompanies();
       })
       .catch(function (erro) {
