@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Super Admin — Cresce Forte</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  .cf-page { min-height: 100vh; background: #eff4f5; font-family: Inter, sans-serif; }
+  .cf-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 14px clamp(20px, 4vw, 56px);
+    background: #f4f8f9;
+    border-bottom: 1px solid rgba(13,43,62,0.1);
+  }
+  .cf-brand { display: flex; align-items: center; gap: 10px; }
+  .cf-logo-mark {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    background: #fff;
+    border: 1px solid rgba(13,43,62,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    box-shadow: 0 1px 2px rgba(13,43,62,0.06);
+  }
+  .cf-logo-mark img { width: 100%; height: 100%; object-fit: contain; }
+  .cf-brand-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 17px;
+    letter-spacing: -0.01em;
+    color: #0d2b3e;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .cf-badge {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #4f8a00;
+    background: rgba(124,182,2,0.12);
+    padding: 4px 9px;
+    border-radius: 999px;
+    margin-left: 4px;
+  }
+  .cf-user-area { display: flex; align-items: center; gap: 16px; }
+  .cf-user-email { font-size: 13.5px; color: #56707e; }
+  .cf-logout {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #3d5768;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(13,43,62,0.15);
+    background: none;
+    cursor: pointer;
+    font-family: Inter, sans-serif;
+  }
+  .cf-logout:hover { border-color: rgba(13,43,62,0.35); color: #0d2b3e; }
+  main.cf-main {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: clamp(40px, 6vw, 64px) clamp(20px, 4vw, 56px);
+  }
+  main.cf-main h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: clamp(24px, 3vw, 32px);
+    color: #0d2b3e;
+    margin: 0 0 8px;
+  }
+  main.cf-main p.cf-sub { font-size: 15px; color: #56707e; margin: 0 0 36px; }
+
+  .cf-card {
+    background: #fff;
+    border: 1px solid rgba(13,43,62,0.1);
+    border-radius: 20px;
+    box-shadow: 0 2px 6px -1px rgba(13,43,62,0.06), 0 14px 32px -14px rgba(13,43,62,0.16);
+    overflow: hidden;
+  }
+  .cf-card-head { padding: 24px 28px 20px; }
+  .cf-card-head h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 17px;
+    color: #0d2b3e;
+    margin: 0 0 4px;
+  }
+  .cf-card-head p { font-size: 13.5px; color: #56707e; margin: 0; }
+
+  .cf-loading, .cf-error-text {
+    padding: 4px 28px 28px;
+    font-size: 13.5px;
+    color: #56707e;
+    margin: 0;
+  }
+  .cf-error-text { color: #a13a2a; }
+
+  .cf-company-row { border-top: 1px solid rgba(13,43,62,0.08); }
+  .cf-company-main {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 28px;
+    flex-wrap: wrap;
+  }
+  .cf-company-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 160px;
+  }
+  .cf-company-name { font-weight: 600; font-size: 14.5px; color: #0d2b3e; }
+  .cf-company-legal { font-size: 12.5px; color: #56707e; }
+  .cf-status-badge {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #4f8a00;
+    background: rgba(124,182,2,0.12);
+    padding: 4px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .cf-status-badge.cf-status-muted { color: #56707e; background: rgba(13,43,62,0.06); }
+  .cf-manage-btn {
+    font-size: 13px;
+    font-weight: 600;
+    color: #3d5768;
+    background: none;
+    border: 1px solid rgba(13,43,62,0.15);
+    border-radius: 999px;
+    padding: 7px 15px;
+    cursor: pointer;
+    font-family: Inter, sans-serif;
+  }
+  .cf-manage-btn:hover { border-color: rgba(13,43,62,0.35); color: #0d2b3e; }
+
+  .cf-company-services {
+    padding: 4px 28px 20px;
+    background: #f9fbfb;
+    border-top: 1px solid rgba(13,43,62,0.08);
+  }
+  .cf-service-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(13,43,62,0.06);
+  }
+  .cf-service-row:last-child { border-bottom: none; }
+  .cf-service-name { flex: 1; font-size: 13.5px; font-weight: 500; color: #0d2b3e; }
+  .cf-service-msg { font-size: 12px; color: #56707e; white-space: nowrap; }
+  .cf-service-msg-ok { color: #4f8a00; }
+  .cf-service-msg-error { color: #a13a2a; }
+
+  .cf-toggle { position: relative; display: inline-block; width: 42px; height: 24px; flex-shrink: 0; }
+  .cf-toggle input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    margin: 0;
+    cursor: pointer;
+    z-index: 1;
+  }
+  .cf-toggle-track {
+    position: absolute;
+    inset: 0;
+    background: rgba(13,43,62,0.18);
+    border-radius: 999px;
+    transition: background 0.15s ease;
+  }
+  .cf-toggle-thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(13,43,62,0.3);
+    transition: transform 0.15s ease;
+  }
+  .cf-toggle input:checked + .cf-toggle-track { background: #7cb602; }
+  .cf-toggle input:checked + .cf-toggle-track .cf-toggle-thumb { transform: translateX(18px); }
+  .cf-toggle input:disabled { cursor: default; }
+  .cf-toggle-loading .cf-toggle-track { opacity: 0.6; }
+
+  .cf-card + .cf-card { margin-top: 24px; }
+  .cf-card-head-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+  .cf-primary-btn {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    background: #0f7c8c;
+    border: none;
+    border-radius: 999px;
+    padding: 9px 18px;
+    cursor: pointer;
+    font-family: Inter, sans-serif;
+    white-space: nowrap;
+  }
+  .cf-primary-btn:hover { background: #0d6a78; }
+  .cf-primary-btn:disabled { opacity: 0.6; cursor: default; }
+  .cf-secondary-btn {
+    font-size: 13px;
+    font-weight: 600;
+    color: #3d5768;
+    background: none;
+    border: 1px solid rgba(13,43,62,0.15);
+    border-radius: 999px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-family: Inter, sans-serif;
+  }
+  .cf-secondary-btn:hover { border-color: rgba(13,43,62,0.35); color: #0d2b3e; }
+
+  .cf-form-panel { padding: 4px 28px 28px; border-top: 1px solid rgba(13,43,62,0.08); }
+  .cf-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px 18px;
+    margin: 16px 0 4px;
+  }
+  .cf-form-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: #56707e;
+    margin: 22px 0 0;
+  }
+  .cf-field { display: flex; flex-direction: column; gap: 6px; }
+  .cf-field label { font-size: 12.5px; font-weight: 600; color: #3d5768; }
+  .cf-field input {
+    font-family: Inter, sans-serif;
+    font-size: 13.5px;
+    color: #0d2b3e;
+    padding: 9px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(13,43,62,0.18);
+    background: #fff;
+  }
+  .cf-field input:focus { outline: 2px solid rgba(15,124,140,0.35); border-color: #0f7c8c; }
+  .cf-form-actions { display: flex; align-items: center; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
+  .cf-form-msg { font-size: 13px; margin: 0; }
+  .cf-form-msg-ok { color: #4f8a00; }
+  .cf-form-msg-error { color: #a13a2a; }
+
+  .cf-status-row { display: flex; align-items: center; gap: 8px; }
+  .cf-status-select {
+    font-family: Inter, sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #3d5768;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(13,43,62,0.18);
+    background: #fff;
+    cursor: pointer;
+  }
+  .cf-status-select:disabled { opacity: 0.6; cursor: default; }
+  .cf-status-msg { font-size: 11.5px; white-space: nowrap; }
+  .cf-status-msg-ok { color: #4f8a00; }
+  .cf-status-msg-error { color: #a13a2a; }
+</style>
+</head>
+<body>
+<div class="cf-page">
+  <header class="cf-header">
+    <div class="cf-brand">
+      <span class="cf-logo-mark">
+        <img src="/assets/cresce-forte-icon.webp?v=1" alt="Cresce Forte">
+      </span>
+      <span class="cf-brand-name">Cresce Forte</span>
+      <span class="cf-badge">Super Admin</span>
+    </div>
+    <div class="cf-user-area">
+      <span class="cf-user-email" id="user-email"></span>
+      <button type="button" class="cf-logout" id="logout-btn">Sair</button>
+    </div>
+  </header>
+
+  <main class="cf-main">
+    <h1>Painel do Super Admin</h1>
+    <p class="cf-sub">Visão geral de todas as empresas na plataforma.</p>
+
+    <div class="cf-card" id="new-company-card">
+      <div class="cf-card-head cf-card-head-row">
+        <div>
+          <h2>Nova empresa</h2>
+          <p>Cadastra a empresa e já cria o acesso do administrador dela.</p>
+        </div>
+        <button type="button" class="cf-primary-btn" id="new-company-toggle">Cadastrar empresa</button>
+      </div>
+      <form class="cf-form-panel" id="new-company-form" hidden novalidate>
+        <div class="cf-form-grid">
+          <div class="cf-field">
+            <label for="nc-legal-name">Razão social *</label>
+            <input type="text" id="nc-legal-name" required maxlength="200" autocomplete="off">
+          </div>
+          <div class="cf-field">
+            <label for="nc-trade-name">Nome fantasia</label>
+            <input type="text" id="nc-trade-name" maxlength="200" autocomplete="off">
+          </div>
+          <div class="cf-field">
+            <label for="nc-document">CNPJ / documento</label>
+            <input type="text" id="nc-document" maxlength="32" autocomplete="off">
+          </div>
+          <div class="cf-field">
+            <label for="nc-email">E-mail da empresa</label>
+            <input type="email" id="nc-email" maxlength="200" autocomplete="off">
+          </div>
+          <div class="cf-field">
+            <label for="nc-phone">Telefone</label>
+            <input type="text" id="nc-phone" maxlength="32" autocomplete="off">
+          </div>
+        </div>
+
+        <p class="cf-form-section-title">Administrador da empresa</p>
+        <div class="cf-form-grid">
+          <div class="cf-field">
+            <label for="nc-admin-nome">Nome *</label>
+            <input type="text" id="nc-admin-nome" required maxlength="120" autocomplete="off">
+          </div>
+          <div class="cf-field">
+            <label for="nc-admin-email">E-mail de acesso *</label>
+            <input type="email" id="nc-admin-email" required maxlength="200" autocomplete="off">
+          </div>
+          <div class="cf-field">
+            <label for="nc-admin-senha">Senha temporária *</label>
+            <input type="text" id="nc-admin-senha" required minlength="8" maxlength="72" placeholder="mínimo 8 caracteres" autocomplete="off">
+          </div>
+        </div>
+
+        <div class="cf-form-actions">
+          <button type="submit" class="cf-primary-btn" id="new-company-submit">Criar empresa</button>
+          <button type="button" class="cf-secondary-btn" id="new-company-cancel">Cancelar</button>
+          <p class="cf-form-msg" id="new-company-msg" hidden></p>
+        </div>
+      </form>
+    </div>
+
+    <div class="cf-card">
+      <div class="cf-card-head">
+        <h2>Empresas</h2>
+        <p>Clique em "Gerenciar" para ativar ou desativar os serviços de uma empresa.</p>
+      </div>
+      <div id="companies-list">
+        <p class="cf-loading">Carregando empresas...</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="/assets/auth.js"></script>
+<script>
+(function () {
+  var supabase = CresceForteAuth.client;
+  var companiesListEl = document.getElementById('companies-list');
+
+  // A API do CRM (apps/api) vive no mesmo host do front dele, atrás do
+  // Caddy que roteia /api/* pro container da api (ver infra/caddy/Caddyfile
+  // no repo do CRM) — mesmo domínio que app.html já usa para o card do CRM.
+  var PLATFORM_API_BASE = 'https://cresce-forte-web.jy8rvo.easypanel.host/api';
+
+  // Valores reais de companies.status (supabase/migrations/0015_companies.sql
+  // no repo do CRM) — sempre maiúsculo, check constraint no banco.
+  var STATUS_LABELS = {
+    ACTIVE: 'Ativa',
+    TRIAL: 'Trial',
+    SUSPENDED: 'Suspensa',
+    CANCELLED: 'Cancelada',
+    INACTIVE: 'Inativa'
+  };
+  var STATUS_OPTIONS = ['ACTIVE', 'TRIAL', 'SUSPENDED', 'CANCELLED', 'INACTIVE'];
+
+  CresceForteAuth.requireRole('PLATFORM', { loginUrl: '/login/', fallbackUrl: '/app/' }).then(function (session) {
+    if (!session) return; // already redirected to /login/ or /app/
+    var emailEl = document.getElementById('user-email');
+    var name = session.user.user_metadata && session.user.user_metadata.full_name;
+    emailEl.textContent = name || session.user.email || '';
+    loadCompanies();
+  });
+
+  document.getElementById('logout-btn').addEventListener('click', function () {
+    CresceForteAuth.logout('/login/');
+  });
+
+  function formatStatus(status) {
+    return STATUS_LABELS[status] || status || '—';
+  }
+
+  async function loadCompanies() {
+    companiesListEl.innerHTML = '<p class="cf-loading">Carregando empresas...</p>';
+
+    var result = await supabase
+      .from('companies')
+      .select('id, legal_name, trade_name, status')
+      .order('trade_name', { ascending: true });
+
+    if (result.error) {
+      console.error('Erro ao carregar empresas:', result.error);
+      companiesListEl.innerHTML = '<p class="cf-error-text">Não foi possível carregar as empresas. Tente recarregar a página.</p>';
+      return;
+    }
+
+    var companies = result.data || [];
+    if (companies.length === 0) {
+      companiesListEl.innerHTML = '<p class="cf-loading">Nenhuma empresa cadastrada ainda.</p>';
+      return;
+    }
+
+    companiesListEl.innerHTML = '';
+    companies.forEach(function (company) {
+      companiesListEl.appendChild(buildCompanyRow(company));
+    });
+  }
+
+  function buildCompanyRow(company) {
+    var row = document.createElement('div');
+    row.className = 'cf-company-row';
+
+    var main = document.createElement('div');
+    main.className = 'cf-company-main';
+
+    var info = document.createElement('div');
+    info.className = 'cf-company-info';
+
+    var nameEl = document.createElement('span');
+    nameEl.className = 'cf-company-name';
+    nameEl.textContent = company.trade_name || company.legal_name || 'Empresa sem nome';
+    info.appendChild(nameEl);
+
+    if (company.legal_name && company.legal_name !== company.trade_name) {
+      var legalEl = document.createElement('span');
+      legalEl.className = 'cf-company-legal';
+      legalEl.textContent = company.legal_name;
+      info.appendChild(legalEl);
+    }
+    main.appendChild(info);
+
+    var statusRow = document.createElement('div');
+    statusRow.className = 'cf-status-row';
+
+    var statusEl = document.createElement('span');
+    statusEl.className = 'cf-status-badge';
+    if (company.status && company.status !== 'ACTIVE') {
+      statusEl.className += ' cf-status-muted';
+    }
+    statusEl.textContent = formatStatus(company.status);
+    statusRow.appendChild(statusEl);
+
+    var statusSelect = document.createElement('select');
+    statusSelect.className = 'cf-status-select';
+    statusSelect.title = 'Alterar status da empresa';
+    STATUS_OPTIONS.forEach(function (value) {
+      var opt = document.createElement('option');
+      opt.value = value;
+      opt.textContent = formatStatus(value);
+      if (value === company.status) opt.selected = true;
+      statusSelect.appendChild(opt);
+    });
+
+    var statusMsg = document.createElement('span');
+    statusMsg.className = 'cf-status-msg';
+    statusMsg.hidden = true;
+
+    statusSelect.addEventListener('change', function () {
+      var novoStatus = statusSelect.value;
+      var statusAnterior = company.status;
+
+      statusSelect.disabled = true;
+      statusMsg.hidden = true;
+
+      supabase
+        .from('companies')
+        .update({ status: novoStatus })
+        .eq('id', company.id)
+        .then(function (result) {
+          if (result.error) {
+            console.error('Erro ao atualizar status da empresa:', result.error);
+            statusSelect.value = statusAnterior;
+            statusSelect.disabled = false;
+            statusMsg.textContent = 'Erro ao salvar. Tente novamente.';
+            statusMsg.className = 'cf-status-msg cf-status-msg-error';
+            statusMsg.hidden = false;
+            return;
+          }
+          company.status = novoStatus;
+          // Recarrega a lista inteira: é o jeito mais simples de manter o
+          // badge, o select e a ordenação (por trade_name) sempre
+          // consistentes com o que está no banco.
+          loadCompanies();
+        });
+    });
+
+    statusRow.appendChild(statusSelect);
+    statusRow.appendChild(statusMsg);
+    main.appendChild(statusRow);
+
+    var manageBtn = document.createElement('button');
+    manageBtn.type = 'button';
+    manageBtn.className = 'cf-manage-btn';
+    manageBtn.textContent = 'Gerenciar';
+    main.appendChild(manageBtn);
+
+    row.appendChild(main);
+
+    var panel = document.createElement('div');
+    panel.className = 'cf-company-services';
+    panel.hidden = true;
+    row.appendChild(panel);
+
+    var loaded = false;
+    manageBtn.addEventListener('click', function () {
+      var willShow = panel.hidden;
+      panel.hidden = !willShow;
+      manageBtn.textContent = willShow ? 'Fechar' : 'Gerenciar';
+      if (willShow && !loaded) {
+        loaded = true;
+        loadServicesForCompany(company.id, panel);
+      }
+    });
+
+    return row;
+  }
+
+  async function loadServicesForCompany(companyId, panel) {
+    panel.innerHTML = '<p class="cf-loading">Carregando serviços...</p>';
+
+    var servicesResult = await supabase
+      .from('services')
+      .select('id, key, name')
+      .order('name', { ascending: true });
+
+    if (servicesResult.error) {
+      console.error('Erro ao carregar catálogo de serviços:', servicesResult.error);
+      panel.innerHTML = '<p class="cf-error-text">Não foi possível carregar os serviços.</p>';
+      return;
+    }
+
+    var companyServicesResult = await supabase
+      .from('company_services')
+      .select('service_id, active')
+      .eq('company_id', companyId);
+
+    if (companyServicesResult.error) {
+      console.error('Erro ao carregar serviços da empresa:', companyServicesResult.error);
+      panel.innerHTML = '<p class="cf-error-text">Não foi possível carregar os serviços contratados.</p>';
+      return;
+    }
+
+    var activeMap = {};
+    (companyServicesResult.data || []).forEach(function (row) {
+      activeMap[row.service_id] = !!row.active;
+    });
+
+    var services = servicesResult.data || [];
+    panel.innerHTML = '';
+    if (services.length === 0) {
+      panel.innerHTML = '<p class="cf-loading">Nenhum serviço no catálogo ainda.</p>';
+      return;
+    }
+
+    services.forEach(function (service) {
+      panel.appendChild(buildServiceToggleRow(companyId, service, !!activeMap[service.id]));
+    });
+  }
+
+  function buildServiceToggleRow(companyId, service, isActive) {
+    var row = document.createElement('div');
+    row.className = 'cf-service-row';
+
+    var nameEl = document.createElement('span');
+    nameEl.className = 'cf-service-name';
+    nameEl.textContent = service.name;
+    row.appendChild(nameEl);
+
+    var msgEl = document.createElement('span');
+    msgEl.className = 'cf-service-msg';
+    msgEl.hidden = true;
+
+    var toggle = document.createElement('label');
+    toggle.className = 'cf-toggle';
+
+    var input = document.createElement('input');
+    input.type = 'checkbox';
+    input.checked = isActive;
+
+    var track = document.createElement('span');
+    track.className = 'cf-toggle-track';
+    var thumb = document.createElement('span');
+    thumb.className = 'cf-toggle-thumb';
+    track.appendChild(thumb);
+
+    toggle.appendChild(input);
+    toggle.appendChild(track);
+
+    input.addEventListener('change', function () {
+      var nextActive = input.checked;
+      var previousActive = !nextActive;
+
+      input.disabled = true;
+      toggle.classList.add('cf-toggle-loading');
+      msgEl.hidden = true;
+
+      var payload = {
+        company_id: companyId,
+        service_id: service.id,
+        active: nextActive
+      };
+      // activated_at records the last time the service was turned ON; leave it
+      // untouched when deactivating so the activation history is preserved.
+      if (nextActive) {
+        payload.activated_at = new Date().toISOString();
+      }
+
+      supabase
+        .from('company_services')
+        .upsert(payload, { onConflict: 'company_id,service_id' })
+        .then(function (result) {
+          input.disabled = false;
+          toggle.classList.remove('cf-toggle-loading');
+
+          if (result.error) {
+            console.error('Erro ao atualizar serviço:', result.error);
+            input.checked = previousActive;
+            msgEl.textContent = 'Erro ao salvar. Tente novamente.';
+            msgEl.className = 'cf-service-msg cf-service-msg-error';
+            msgEl.hidden = false;
+            return;
+          }
+
+          msgEl.textContent = 'Salvo.';
+          msgEl.className = 'cf-service-msg cf-service-msg-ok';
+          msgEl.hidden = false;
+          setTimeout(function () { msgEl.hidden = true; }, 2500);
+        });
+    });
+
+    row.appendChild(toggle);
+    row.appendChild(msgEl);
+    return row;
+  }
+
+  // ---------------------------------------------------------------------
+  // Nova empresa — a única ação desta tela que NÃO fala direto com o
+  // Supabase: criar um usuário no Supabase Auth exige a service_role key,
+  // que uma página estática nunca pode guardar. Por isso isto chama a rota
+  // nova do backend do CRM (POST /api/plataforma/empresas), passando o
+  // access_token da sessão atual — mesmo padrão de apps/web/src/lib/apiV1.js
+  // no repo do CRM.
+  // ---------------------------------------------------------------------
+  var newCompanyToggle = document.getElementById('new-company-toggle');
+  var newCompanyForm = document.getElementById('new-company-form');
+  var newCompanyCancel = document.getElementById('new-company-cancel');
+  var newCompanySubmit = document.getElementById('new-company-submit');
+  var newCompanyMsg = document.getElementById('new-company-msg');
+
+  var ncFields = {
+    legalName: document.getElementById('nc-legal-name'),
+    tradeName: document.getElementById('nc-trade-name'),
+    document: document.getElementById('nc-document'),
+    email: document.getElementById('nc-email'),
+    phone: document.getElementById('nc-phone'),
+    adminNome: document.getElementById('nc-admin-nome'),
+    adminEmail: document.getElementById('nc-admin-email'),
+    adminSenhaTemporaria: document.getElementById('nc-admin-senha')
+  };
+
+  function setNewCompanyFormOpen(open) {
+    newCompanyForm.hidden = !open;
+    newCompanyToggle.hidden = open;
+    if (!open) {
+      newCompanyForm.reset();
+      newCompanyMsg.hidden = true;
+    }
+  }
+
+  newCompanyToggle.addEventListener('click', function () { setNewCompanyFormOpen(true); });
+  newCompanyCancel.addEventListener('click', function () { setNewCompanyFormOpen(false); });
+
+  function showNewCompanyMsg(text, ok) {
+    newCompanyMsg.textContent = text;
+    newCompanyMsg.className = 'cf-form-msg ' + (ok ? 'cf-form-msg-ok' : 'cf-form-msg-error');
+    newCompanyMsg.hidden = false;
+  }
+
+  newCompanyForm.addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    if (!newCompanyForm.reportValidity()) return;
+
+    var payload = {
+      legalName: ncFields.legalName.value.trim(),
+      tradeName: ncFields.tradeName.value.trim() || undefined,
+      document: ncFields.document.value.trim() || undefined,
+      email: ncFields.email.value.trim() || undefined,
+      phone: ncFields.phone.value.trim() || undefined,
+      adminNome: ncFields.adminNome.value.trim(),
+      adminEmail: ncFields.adminEmail.value.trim(),
+      adminSenhaTemporaria: ncFields.adminSenhaTemporaria.value
+    };
+    // Remove os campos opcionais vazios em vez de mandar string vazia —
+    // a rota trata undefined como "não informado" (zod .optional()).
+    Object.keys(payload).forEach(function (key) {
+      if (payload[key] === undefined) delete payload[key];
+    });
+
+    newCompanySubmit.disabled = true;
+    newCompanyCancel.disabled = true;
+    newCompanyMsg.hidden = true;
+
+    supabase.auth.getSession()
+      .then(function (sessionResult) {
+        var token = sessionResult.data && sessionResult.data.session && sessionResult.data.session.access_token;
+        if (!token) throw new Error('Sessão expirada. Recarregue a página e faça login novamente.');
+
+        return fetch(PLATFORM_API_BASE + '/plataforma/empresas', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify(payload)
+        });
+      })
+      .then(function (res) {
+        return res.json().catch(function () { return {}; }).then(function (body) {
+          if (!res.ok) {
+            var mensagem = (body.erro && body.erro.mensagem) || ('Falha ao criar empresa (HTTP ' + res.status + ').');
+            throw new Error(mensagem);
+          }
+          return body.dados;
+        });
+      })
+      .then(function () {
+        showNewCompanyMsg('Empresa criada com sucesso.', true);
+        loadCompanies();
+        setTimeout(function () { setNewCompanyFormOpen(false); }, 1200);
+      })
+      .catch(function (erro) {
+        console.error('Erro ao criar empresa:', erro);
+        showNewCompanyMsg(erro.message || 'Não foi possível criar a empresa.', false);
+      })
+      .finally(function () {
+        newCompanySubmit.disabled = false;
+        newCompanyCancel.disabled = false;
+      });
+  });
+})();
+</script>
+</body>
+</html>

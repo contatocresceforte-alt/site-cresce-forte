@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel — Cresce Forte</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  .cf-page { min-height: 100vh; background: #eff4f5; font-family: Inter, sans-serif; }
+  .cf-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 14px clamp(20px, 4vw, 56px);
+    background: #f4f8f9;
+    border-bottom: 1px solid rgba(13,43,62,0.1);
+  }
+  .cf-brand { display: flex; align-items: center; gap: 10px; }
+  .cf-logo-mark {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    background: #fff;
+    border: 1px solid rgba(13,43,62,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    box-shadow: 0 1px 2px rgba(13,43,62,0.06);
+  }
+  .cf-logo-mark img { width: 100%; height: 100%; object-fit: contain; }
+  .cf-brand-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 17px;
+    letter-spacing: -0.01em;
+    color: #0d2b3e;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .cf-user-area { display: flex; align-items: center; gap: 16px; }
+  .cf-user-email { font-size: 13.5px; color: #56707e; }
+  .cf-logout {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #3d5768;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(13,43,62,0.15);
+    background: none;
+    cursor: pointer;
+    font-family: Inter, sans-serif;
+  }
+  .cf-logout:hover { border-color: rgba(13,43,62,0.35); color: #0d2b3e; }
+  main.cf-main {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: clamp(40px, 6vw, 64px) clamp(20px, 4vw, 56px);
+  }
+  main.cf-main h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: clamp(24px, 3vw, 32px);
+    color: #0d2b3e;
+    margin: 0 0 8px;
+  }
+  main.cf-main p.cf-sub { font-size: 15px; color: #56707e; margin: 0 0 36px; }
+  .cf-placeholder {
+    background: #fff;
+    border: 1px solid rgba(13,43,62,0.1);
+    border-radius: 20px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 2px 6px -1px rgba(13,43,62,0.06), 0 14px 32px -14px rgba(13,43,62,0.16);
+    max-width: 480px;
+  }
+  .cf-placeholder .cf-tag {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #56707e;
+    background: rgba(13,43,62,0.06);
+    padding: 4px 9px;
+    border-radius: 999px;
+    width: fit-content;
+  }
+  .cf-placeholder h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 17px;
+    color: #0d2b3e;
+    margin: 0;
+  }
+  .cf-placeholder p { font-size: 13.5px; line-height: 1.6; color: #56707e; margin: 0; }
+  .cf-modules { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; max-width: 900px; }
+  .cf-module {
+    background: #fff;
+    border: 1px solid rgba(13,43,62,0.1);
+    border-radius: 20px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 2px 6px -1px rgba(13,43,62,0.06), 0 14px 32px -14px rgba(13,43,62,0.16);
+    text-decoration: none;
+  }
+  .cf-module h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 17px;
+    color: #0d2b3e;
+    margin: 0;
+  }
+  .cf-module p { font-size: 13.5px; line-height: 1.5; color: #56707e; margin: 0; }
+  .cf-module .cf-open {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f7c8c;
+  }
+</style>
+</head>
+<body>
+<div class="cf-page">
+  <header class="cf-header">
+    <div class="cf-brand">
+      <span class="cf-logo-mark">
+        <img src="/assets/cresce-forte-icon.webp?v=1" alt="Cresce Forte">
+      </span>
+      <span class="cf-brand-name">Cresce Forte</span>
+    </div>
+    <div class="cf-user-area">
+      <span class="cf-user-email" id="user-email"></span>
+      <button type="button" class="cf-logout" id="logout-btn">Sair</button>
+    </div>
+  </header>
+
+  <main class="cf-main">
+    <h1>Suas ferramentas</h1>
+    <p class="cf-sub">Escolha o que você quer acessar.</p>
+
+    <div class="cf-modules" id="modules-area">
+      <div class="cf-placeholder">
+        <span class="cf-tag">Carregando</span>
+        <h2>Módulos contratados</h2>
+        <p>Buscando os serviços ativos da sua empresa...</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="/assets/auth.js"></script>
+<script>
+(function () {
+  // URL de cada módulo já publicado.
+  // Login do CRM continua sendo o dele mesmo (ponte bcrypt, Fase 4 do plano
+  // ainda não trocou isso) — abrir aqui não loga sozinho lá, é aba separada.
+  var MODULE_INFO = {
+    crm: { url: 'https://crm.cresceforte.com/', desc: 'Converse com clientes, gerencie seu funil de vendas e seu catálogo de produtos.' },
+    catalogo: { url: 'https://catalogo.cresceforte.com/', desc: 'Monte e publique seu catálogo digital.' }
+  };
+
+  function renderModules(rows) {
+    var area = document.getElementById('modules-area');
+    area.innerHTML = '';
+    if (!rows || !rows.length) {
+      area.innerHTML = '<div class="cf-placeholder"><span class="cf-tag">Nenhum módulo</span><h2>Nenhum serviço ativo</h2><p>Fale com o suporte da Cresce Forte para ativar um módulo para sua empresa.</p></div>';
+      return;
+    }
+    rows.forEach(function (row) {
+      var svc = row.services;
+      var info = MODULE_INFO[svc.key] || {};
+      var card = document.createElement(info.url ? 'a' : 'div');
+      card.className = 'cf-module';
+      if (info.url) { card.href = info.url; card.target = '_blank'; card.rel = 'noopener'; }
+      var h2 = document.createElement('h2');
+      h2.textContent = svc.name;
+      var p = document.createElement('p');
+      p.textContent = info.desc || 'Módulo ativo para sua empresa.';
+      var tag = document.createElement('span');
+      tag.className = 'cf-open';
+      if (info.url) {
+        tag.textContent = 'Abrir →';
+      } else {
+        tag.textContent = 'Em configuração';
+        tag.style.color = '#94a3b8';
+      }
+      card.appendChild(h2);
+      card.appendChild(p);
+      card.appendChild(tag);
+      area.appendChild(card);
+    });
+  }
+
+  // validatedSession em vez de requireAuth: duas linhas abaixo, o
+  // app_metadata.company_id desta sessão vira o filtro dos módulos exibidos.
+  // Sessão lida só do localStorage é forjável pelo console do navegador —
+  // aqui ela é confirmada com o servidor do Supabase antes de virar decisão
+  // de tela. Quem de fato impede ler os módulos de outra empresa é a RLS de
+  // company_services; isto só evita a tela mentir.
+  CresceForteAuth.validatedSession().then(async function (session) {
+    if (!session) {
+      window.location.href = '/login/';
+      return;
+    }
+    var emailEl = document.getElementById('user-email');
+    var name = session.user.user_metadata && session.user.user_metadata.full_name;
+    emailEl.textContent = name || session.user.email || '';
+
+    var companyId = CresceForteAuth.getCompanyId(session);
+    if (!companyId) { renderModules([]); return; }
+
+    var result = await CresceForteAuth.client
+      .from('company_services')
+      .select('active, services(key, name)')
+      .eq('company_id', companyId)
+      .eq('active', true);
+
+    if (result.error) {
+      console.error('Erro ao buscar módulos:', result.error);
+      document.getElementById('modules-area').innerHTML =
+        '<div class="cf-placeholder"><span class="cf-tag">Erro</span><h2>Não foi possível carregar seus módulos</h2><p>Atualize a página em instantes.</p></div>';
+      return;
+    }
+    renderModules(result.data);
+  });
+
+  document.getElementById('logout-btn').addEventListener('click', function () {
+    CresceForteAuth.logout('/login/');
+  });
+})();
+</script>
+</body>
+</html>

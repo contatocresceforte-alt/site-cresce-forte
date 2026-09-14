@@ -1,10 +1,10 @@
 // assets/auth.js
-// Shared Supabase client + auth helpers for the Cresce Forte hub (login.html, app.html, admin.html).
+// Shared Supabase client + auth helpers for the Cresce Forte hub (/login/, /app/, /admin/).
 // Include the @supabase/supabase-js UMD <script> tag BEFORE this file on every page that uses it.
 //
 // Usage:
-//   const session = await CresceForteAuth.requireAuth();          // redirects to login.html if not signed in
-//   const session = await CresceForteAuth.requireRole('PLATFORM'); // also redirects non-PLATFORM users to app.html
+//   const session = await CresceForteAuth.requireAuth();          // redirects to /login/ if not signed in
+//   const session = await CresceForteAuth.requireRole('PLATFORM'); // also redirects non-PLATFORM users to /app/
 //   await CresceForteAuth.logout();
 
 (function (global) {
@@ -80,7 +80,7 @@
   // Ensures there is a valid session; otherwise redirects to the login page.
   // Returns the session (never null) when it resolves without redirecting.
   async function requireAuth(loginUrl) {
-    loginUrl = loginUrl || 'login.html';
+    loginUrl = loginUrl || '/login/';
     var session = await getSession();
     if (!session) {
       global.location.href = loginUrl;
@@ -98,8 +98,8 @@
   // as much as the session it reads, and the stored session is forgeable.
   async function requireRole(userType, options) {
     options = options || {};
-    var loginUrl = options.loginUrl || 'login.html';
-    var fallbackUrl = options.fallbackUrl || 'app.html';
+    var loginUrl = options.loginUrl || '/login/';
+    var fallbackUrl = options.fallbackUrl || '/app/';
 
     var session = await validatedSession();
     if (!session) {
@@ -116,7 +116,7 @@
 
   // Signs the user out and redirects to the login page.
   async function logout(loginUrl) {
-    loginUrl = loginUrl || 'login.html';
+    loginUrl = loginUrl || '/login/';
     try {
       await client.auth.signOut();
     } catch (err) {
