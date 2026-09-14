@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /login
+Disallow: /app
+Disallow: /admin
+Disallow: /reset-password
+Disallow: /Dashboard.dc.html
+Disallow: /Login.dc.html
+
+Sitemap: https://cresceforte.com/sitemap.xml
