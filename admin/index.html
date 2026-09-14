@@ -380,10 +380,13 @@
   var supabase = CresceForteAuth.client;
   var companiesListEl = document.getElementById('companies-list');
 
-  // A API do CRM (apps/api) vive no mesmo host do front dele, atrás do
-  // Caddy que roteia /api/* pro container da api (ver infra/caddy/Caddyfile
-  // no repo do CRM) — mesmo domínio que app.html já usa para o card do CRM.
-  var PLATFORM_API_BASE = 'https://cresce-forte-web.jy8rvo.easypanel.host/api';
+  // A API do CRM (apps/api) vive atrás do nginx do front dele (container
+  // `web`), que roteia /api/ pro container `api` não importa qual domínio
+  // bateu na borda (confirmado ao vivo pela Segurança/CRM, 2026-09-14) —
+  // por isso dá pra usar o domínio público crm.cresceforte.com aqui, o
+  // mesmo que app.html já usa para o card do CRM, em vez do host direto do
+  // EasyPanel (que bypassa o Cloudflare).
+  var PLATFORM_API_BASE = 'https://crm.cresceforte.com/api';
 
   // Valores reais de companies.status (supabase/migrations/0015_companies.sql
   // no repo do CRM) — sempre maiúsculo, check constraint no banco.
