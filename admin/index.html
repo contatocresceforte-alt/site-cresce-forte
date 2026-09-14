@@ -347,11 +347,8 @@
             <label for="nc-admin-email">E-mail de acesso *</label>
             <input type="email" id="nc-admin-email" required maxlength="200" autocomplete="off">
           </div>
-          <div class="cf-field">
-            <label for="nc-admin-senha">Senha temporária *</label>
-            <input type="text" id="nc-admin-senha" required minlength="8" maxlength="72" placeholder="mínimo 8 caracteres" autocomplete="off">
-          </div>
         </div>
+        <p style="font-size:12.5px;color:#56707e;margin:8px 0 0">O servidor gera a senha temporária sozinho e mostra ela aqui, uma vez, depois de criar a empresa.</p>
 
         <div class="cf-form-actions">
           <button type="submit" class="cf-primary-btn" id="new-company-submit">Criar empresa</button>
@@ -689,8 +686,7 @@
     email: document.getElementById('nc-email'),
     phone: document.getElementById('nc-phone'),
     adminNome: document.getElementById('nc-admin-nome'),
-    adminEmail: document.getElementById('nc-admin-email'),
-    adminSenhaTemporaria: document.getElementById('nc-admin-senha')
+    adminEmail: document.getElementById('nc-admin-email')
   };
 
   function setNewCompanyFormOpen(open) {
@@ -723,8 +719,7 @@
       email: ncFields.email.value.trim() || undefined,
       phone: ncFields.phone.value.trim() || undefined,
       adminNome: ncFields.adminNome.value.trim(),
-      adminEmail: ncFields.adminEmail.value.trim(),
-      adminSenhaTemporaria: ncFields.adminSenhaTemporaria.value
+      adminEmail: ncFields.adminEmail.value.trim()
     };
     // Remove os campos opcionais vazios em vez de mandar string vazia —
     // a rota trata undefined como "não informado" (zod .optional()).
@@ -759,10 +754,15 @@
           return body.dados;
         });
       })
-      .then(function () {
-        showNewCompanyMsg('Empresa criada com sucesso.', true);
+      .then(function (dados) {
+        var senha = dados && dados.senhaTemporaria;
+        showNewCompanyMsg(
+          senha
+            ? 'Empresa criada. Senha temporária do administrador: ' + senha + ' — copie agora, ela não aparece de novo.'
+            : 'Empresa criada com sucesso.',
+          true
+        );
         loadCompanies();
-        setTimeout(function () { setNewCompanyFormOpen(false); }, 1200);
       })
       .catch(function (erro) {
         console.error('Erro ao criar empresa:', erro);
