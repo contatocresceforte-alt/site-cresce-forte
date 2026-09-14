@@ -460,13 +460,16 @@
     manageBtn.type = 'button';
     manageBtn.className = 'cf-manage-btn';
     manageBtn.textContent = 'Gerenciar';
+    manageBtn.setAttribute('aria-expanded', 'false');
     main.appendChild(manageBtn);
 
     row.appendChild(main);
 
     var panel = document.createElement('div');
     panel.className = 'cf-company-services';
+    panel.id = 'services-panel-' + company.id;
     panel.hidden = true;
+    manageBtn.setAttribute('aria-controls', panel.id);
     row.appendChild(panel);
 
     var loaded = false;
@@ -474,6 +477,7 @@
       var willShow = panel.hidden;
       panel.hidden = !willShow;
       manageBtn.textContent = willShow ? 'Fechar' : 'Gerenciar';
+      manageBtn.setAttribute('aria-expanded', String(willShow));
       if (willShow && !loaded) {
         loaded = true;
         loadServicesForCompany(company.id, panel);
