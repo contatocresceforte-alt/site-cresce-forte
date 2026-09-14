@@ -51,7 +51,12 @@
       </div>
       <div class="cf-field">
         <label for="password">Senha</label>
-        <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="••••••••">
+        <div class="cf-pwd-wrap">
+          <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="••••••••">
+          <button type="button" class="cf-pwd-toggle" id="password-toggle" aria-label="Mostrar senha" aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
       </div>
       <button type="submit" class="cf-submit" id="submit-btn">Entrar</button>
     </form>
@@ -73,6 +78,18 @@
   var forgotBtn = document.getElementById('forgot-btn');
   var errorBox = document.getElementById('error-box');
   var successBox = document.getElementById('success-box');
+  var passwordToggle = document.getElementById('password-toggle');
+
+  // Eye icon: same SVG element, swap only the inner path/circle on toggle.
+  var EYE_OPEN = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/>';
+  var EYE_OFF = '<path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-3.22 4.34M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+  passwordToggle.addEventListener('click', function () {
+    var show = passwordInput.type === 'password';
+    passwordInput.type = show ? 'text' : 'password';
+    passwordToggle.setAttribute('aria-pressed', String(show));
+    passwordToggle.setAttribute('aria-label', show ? 'Esconder senha' : 'Mostrar senha');
+    passwordToggle.querySelector('svg').innerHTML = show ? EYE_OFF : EYE_OPEN;
+  });
 
   function showError(message) {
     successBox.hidden = true;

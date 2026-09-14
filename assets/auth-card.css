@@ -107,6 +107,27 @@ form.cf-form { display: flex; flex-direction: column; gap: 16px; }
   border-color: rgba(124,182,2,0.6);
   box-shadow: 0 0 0 3px rgba(124,182,2,0.15);
 }
+.cf-pwd-wrap { position: relative; }
+.cf-pwd-wrap input { padding-right: 44px; }
+.cf-pwd-toggle {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  color: #7c96a3;
+  cursor: pointer;
+}
+.cf-pwd-toggle:hover { color: #3d5768; }
+.cf-pwd-toggle:focus-visible { outline: 2px solid rgba(124,182,2,0.6); outline-offset: 1px; }
+.cf-pwd-toggle svg { width: 18px; height: 18px; }
 .cf-submit {
   margin-top: 4px;
   font-size: 14.5px;
