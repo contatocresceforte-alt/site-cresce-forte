@@ -203,6 +203,31 @@
   .cf-form-msg-ok { color: #4f8a00; }
   .cf-form-msg-error { color: #a13a2a; }
 
+  .cf-inline-pwd { display: inline-flex; align-items: center; gap: 6px; margin-left: 4px; }
+  .cf-inline-pwd-value {
+    font-weight: 700;
+    font-family: 'Space Grotesk', sans-serif;
+    letter-spacing: 0.03em;
+    user-select: all;
+  }
+  .cf-reveal-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background: none;
+    border: none;
+    border-radius: 6px;
+    color: inherit;
+    opacity: 0.75;
+    cursor: pointer;
+  }
+  .cf-reveal-btn:hover { opacity: 1; }
+  .cf-reveal-btn:focus-visible { outline: 2px solid currentColor; outline-offset: 1px; }
+  .cf-reveal-btn svg { width: 16px; height: 16px; }
+
   .cf-status-row { display: flex; align-items: center; gap: 8px; }
   .cf-status-select {
     font-family: Inter, sans-serif;
@@ -642,9 +667,46 @@
   newCompanyToggle.addEventListener('click', function () { setNewCompanyFormOpen(true); });
   newCompanyCancel.addEventListener('click', function () { setNewCompanyFormOpen(false); });
 
-  function showNewCompanyMsg(text, ok) {
-    newCompanyMsg.textContent = text;
+  // Same eye icon as /login/ e /reset-password/ (assets/auth-card.css), mas
+  // aqui é só pra revelar um texto estático, não um <input type="password">.
+  var EYE_OPEN = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/>';
+  var EYE_OFF = '<path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-3.22 4.34M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+
+  function showNewCompanyMsg(text, ok, senha) {
     newCompanyMsg.className = 'cf-form-msg ' + (ok ? 'cf-form-msg-ok' : 'cf-form-msg-error');
+    newCompanyMsg.innerHTML = '';
+    newCompanyMsg.appendChild(document.createTextNode(text));
+
+    if (senha) {
+      var wrap = document.createElement('span');
+      wrap.className = 'cf-inline-pwd';
+
+      var valueEl = document.createElement('span');
+      valueEl.className = 'cf-inline-pwd-value';
+
+      var revealed = false;
+      function render() { valueEl.textContent = revealed ? senha : '••••••••••'; }
+      render();
+
+      var toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'cf-reveal-btn';
+      toggle.setAttribute('aria-label', 'Mostrar senha temporária');
+      toggle.setAttribute('aria-pressed', 'false');
+      toggle.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + EYE_OPEN + '</svg>';
+      toggle.addEventListener('click', function () {
+        revealed = !revealed;
+        render();
+        toggle.setAttribute('aria-pressed', String(revealed));
+        toggle.setAttribute('aria-label', revealed ? 'Esconder senha temporária' : 'Mostrar senha temporária');
+        toggle.querySelector('svg').innerHTML = revealed ? EYE_OFF : EYE_OPEN;
+      });
+
+      wrap.appendChild(valueEl);
+      wrap.appendChild(toggle);
+      newCompanyMsg.appendChild(wrap);
+    }
+
     newCompanyMsg.hidden = false;
   }
 
@@ -699,9 +761,10 @@
         var senha = dados && dados.senhaTemporaria;
         showNewCompanyMsg(
           senha
-            ? 'Empresa criada. Senha temporária do administrador: ' + senha + ' — copie agora, ela não aparece de novo.'
+            ? 'Empresa criada. Senha temporária do administrador — copie agora, ela não aparece de novo:'
             : 'Empresa criada com sucesso.',
-          true
+          true,
+          senha
         );
         // form.reset() só afeta os controles (input/select), não o <p> da
         // mensagem — limpa os campos sem esconder o aviso da senha. Sem
