@@ -31,7 +31,7 @@
         tag.textContent = 'Abrir →';
       } else {
         tag.textContent = 'Em configuração';
-        tag.style.color = '#6b7f91';
+        tag.style.color = '#56707e';
       }
       card.appendChild(h2);
       card.appendChild(p);

@@ -113,6 +113,8 @@
 
     var statusMsg = document.createElement('span');
     statusMsg.className = 'cf-status-msg';
+    statusMsg.setAttribute('role', 'status');
+    statusMsg.setAttribute('aria-live', 'polite');
     statusMsg.hidden = true;
 
     statusSelect.addEventListener('change', function () {
@@ -165,6 +167,7 @@
     var panel = document.createElement('div');
     panel.className = 'cf-company-services';
     panel.id = 'services-panel-' + company.id;
+    panel.setAttribute('aria-live', 'polite');
     panel.hidden = true;
     manageBtn.setAttribute('aria-controls', panel.id);
     row.appendChild(panel);
@@ -237,6 +240,8 @@
 
     var msgEl = document.createElement('span');
     msgEl.className = 'cf-service-msg';
+    msgEl.setAttribute('role', 'status');
+    msgEl.setAttribute('aria-live', 'polite');
     msgEl.hidden = true;
 
     var toggle = document.createElement('label');
@@ -333,9 +338,12 @@
   function setNewCompanyFormOpen(open) {
     newCompanyForm.hidden = !open;
     newCompanyToggle.hidden = open;
-    if (!open) {
+    if (open) {
+      ncFields.legalName.focus();
+    } else {
       newCompanyForm.reset();
       newCompanyMsg.hidden = true;
+      newCompanyToggle.focus();
     }
   }
 
@@ -376,7 +384,11 @@
   newCompanyForm.addEventListener('submit', function (event) {
     event.preventDefault();
 
-    if (!newCompanyForm.reportValidity()) return;
+    if (!newCompanyForm.checkValidity()) {
+      newCompanyForm.reportValidity();
+      showNewCompanyMsg('Preencha os campos obrigatórios (marcados com *) antes de criar a empresa.', false);
+      return;
+    }
 
     var payload = {
       legalName: ncFields.legalName.value.trim(),

@@ -24,13 +24,23 @@
   ];
   PASSWORD_RULES.forEach(function (rule) {
     var li = document.createElement('li');
-    li.textContent = rule.label;
+    li.textContent = rule.label + ' ';
+    // Texto só pra leitor de tela — a marcação visual (cor + risco) some
+    // pra quem não distingue cor, e não tem aria-live na lista inteira de
+    // propósito (anunciaria a cada tecla digitada, virando ruído).
+    var status = document.createElement('span');
+    status.className = 'cf-rule-status';
+    status.style.cssText = 'position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap';
+    li.appendChild(status);
     rulesList.appendChild(li);
   });
   function updateRules() {
     var password = passwordInput.value;
     PASSWORD_RULES.forEach(function (rule, i) {
-      rulesList.children[i].classList.toggle('cf-rule-ok', rule.test(password));
+      var ok = rule.test(password);
+      var li = rulesList.children[i];
+      li.classList.toggle('cf-rule-ok', ok);
+      li.querySelector('.cf-rule-status').textContent = ok ? '(atendido)' : '';
     });
   }
   function passwordMeetsRules(password) {
@@ -89,6 +99,7 @@
       if (!recoveryReady && form.hidden) {
         titleEl.textContent = 'Link inválido';
         subEl.textContent = 'Abra esta página a partir do link enviado por e-mail.';
+        showError('Não encontramos um link de recuperação válido nesta página.');
       }
     }, 4000);
   }
