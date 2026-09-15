@@ -30,7 +30,6 @@
     // propósito (anunciaria a cada tecla digitada, virando ruído).
     var status = document.createElement('span');
     status.className = 'cf-rule-status';
-    status.style.cssText = 'position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap';
     li.appendChild(status);
     rulesList.appendChild(li);
   });

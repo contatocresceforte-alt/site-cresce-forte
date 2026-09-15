@@ -1,0 +1,235 @@
+.cf-badge {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #3f6f00;
+  background: rgba(124,182,2,0.12);
+  padding: 4px 9px;
+  border-radius: 999px;
+  margin-left: 4px;
+}
+
+.cf-card {
+  background: #fff;
+  border: 1px solid rgba(13,43,62,0.1);
+  border-radius: 20px;
+  box-shadow: 0 2px 6px -1px rgba(13,43,62,0.06), 0 14px 32px -14px rgba(13,43,62,0.16);
+  overflow: hidden;
+}
+.cf-card-head { padding: 24px 28px 20px; }
+.cf-card-head h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 17px;
+  color: #0d2b3e;
+  margin: 0 0 4px;
+}
+.cf-card-head p { font-size: 13.5px; color: #56707e; margin: 0; }
+
+.cf-loading, .cf-error-text {
+  padding: 4px 28px 28px;
+  font-size: 13.5px;
+  color: #56707e;
+  margin: 0;
+}
+.cf-error-text { color: #a13a2a; }
+
+.cf-company-row { border-top: 1px solid rgba(13,43,62,0.08); }
+.cf-company-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 28px;
+  flex-wrap: wrap;
+}
+.cf-company-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 160px;
+}
+.cf-company-name { font-weight: 600; font-size: 14.5px; color: #0d2b3e; }
+.cf-company-legal { font-size: 12.5px; color: #56707e; }
+.cf-status-badge {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #3f6f00;
+  background: rgba(124,182,2,0.12);
+  padding: 4px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.cf-status-badge.cf-status-muted { color: #56707e; background: rgba(13,43,62,0.06); }
+.cf-manage-btn {
+  font-size: 13px;
+  font-weight: 600;
+  color: #3d5768;
+  background: none;
+  border: 1px solid rgba(13,43,62,0.15);
+  border-radius: 999px;
+  padding: 7px 15px;
+  cursor: pointer;
+  font-family: Inter, sans-serif;
+}
+.cf-manage-btn:hover { border-color: rgba(13,43,62,0.35); color: #0d2b3e; }
+
+.cf-company-services {
+  padding: 4px 28px 20px;
+  background: #f9fbfb;
+  border-top: 1px solid rgba(13,43,62,0.08);
+}
+.cf-service-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(13,43,62,0.06);
+}
+.cf-service-row:last-child { border-bottom: none; }
+.cf-service-name { flex: 1; font-size: 13.5px; font-weight: 600; color: #0d2b3e; }
+.cf-service-msg { font-size: 12px; color: #56707e; white-space: nowrap; }
+.cf-service-msg-ok { color: #3f6f00; }
+.cf-service-msg-error { color: #a13a2a; }
+
+.cf-toggle { position: relative; display: inline-block; width: 42px; height: 24px; flex-shrink: 0; }
+.cf-toggle input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  margin: 0;
+  cursor: pointer;
+  z-index: 1;
+}
+.cf-toggle-track {
+  position: absolute;
+  inset: 0;
+  background: rgba(13,43,62,0.18);
+  border-radius: 999px;
+  transition: background 0.15s ease;
+}
+.cf-toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(13,43,62,0.3);
+  transition: transform 0.15s ease;
+}
+.cf-toggle input:checked + .cf-toggle-track { background: #7cb602; }
+.cf-toggle input:checked + .cf-toggle-track .cf-toggle-thumb { transform: translateX(18px); }
+.cf-toggle input:focus-visible + .cf-toggle-track { outline: 2px solid #0f7c8c; outline-offset: 2px; }
+.cf-toggle input:disabled { cursor: default; }
+.cf-toggle-loading .cf-toggle-track { opacity: 0.6; }
+
+.cf-card + .cf-card { margin-top: 24px; }
+.cf-card-head-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+.cf-primary-btn {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  background: #0f7c8c;
+  border: none;
+  border-radius: 999px;
+  padding: 9px 18px;
+  cursor: pointer;
+  font-family: Inter, sans-serif;
+  white-space: nowrap;
+}
+.cf-primary-btn:hover { background: #0d6a78; }
+.cf-primary-btn:disabled { opacity: 0.6; cursor: default; }
+.cf-secondary-btn {
+  font-size: 13px;
+  font-weight: 600;
+  color: #3d5768;
+  background: none;
+  border: 1px solid rgba(13,43,62,0.15);
+  border-radius: 999px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-family: Inter, sans-serif;
+}
+.cf-secondary-btn:hover { border-color: rgba(13,43,62,0.35); color: #0d2b3e; }
+
+.cf-form-panel { padding: 4px 28px 28px; border-top: 1px solid rgba(13,43,62,0.08); }
+.cf-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px 18px;
+  margin: 16px 0 4px;
+}
+.cf-form-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #56707e;
+  margin: 22px 0 0;
+}
+.cf-field { display: flex; flex-direction: column; gap: 6px; }
+.cf-field label { font-size: 12.5px; font-weight: 600; color: #3d5768; }
+.cf-field input {
+  font-family: Inter, sans-serif;
+  font-size: 13.5px;
+  color: #0d2b3e;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(13,43,62,0.18);
+  background: #fff;
+}
+.cf-field input:focus { outline: 2px solid rgba(15,124,140,0.35); border-color: #0f7c8c; }
+.cf-form-actions { display: flex; align-items: center; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
+.cf-form-msg { font-size: 13px; margin: 0; }
+.cf-form-msg-ok { color: #3f6f00; }
+.cf-form-msg-error { color: #a13a2a; }
+
+.cf-inline-pwd { display: inline-flex; align-items: center; gap: 6px; margin-left: 4px; }
+.cf-inline-pwd-value {
+  font-weight: 700;
+  font-family: 'Space Grotesk', sans-serif;
+  letter-spacing: 0.03em;
+  user-select: all;
+}
+.cf-reveal-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: inherit;
+  opacity: 0.75;
+  cursor: pointer;
+}
+.cf-reveal-btn:hover { opacity: 1; }
+.cf-reveal-btn:focus-visible { outline: 2px solid currentColor; outline-offset: 1px; }
+.cf-reveal-btn svg { width: 16px; height: 16px; }
+
+.cf-status-row { display: flex; align-items: center; gap: 8px; }
+.cf-status-select {
+  font-family: Inter, sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #3d5768;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(13,43,62,0.18);
+  background: #fff;
+  cursor: pointer;
+}
+.cf-status-select:disabled { opacity: 0.6; cursor: default; }
+.cf-status-msg { font-size: 11.5px; white-space: nowrap; }
+.cf-status-msg-ok { color: #3f6f00; }
+.cf-status-msg-error { color: #a13a2a; }
+
+.cf-temp-pwd-hint { font-size: 12.5px; color: #56707e; margin: 8px 0 0; }

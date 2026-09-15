@@ -31,7 +31,7 @@
         tag.textContent = 'Abrir →';
       } else {
         tag.textContent = 'Em configuração';
-        tag.style.color = '#56707e';
+        tag.classList.add('cf-open-muted');
       }
       card.appendChild(h2);
       card.appendChild(p);
