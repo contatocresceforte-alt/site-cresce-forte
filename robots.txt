@@ -1,10 +1,13 @@
 # robots.txt para cresceforte.com
+# /login e /reset-password sao linkados publicamente (rodape, e-mail de
+# recuperacao) e ja tem <meta name="robots" content="noindex,nofollow">, que
+# so funciona se o crawler puder abrir a pagina — por isso ficam sem
+# Disallow aqui. /app e /admin nunca sao linkados de lugar publico, entao o
+# Disallow evita ate a tentativa de crawl.
 User-agent: *
 Allow: /
-Disallow: /login
 Disallow: /app
 Disallow: /admin
-Disallow: /reset-password
 Disallow: /Dashboard.dc.html
 Disallow: /Login.dc.html
 

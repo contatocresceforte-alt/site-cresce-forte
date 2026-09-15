@@ -9,7 +9,9 @@
 <link rel="icon" href="/assets/cresce-forte-icon.webp?v=1" type="image/webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" media="print">
+<script src="/assets/font-swap.js"></script>
+<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet"></noscript>
 <link rel="stylesheet" href="/assets/auth-card.css?v=2">
 <style>
   .cf-forgot {
@@ -67,118 +69,8 @@
   <a href="/" class="cf-back">← Voltar ao site</a>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="/assets/auth.js"></script>
-<script>
-(function () {
-  var form = document.getElementById('login-form');
-  var emailInput = document.getElementById('email');
-  var passwordInput = document.getElementById('password');
-  var submitBtn = document.getElementById('submit-btn');
-  var forgotBtn = document.getElementById('forgot-btn');
-  var errorBox = document.getElementById('error-box');
-  var successBox = document.getElementById('success-box');
-  var passwordToggle = document.getElementById('password-toggle');
-
-  // Eye icon: same SVG element, swap only the inner path/circle on toggle.
-  var EYE_OPEN = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/>';
-  var EYE_OFF = '<path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-3.22 4.34M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
-  passwordToggle.addEventListener('click', function () {
-    var show = passwordInput.type === 'password';
-    passwordInput.type = show ? 'text' : 'password';
-    passwordToggle.setAttribute('aria-pressed', String(show));
-    passwordToggle.setAttribute('aria-label', show ? 'Esconder senha' : 'Mostrar senha');
-    passwordToggle.querySelector('svg').innerHTML = show ? EYE_OFF : EYE_OPEN;
-  });
-
-  function showError(message) {
-    successBox.hidden = true;
-    errorBox.textContent = message;
-    errorBox.hidden = false;
-  }
-
-  function clearError() {
-    errorBox.hidden = true;
-    errorBox.textContent = '';
-  }
-
-  function showSuccess(message) {
-    errorBox.hidden = true;
-    successBox.textContent = message;
-    successBox.hidden = false;
-  }
-
-  function routeForUserType(userType) {
-    window.location.href = userType === 'PLATFORM' ? '/admin/' : '/app/';
-  }
-
-  // If already signed in, skip the form and go straight to the right place.
-  CresceForteAuth.getSession().then(function (session) {
-    if (session) {
-      routeForUserType(CresceForteAuth.getUserType(session));
-    }
-  });
-
-  emailInput.addEventListener('input', clearError);
-  passwordInput.addEventListener('input', clearError);
-
-  form.addEventListener('submit', async function (e) {
-    e.preventDefault();
-    clearError();
-
-    var email = emailInput.value.trim();
-    var password = passwordInput.value;
-
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Entrando...';
-
-    try {
-      var result = await CresceForteAuth.client.auth.signInWithPassword({ email: email, password: password });
-      if (result.error) {
-        showError('E-mail ou senha incorretos.');
-        return;
-      }
-      var user = result.data && result.data.user;
-      var userType = user && user.app_metadata ? user.app_metadata.user_type : undefined;
-      routeForUserType(userType);
-    } catch (err) {
-      console.error('Login error:', err);
-      showError('Não foi possível entrar agora. Tente novamente em instantes.');
-    } finally {
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Entrar';
-    }
-  });
-
-  forgotBtn.addEventListener('click', async function () {
-    var email = emailInput.value.trim();
-    if (!email) {
-      showError('Digite seu e-mail acima antes de pedir a recuperação de senha.');
-      emailInput.focus();
-      return;
-    }
-
-    forgotBtn.disabled = true;
-    forgotBtn.textContent = 'Enviando...';
-
-    try {
-      var result = await CresceForteAuth.client.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + '/reset-password/'
-      });
-      if (result.error) {
-        showError('Não foi possível enviar o e-mail de recuperação agora. Tente novamente em instantes.');
-        return;
-      }
-      showSuccess('Se ' + email + ' tiver uma conta, enviamos um link para redefinir a senha.');
-    } catch (err) {
-      console.error('Reset password request error:', err);
-      showError('Não foi possível enviar o e-mail de recuperação agora. Tente novamente em instantes.');
-    } finally {
-      forgotBtn.disabled = false;
-      forgotBtn.textContent = 'Esqueci minha senha';
-    }
-  });
-})();
-</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js" integrity="sha384-0w2KAL2YHP6wKOkUDzkCDGgVvfmHnj02DHeQ6XcHOgTfFsGyonKOpShMH1x6nk9o" crossorigin="anonymous"></script>
+<script src="/assets/auth.js?v=2"></script>
+<script src="/assets/login.js"></script>
 </body>
 </html>

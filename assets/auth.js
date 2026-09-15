@@ -90,8 +90,8 @@
   }
 
   // Ensures there is a valid session AND that the user's app_metadata.user_type matches
-  // `userType`. Otherwise redirects to `options.fallbackUrl` (defaults to app.html) if signed
-  // in with the wrong role, or to `options.loginUrl` (defaults to login.html) if not signed in.
+  // `userType`. Otherwise redirects to `options.fallbackUrl` (defaults to /app/) if signed
+  // in with the wrong role, or to `options.loginUrl` (defaults to /login/) if not signed in.
   //
   // Unlike requireAuth(), this one validates the token against the server
   // (validatedSession) before looking at the role — a role check is only worth
@@ -125,6 +125,40 @@
     global.location.href = loginUrl;
   }
 
+  // Sends the user to the right home screen for their role.
+  function routeForUserType(userType) {
+    global.location.href = userType === 'PLATFORM' ? '/admin/' : '/app/';
+  }
+
+  // Shared eye icon (same SVG element, swap only the inner path/circle) used by
+  // /login/, /reset-password/ and /admin/ — one copy instead of one per page.
+  var EYE_OPEN = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/>';
+  var EYE_OFF = '<path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-3.22 4.34M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+
+  // Wires an eye-icon <button> that toggles some hidden value's visibility.
+  // `onToggle(showing)` applies the actual show/hide (e.g. input.type, or
+  // swapping displayed text) — this only owns the icon and aria state.
+  function wireEyeToggle(button, onToggle, labels) {
+    labels = labels || {};
+    var showLabel = labels.show || 'Mostrar senha';
+    var hideLabel = labels.hide || 'Esconder senha';
+    button.addEventListener('click', function () {
+      var showing = button.getAttribute('aria-pressed') === 'true';
+      var next = !showing;
+      button.setAttribute('aria-pressed', String(next));
+      button.setAttribute('aria-label', next ? hideLabel : showLabel);
+      button.querySelector('svg').innerHTML = next ? EYE_OFF : EYE_OPEN;
+      onToggle(next);
+    });
+  }
+
+  // Wires an eye-icon button next to a password <input>, toggling its type.
+  function wirePasswordToggle(input, button) {
+    wireEyeToggle(button, function (showing) {
+      input.type = showing ? 'text' : 'password';
+    });
+  }
+
   global.CresceForteAuth = {
     client: client,
     getSession: getSession,
@@ -133,6 +167,11 @@
     getCompanyId: getCompanyId,
     requireAuth: requireAuth,
     requireRole: requireRole,
-    logout: logout
+    logout: logout,
+    routeForUserType: routeForUserType,
+    EYE_OPEN: EYE_OPEN,
+    EYE_OFF: EYE_OFF,
+    wireEyeToggle: wireEyeToggle,
+    wirePasswordToggle: wirePasswordToggle
   };
 })(window);
