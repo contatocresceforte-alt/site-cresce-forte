@@ -126,9 +126,14 @@
         .from('companies')
         .update({ status: novoStatus })
         .eq('id', company.id)
+        .select('id')
         .then(function (result) {
-          if (result.error) {
-            console.error('Erro ao atualizar status da empresa:', result.error);
+          // .select() força o PostgREST a devolver as linhas afetadas — sem
+          // isso, uma RLS que bloqueia o update silenciosamente responde
+          // 204/error:null (0 linhas mudadas), e a tela mostraria "salvo"
+          // sem ter salvo nada.
+          if (result.error || !result.data || !result.data.length) {
+            console.error('Erro ao atualizar status da empresa:', result.error || 'nenhuma linha afetada (RLS?)');
             statusSelect.value = statusAnterior;
             statusSelect.disabled = false;
             statusMsg.textContent = 'Erro ao salvar. Tente novamente.';
@@ -273,12 +278,15 @@
       supabase
         .from('company_services')
         .upsert(payload, { onConflict: 'company_id,service_id' })
+        .select('service_id')
         .then(function (result) {
           input.disabled = false;
           toggle.classList.remove('cf-toggle-loading');
 
-          if (result.error) {
-            console.error('Erro ao atualizar serviço:', result.error);
+          // Mesma razão do update de status: sem .select(), RLS bloqueando
+          // em silêncio pareceria sucesso (204/error:null, 0 linhas).
+          if (result.error || !result.data || !result.data.length) {
+            console.error('Erro ao atualizar serviço:', result.error || 'nenhuma linha afetada (RLS?)');
             input.checked = previousActive;
             msgEl.textContent = 'Erro ao salvar. Tente novamente.';
             msgEl.className = 'cf-service-msg cf-service-msg-error';
