@@ -3,9 +3,12 @@
 // Include the @supabase/supabase-js UMD <script> tag BEFORE this file on every page that uses it.
 //
 // Usage:
-//   const session = await CresceForteAuth.requireAuth();          // redirects to /login/ if not signed in
-//   const session = await CresceForteAuth.requireRole('PLATFORM'); // also redirects non-PLATFORM users to /app/
+//   const session = await CresceForteAuth.requireRole('PLATFORM'); // redirects to /login/ if not signed in,
+//                                                                   // or to /app/ if signed in with the wrong role
 //   await CresceForteAuth.logout();
+//
+// requireAuth() below also exists, but only checks localStorage (see its own
+// comment) — prefer requireRole() or validatedSession() for any real access check.
 
 (function (global) {
   'use strict';
@@ -79,6 +82,10 @@
 
   // Ensures there is a valid session; otherwise redirects to the login page.
   // Returns the session (never null) when it resolves without redirecting.
+  //
+  // Only checks localStorage (getSession), never the server — a forged
+  // session blob passes. No page calls this today; prefer requireRole() or
+  // validatedSession() for anything that gates real access.
   async function requireAuth(loginUrl) {
     loginUrl = loginUrl || '/login/';
     var session = await getSession();
