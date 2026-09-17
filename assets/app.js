@@ -1,14 +1,44 @@
 // assets/app.js — page logic for /app/. Requires supabase-js + auth.js loaded first.
 (function () {
-  // URL de cada módulo já publicado.
-  // Login do CRM continua sendo o dele mesmo (ponte bcrypt, Fase 4 do plano
-  // ainda não trocou isso) — abrir aqui não loga sozinho lá, é aba separada.
+  // URL de cada módulo já publicado. ticketUrl emite um ticket opaco de uso
+  // único (~2min) que o próprio destino confere contra o e-mail digitado no
+  // segundo login — trava troca de conta sem querer entre módulos. Sem
+  // emissor central: cada destino expõe o próprio endpoint (decisão dos 3
+  // repos, ver "Erro — Segundo login do Catálogo aceita conta de outra
+  // empresa" no vault). Se a emissão falhar por qualquer motivo, abre a URL
+  // normal sem ticket — mesmo comportamento de hoje, login pede de novo sem
+  // travar ninguém fora.
   var MODULE_INFO = {
-    crm: { url: 'https://crm.cresceforte.com/', desc: 'Converse com clientes, gerencie seu funil de vendas e seu catálogo de produtos.' },
-    catalogo: { url: 'https://catalogo.cresceforte.com/', desc: 'Monte e publique seu catálogo digital.' }
+    crm: { url: 'https://crm.cresceforte.com/', ticketUrl: 'https://crm.cresceforte.com/api/auth/portal-ticket', desc: 'Converse com clientes, gerencie seu funil de vendas e seu catálogo de produtos.' },
+    catalogo: { url: 'https://catalogo.cresceforte.com/', ticketUrl: 'https://catalogo.cresceforte.com/catalog-editor-api/portal-ticket', desc: 'Monte e publique seu catálogo digital.' }
   };
 
-  function renderModules(rows) {
+  function openModule(info, accessToken) {
+    if (!info.ticketUrl || !accessToken) { window.open(info.url, '_blank', 'noopener'); return; }
+    // Abre a aba já na hora do clique (gesto síncrono do usuário) e só troca
+    // a URL depois — window.open() chamado só depois do fetch resolver
+    // (assíncrono) é bloqueado por popup blocker em navegador de verdade,
+    // mesmo com noopener.
+    var tab = window.open('', '_blank', 'noopener');
+    var controller = window.AbortController ? new AbortController() : null;
+    var timeoutId = controller ? setTimeout(function () { controller.abort(); }, 4000) : null;
+    fetch(info.ticketUrl, {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + accessToken },
+      signal: controller ? controller.signal : undefined
+    })
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (data) {
+        var dest = data && data.ticket ? info.url + '?ticket=' + encodeURIComponent(data.ticket) : info.url;
+        if (tab) { tab.location = dest; } else { window.open(dest, '_blank', 'noopener'); }
+      })
+      .catch(function () {
+        if (tab) { tab.location = info.url; } else { window.open(info.url, '_blank', 'noopener'); }
+      })
+      .finally(function () { if (timeoutId) clearTimeout(timeoutId); });
+  }
+
+  function renderModules(rows, accessToken) {
     var area = document.getElementById('modules-area');
     area.innerHTML = '';
     if (!rows || !rows.length) {
@@ -18,9 +48,12 @@
     rows.forEach(function (row) {
       var svc = row.services;
       var info = MODULE_INFO[svc.key] || {};
-      var card = document.createElement(info.url ? 'a' : 'div');
+      var card = document.createElement(info.url ? 'button' : 'div');
       card.className = 'cf-module';
-      if (info.url) { card.href = info.url; card.target = '_blank'; card.rel = 'noopener'; }
+      if (info.url) {
+        card.type = 'button';
+        card.addEventListener('click', function () { openModule(info, accessToken); });
+      }
       var h2 = document.createElement('h2');
       h2.textContent = svc.name;
       var p = document.createElement('p');
@@ -70,7 +103,7 @@
         '<div class="cf-placeholder"><span class="cf-tag">Erro</span><h2>Não foi possível carregar seus módulos</h2><p>Atualize a página em instantes.</p></div>';
       return;
     }
-    renderModules(result.data);
+    renderModules(result.data, session.access_token);
   });
 
   document.getElementById('logout-btn').addEventListener('click', function () {
