@@ -17,9 +17,13 @@
     if (!info.ticketUrl || !accessToken) { window.open(info.url, '_blank', 'noopener'); return; }
     // Abre a aba já na hora do clique (gesto síncrono do usuário) e só troca
     // a URL depois — window.open() chamado só depois do fetch resolver
-    // (assíncrono) é bloqueado por popup blocker em navegador de verdade,
-    // mesmo com noopener.
-    var tab = window.open('', '_blank', 'noopener');
+    // (assíncrono) é bloqueado por popup blocker em navegador de verdade.
+    // 'noopener' aqui faria window.open() retornar null (spec atual), então
+    // a gente perderia a referência e cairia sempre no fallback assíncrono —
+    // abre sem a feature e zera .opener manualmente, mesmo efeito de
+    // segurança sem perder a referência à aba.
+    var tab = window.open('', '_blank');
+    if (tab) { tab.opener = null; }
     var controller = window.AbortController ? new AbortController() : null;
     var timeoutId = controller ? setTimeout(function () { controller.abort(); }, 4000) : null;
     fetch(info.ticketUrl, {
