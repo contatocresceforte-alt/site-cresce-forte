@@ -21,8 +21,13 @@
 
   var RESEND_MS = 250;
   var HANDSHAKE_MS = 10000;
-  var MSG_BLOCKED = 'Seu navegador bloqueou a nova aba. Permita pop-ups ou abra no navegador.';
-  var MSG_HANDSHAKE = 'Não foi possível abrir pelo portal. Tente de novo ou abra pelo navegador.';
+  // Os dois textos dizem O QUE FAZER, porque depois que o login nativo dos
+  // módulos sair não existe caminho alternativo por aqui: quem não consegue
+  // abrir pelo portal só resolve trocando de navegador ou liberando o pop-up.
+  // "Outro app" cobre o navegador embutido (WhatsApp, Instagram, Facebook), que
+  // muitas vezes não devolve a aba de window.open e por isso cai no primeiro.
+  var MSG_BLOCKED = 'Seu navegador bloqueou a nova aba. Permita pop-ups para este site e clique de novo. Se você está dentro de outro aplicativo, como WhatsApp ou Instagram, abra este painel no Chrome ou no Safari.';
+  var MSG_HANDSHAKE = 'Não foi possível abrir pelo portal. Feche a aba que abriu, volte aqui e clique de novo. Se continuar, abra este painel no Chrome ou no Safari.';
 
   // Os módulos recusam token com iat velho (~5 min) e conferem no Supabase que
   // a sessão ainda existe; renovar antes de pedir o ticket evita a recusa. Se a
