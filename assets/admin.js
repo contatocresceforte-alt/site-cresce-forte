@@ -172,15 +172,23 @@
     manageBtn.setAttribute('aria-controls', panel.id);
     row.appendChild(panel);
 
+    // `loaded` só vira true quando a carga DEU CERTO. Marcando antes, uma falha
+    // de rede deixava o painel preso em "Não foi possível carregar os serviços":
+    // fechar e reabrir não tentava de novo, e só recarregar a página inteira
+    // resolvia. `carregando` evita que dois cliques rápidos disparem duas cargas.
     var loaded = false;
+    var carregando = false;
     manageBtn.addEventListener('click', function () {
       var willShow = panel.hidden;
       panel.hidden = !willShow;
       manageBtn.textContent = willShow ? 'Fechar' : 'Gerenciar';
       manageBtn.setAttribute('aria-expanded', String(willShow));
-      if (willShow && !loaded) {
-        loaded = true;
-        loadServicesForCompany(company.id, panel);
+      if (willShow && !loaded && !carregando) {
+        carregando = true;
+        loadServicesForCompany(company.id, panel).then(function (ok) {
+          carregando = false;
+          loaded = !!ok;
+        });
       }
     });
 
@@ -197,8 +205,8 @@
 
     if (servicesResult.error) {
       console.error('Erro ao carregar catálogo de serviços:', servicesResult.error);
-      panel.innerHTML = '<p class="cf-error-text">Não foi possível carregar os serviços.</p>';
-      return;
+      panel.innerHTML = '<p class="cf-error-text">Não foi possível carregar os serviços. Feche e abra de novo para tentar outra vez.</p>';
+      return false;
     }
 
     var companyServicesResult = await supabase
@@ -208,8 +216,8 @@
 
     if (companyServicesResult.error) {
       console.error('Erro ao carregar serviços da empresa:', companyServicesResult.error);
-      panel.innerHTML = '<p class="cf-error-text">Não foi possível carregar os serviços contratados.</p>';
-      return;
+      panel.innerHTML = '<p class="cf-error-text">Não foi possível carregar os serviços contratados. Feche e abra de novo para tentar outra vez.</p>';
+      return false;
     }
 
     var activeMap = {};
@@ -221,12 +229,13 @@
     panel.innerHTML = '';
     if (services.length === 0) {
       panel.innerHTML = '<p class="cf-loading">Nenhum serviço no catálogo ainda.</p>';
-      return;
+      return true;
     }
 
     services.forEach(function (service) {
       panel.appendChild(buildServiceToggleRow(companyId, service, !!activeMap[service.id]));
     });
+    return true;
   }
 
   function buildServiceToggleRow(companyId, service, isActive) {

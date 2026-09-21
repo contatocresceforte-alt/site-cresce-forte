@@ -16,7 +16,35 @@
   var SUPABASE_URL = 'https://snxcmrnubtcryxnkzpzc.supabase.co';
   var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGNtcm51YnRjcnl4bmt6cHpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyMDc4NjksImV4cCI6MjEwNDc4Mzg2OX0.RAJusXsGb_Wdy-CytS8qtNLbIthyFUG3qri0Fj3-hcw';
 
+  // Sem o supabase-js (CDN fora do ar, rede da loja bloqueando, `integrity`
+  // reprovando depois de uma republicação do pacote) este arquivo lança, e o
+  // script da página — que vem depois — nunca chega a rodar. Sem avisar, a tela
+  // fica VIVA E MUDA no texto estático: /app/ em "Carregando", /admin/ em
+  // "Carregando empresas...", /reset-password/ em "Confirmando seu link de
+  // recuperação...", para sempre. Tela parada é pior que tela com erro, porque
+  // a pessoa espera. O aviso mora aqui, no arquivo comum às quatro telas, e não
+  // em cada uma delas: o /login/ já tinha a saída dele e as outras três não.
+  function avisarIndisponivel() {
+    var MSG = 'Não foi possível carregar esta página agora. Verifique sua conexão e recarregue.';
+    try {
+      var doc = global.document;
+      // Ordem: o texto que está MENTINDO em cada tela vem primeiro. No
+      // /reset-password/ é o subtítulo "Confirmando seu link de recuperação...",
+      // e trocar só a caixa de erro deixaria a promessa de pé embaixo do aviso.
+      var sub = doc.getElementById('card-sub');
+      if (sub) { sub.textContent = MSG; return; }
+      // /login/ não tem subtítulo de estado: a caixa de erro é o lugar.
+      var box = doc.getElementById('error-box');
+      if (box) { box.textContent = MSG; box.hidden = false; return; }
+      // Onde mora o "Carregando" de /app/ e de /admin/: trocar o texto apaga a
+      // promessa de que algo ainda vem. Os dois já têm aria-live.
+      var area = doc.getElementById('modules-area') || doc.getElementById('companies-list');
+      if (area) { area.textContent = MSG; }
+    } catch (e) { /* tela sem esses elementos: o erro abaixo ainda vale */ }
+  }
+
   if (!global.supabase || typeof global.supabase.createClient !== 'function') {
+    avisarIndisponivel();
     throw new Error('assets/auth.js: the @supabase/supabase-js UMD <script> tag must be included before this file.');
   }
 

@@ -83,6 +83,11 @@
   recoveryClient.auth.onAuthStateChange(function (event, session) {
     if (event === 'PASSWORD_RECOVERY') {
       recoveryReady = true;
+      // O aviso dos 4 s abaixo pode já ter escrito "Este link não redefine
+      // senha" quando a rede está lenta. Ele fica errado assim que o evento
+      // chega: sem devolver o título, a tela mostra formulário bom embaixo de
+      // título que manda desistir.
+      titleEl.textContent = 'Redefinir senha';
       // Mostra de QUEM é a sessão de recuperação: um link forjado com tokens
       // de outra conta cai aqui igual a um legítimo, e o e-mail é a única
       // pista que a pessoa tem de que não é a conta dela.
