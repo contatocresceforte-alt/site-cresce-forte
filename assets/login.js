@@ -51,10 +51,18 @@
   emailInput.addEventListener('input', clearError);
   passwordInput.addEventListener('input', clearError);
 
-  // Botão desabilitado NÃO impede o envio: Enter dentro de um campo de texto
-  // envia o formulário sem passar pelo botão. A trava tem de morar no handler,
-  // senão um envio a mais entra enquanto o primeiro está no ar ou enquanto a
-  // página já está saindo.
+  // A trava mora no handler, não no botão: `disabled` é aviso visual e não
+  // cobre todo caminho de envio. Um segundo envio pode entrar enquanto o
+  // primeiro está no ar, ou enquanto a página já está saindo depois do sucesso.
+  //
+  // Honestidade sobre o que foi medido: o envio duplo foi observado chamando o
+  // handler direto (dois `signInWithPassword`), o que prova reentrância do
+  // handler — NÃO prova que o Enter fura um botão desabilitado. A Esther leu a
+  // especificação: com botão de submit presente, o envio implícito dispara um
+  // clique nele, e clique em botão desabilitado não faz nada. Não consegui
+  // medir isso: o teclado do navegador embutido não produz envio implícito nem
+  // num formulário SEM botão (controle deu 0). A trava fica de qualquer jeito,
+  // porque ela não depende de qual das duas explicações vale.
   var enviando = false;
 
   form.addEventListener('submit', async function (e) {
