@@ -43,7 +43,10 @@
         </div>
         <button type="button" class="cf-primary-btn" id="new-company-toggle">Cadastrar empresa</button>
       </div>
-      <form class="cf-form-panel" id="new-company-form" hidden novalidate>
+      <!-- method="post" pelo mesmo motivo do /login/: sem ele, um submit que
+           escape da interceptacao poe razao social, CNPJ e e-mail do
+           administrador na query string. -->
+      <form class="cf-form-panel" id="new-company-form" method="post" hidden novalidate>
         <div class="cf-form-grid">
           <div class="cf-field">
             <label for="nc-legal-name">Razão social *</label>

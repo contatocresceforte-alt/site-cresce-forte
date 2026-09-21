@@ -9,6 +9,19 @@
   var successBox = document.getElementById('success-box');
   var passwordToggle = document.getElementById('password-toggle');
 
+  // Sem o supabase-js (CDN fora do ar, rede da loja bloqueando, integrity
+  // reprovando), auth.js lanca e CresceForteAuth nem existe. Sem esta saida,
+  // a linha seguinte lançava ReferenceError, o resto do arquivo nunca rodava
+  // e a tela ficava viva e muda: a pessoa digitava a senha e clicava sem
+  // nada acontecer. Aqui ela para antes, com o motivo na tela.
+  if (!window.CresceForteAuth) {
+    errorBox.textContent = 'Não foi possível carregar o login agora. Verifique sua conexão e recarregue a página.';
+    errorBox.hidden = false;
+    submitBtn.disabled = true;
+    forgotBtn.disabled = true;
+    return;
+  }
+
   CresceForteAuth.wirePasswordToggle(passwordInput, passwordToggle);
 
   function showError(message) {

@@ -31,7 +31,9 @@
     <div class="cf-error" id="error-box" role="alert" hidden></div>
     <div class="cf-success" id="success-box" role="status" hidden></div>
 
-    <form class="cf-form" id="reset-form" novalidate hidden>
+    <!-- method="post" pelo mesmo motivo do /login/: sem ele, um submit que
+         escape da interceptacao manda os dois campos de senha na query string. -->
+    <form class="cf-form" id="reset-form" method="post" novalidate hidden>
       <div class="cf-field">
         <label for="password">Nova senha</label>
         <div class="cf-pwd-wrap">
