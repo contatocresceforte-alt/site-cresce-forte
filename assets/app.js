@@ -29,20 +29,154 @@
   var MSG_BLOCKED = 'Seu navegador bloqueou a nova aba. Permita pop-ups para este site e clique de novo. Se você está dentro de outro aplicativo, como WhatsApp ou Instagram, abra este painel no Chrome ou no Safari.';
   var MSG_HANDSHAKE = 'Não foi possível abrir pelo portal. Feche a aba que abriu, volte aqui e clique de novo. Se continuar, abra este painel no Chrome ou no Safari.';
 
-  // Os módulos recusam token com iat velho (~5 min) e conferem no Supabase que
-  // a sessão ainda existe; renovar antes de pedir o ticket evita a recusa. Se a
-  // renovação falhar ou demorar (3s), segue com o token atual — quem decide se
-  // emite ou não o ticket é o servidor do módulo, não este arquivo.
-  function freshAccessToken(current) {
+  // Prazos por clique (proposta portal-emissao-erro-v1, aprovada pela Esther).
+  // O módulo espera a mensagem por 10 s A PARTIR DE QUANDO ELE CARREGA (1 a 2 s
+  // depois do clique), então o hub precisa começar a entregar até uns 7 a 8 s
+  // depois do clique. A renovação (só quando o token está velho) usa até 3 s; a
+  // emissão usa o que sobrar do prazo, entre 3 s e 6 s.
+  var TOKEN_MAX_AGE_S = 240;   // o servidor aceita 300 s (iat); sobram 60 s de margem
+  var REFRESH_MS = 3000;
+  var DEADLINE_MS = 8000;
+  var EMIT_MIN_MS = 3000;
+  var EMIT_MAX_MS = 6000;
+
+  // Códigos que o servidor de emissão pode devolver (conjunto fechado do
+  // contrato). Qualquer outro valor é tratado como "sem código".
+  var CODIGOS = { sem_perfil: 1, sessao_invalida: 1, limite: 1, indisponivel: 1, erro_interno: 1 };
+  var RE_CORRELACAO = /^[0-9a-f]{8}$/;
+
+  // Token vivo em memória. Começa com o da sessão validada e é regravado por
+  // toda renovação que TERMINA (mesmo depois do prazo do clique) e pelo
+  // onAuthStateChange, para os cliques seguintes não usarem um token envelhecido.
+  // A persistência da sessão continua sendo do supabase-js.
+  var vivo = null;
+
+  // Conta os cliques em cartão, para um clique lento não escrever na tela depois
+  // de um clique mais novo (ver openModule).
+  var cliqueAtual = 0;
+
+  // Idade do token em segundos, lida do iat só para decidir se renova. O servidor
+  // continua sendo a única autoridade sobre validade, e nada além da decisão de
+  // tempo sai destas claims. Ilegível, malformado ou sem iat numérico conta como
+  // "muito velho": enviesado para renovar, nunca para usar.
+  // navigator.onLine mente quando diz "true" (pode haver rede sem internet), mas
+  // "false" é confiável: o sistema operacional não vê interface nenhuma.
+  function semRede() {
+    return typeof navigator === 'object' && navigator && navigator.onLine === false;
+  }
+
+  function idadeDoToken(token) {
+    try {
+      var parte = String(token).split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      var iat = JSON.parse(atob(parte)).iat;
+      if (typeof iat !== 'number' || !isFinite(iat)) { return Infinity; }
+      var idade = Date.now() / 1000 - iat;
+      // iat no futuro quer dizer relógio do cliente atrasado (ou token estranho).
+      // Tratar como idade 0 seria o único ponto enviesado para USAR: uma máquina
+      // atrasada nunca renovaria por conta própria. Vale a mesma regra do resto:
+      // na dúvida, renova. Tolerância de 60 s cobre o desencontro normal.
+      if (idade < -60) { return Infinity; }
+      return Math.max(0, idade);
+    } catch (e) { return Infinity; }
+  }
+
+  // Renova a sessão com teto de REFRESH_MS. Devolve o token novo, ou null se a
+  // renovação falhou ou não terminou no prazo. NUNCA devolve o token velho: o hub
+  // não manda de propósito um token que já sabe vencido. Se ela terminar depois do
+  // prazo, o token novo ainda é gravado em `vivo` para o próximo clique.
+  function renovar() {
+    var id = null;
     var refresh = CresceForteAuth.client.auth.refreshSession().then(function (r) {
-      return r && r.data && r.data.session ? r.data.session.access_token : current;
-    }).catch(function () { return current; });
-    var timeout = new Promise(function (resolve) { setTimeout(function () { resolve(current); }, 3000); });
-    return Promise.race([refresh, timeout]);
+      var t = r && r.data && r.data.session ? r.data.session.access_token : null;
+      if (t) { vivo = t; }
+      return t;
+    }).catch(function () { return null; });
+    var prazo = new Promise(function (resolve) { id = setTimeout(function () { resolve(null); }, REFRESH_MS); });
+    // Cancela o prazo quando a renovação chega antes, para não deixar um
+    // temporizador solto por clique.
+    return Promise.race([refresh, prazo]).then(function (t) { if (id) { clearTimeout(id); } return t; });
+  }
+
+  // Token que serve para pedir o ticket agora: o vivo, se recente; senão renova.
+  function tokenParaEmitir() {
+    if (vivo && idadeDoToken(vivo) <= TOKEN_MAX_AGE_S) { return Promise.resolve(vivo); }
+    return renovar();
+  }
+
+  // Lê o corpo de erro da emissão. codigo e correlacao são campos irmãos de
+  // `erro`/`error` (o texto humano, que o hub ignora). O handler global do CRM
+  // manda erro.codigo como objeto: aceito como segunda chance. Nada do corpo vai
+  // para innerHTML, log ou URL.
+  function classificarRecusa(status, body) {
+    var codigo = null;
+    if (body && typeof body === 'object') {
+      var c = typeof body.codigo === 'string' ? body.codigo :
+        (body.erro && typeof body.erro === 'object' && typeof body.erro.codigo === 'string' ? body.erro.codigo : null);
+      if (c && CODIGOS[c] === 1) { codigo = c; }
+    }
+    var correlacao = body && typeof body === 'object' && typeof body.correlacao === 'string' && RE_CORRELACAO.test(body.correlacao) ? body.correlacao : null;
+    var motivo = 'generico';
+    if (codigo === 'sem_perfil') { motivo = 'sem_perfil'; }
+    else if (codigo === 'sessao_invalida' || (codigo === null && status === 401)) { motivo = 'sessao_invalida'; }
+    else if (codigo === 'limite' || status === 429) { motivo = 'limite'; }
+    return { ok: false, motivo: motivo, correlacao: correlacao };
+  }
+
+  // Um pedido de emissão. Sempre resolve (nunca rejeita) com {ok:true, ticket} ou
+  // {ok:false, motivo, correlacao}. O motivo 'tempo' (nosso abort) é distinto de
+  // 'rede' (sem resposta): o suporte precisa saber quem cortou.
+  function emitir(info, token, inicio) {
+    var restante = DEADLINE_MS - (Date.now() - inicio);
+    var ms = Math.max(EMIT_MIN_MS, Math.min(EMIT_MAX_MS, restante));
+    var controller = window.AbortController ? new AbortController() : null;
+    var timeoutId = controller ? setTimeout(function () { controller.abort(); }, ms) : null;
+    function fim(r) { if (timeoutId) { clearTimeout(timeoutId); } return r; }
+    function falhou(err) { return fim({ ok: false, motivo: err && err.name === 'AbortError' ? 'tempo' : 'rede', correlacao: null }); }
+    return fetch(info.ticketUrl, {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + token },
+      signal: controller ? controller.signal : undefined
+    }).then(function (res) {
+      if (res.ok) {
+        // Corpo ilegível num 2xx é problema do servidor, não da rede: o servidor
+        // respondeu. Cai no genérico, como qualquer 2xx sem ticket.
+        return res.json().then(function (d) { return d; }, function () { return null; }).then(function (d) {
+          return fim(d && typeof d.ticket === 'string' && d.ticket ? { ok: true, ticket: d.ticket } : { ok: false, motivo: 'generico', correlacao: null });
+        });
+      }
+      return res.json().then(function (b) { return b; }, function () { return null; }).then(function (b) {
+        return fim(classificarRecusa(res.status, b));
+      });
+    }, falhou);
+  }
+
+  // Texto da tela para cada motivo. Sempre texto FIXO do hub: nunca a mensagem do
+  // servidor. `nome` é o nome do cartão (vem do banco) e entra só por textContent.
+  function mensagemDaRecusa(r, nome) {
+    switch (r.motivo) {
+      case 'sem_perfil': return 'Sua conta não tem acesso ao ' + nome + '. Fale com quem administra a sua empresa na Cresce Forte.';
+      // 'sessao_invalida' como apelido de 'sessao': hoje o openModule sempre
+      // converte antes de chegar aqui, mas se alguém mexer na lógica de repetição
+      // o motivo cairia no default e mostraria mensagem genérica COM código de
+      // correlação para um problema de sessão.
+      case 'sessao_invalida':
+      case 'sessao': return 'Não consegui confirmar a sua sessão. Tente de novo; se continuar, saia e entre de novo no portal.';
+      case 'limite': return 'Muitas tentativas seguidas. Espere um minuto e clique de novo.';
+      case 'tempo': return 'O servidor demorou para responder. Tente de novo.';
+      // Não diz "sem conexão": um fetch bloqueado por CORS falha igual a falta de internet.
+      case 'rede': return 'Não consegui falar com o servidor. Confira a internet e tente de novo; se continuar, avise o suporte.';
+      default: return 'Não foi possível abrir o ' + nome + ' agora. Tente de novo em instantes. Se continuar, avise o suporte' +
+        (r.correlacao ? ' informando o código: ' + r.correlacao : '') + '.';
+    }
   }
 
   // Erro na própria página do hub: a aba do módulo já está em outra origem e
   // não dá pra escrever nela.
+  function limparErroDoHub() {
+    var box = document.getElementById('portal-error');
+    if (box && box.parentNode) { box.parentNode.removeChild(box); }
+  }
+
   function showHubError(message) {
     var box = document.getElementById('portal-error');
     if (!box) {
@@ -83,8 +217,20 @@
     limit = setTimeout(function () { stop(); if (onTimeout) { onTimeout(); } }, HANDSHAKE_MS);
   }
 
-  function openModule(info, accessToken) {
-    if (!info.ticketUrl || !accessToken) { window.open(info.url, '_blank', 'noopener'); return; }
+  function openModule(info, nome) {
+    // O erro do clique anterior não pode ficar na tela depois de um clique novo:
+    // uma mensagem velha ao lado de um sucesso faz diagnosticar o incidente errado.
+    limparErroDoHub();
+    if (!info.ticketUrl || !vivo) { window.open(info.url, '_blank', 'noopener'); return; }
+    // Dois cliques seguidos correm em paralelo e dividem a MESMA caixa de erro.
+    // Sem isto, um clique lento que falha depois de um clique novo escreve a
+    // mensagem dele por cima, e a tela passa a mostrar o erro da tentativa errada
+    // (ou um erro ao lado de um módulo que abriu). Só o clique mais recente pode
+    // escrever na tela; a entrega à aba de cada clique continua normal, porque
+    // cada uma tem a sua própria aba.
+    var meu = ++cliqueAtual;
+    function meuErro(msg) { if (meu === cliqueAtual) { showHubError(msg); } }
+    var inicio = Date.now();
     var origin = new URL(info.url).origin;
     // Abre a aba já na hora do clique (gesto síncrono do usuário) — window.open()
     // chamado só depois do fetch resolver (assíncrono) é bloqueado por popup
@@ -93,37 +239,61 @@
     // precisa; abre sem a feature e zera .opener manualmente (o módulo não
     // alcança o hub, a referência hub→aba continua).
     var tab = window.open(info.url + '#portal', '_blank');
-    if (!tab) { showHubError(MSG_BLOCKED); return; }
+    if (!tab) { meuErro(MSG_BLOCKED); return; }
     // Alguns motores podem lançar SecurityError aqui; sem o try/catch a função
     // abortaria antes de entregar o ticket. O hub segue mesmo assim.
     try { tab.opener = null; } catch (e) { /* segue para a entrega */ }
-    var controller = null;
-    var timeoutId = null;
 
-    freshAccessToken(accessToken)
+    tokenParaEmitir()
       .then(function (token) {
-        controller = window.AbortController ? new AbortController() : null;
-        timeoutId = controller ? setTimeout(function () { controller.abort(); }, 4000) : null;
-        return fetch(info.ticketUrl, {
-          method: 'POST',
-          headers: { Authorization: 'Bearer ' + token },
-          signal: controller ? controller.signal : undefined
+        // Renovação que não completou: NÃO emite. Nunca manda de propósito um
+        // token que já se sabe vencido.
+        // Sem internet, a renovação falha e "saia e entre de novo no portal"
+        // seria conselho errado: a sessão pode estar ótima. navigator.onLine só é
+        // confiável quando diz que NÃO há rede, e é exatamente esse o uso aqui.
+        if (!token) { return { ok: false, motivo: semRede() ? 'rede' : 'sessao', correlacao: null }; }
+        return emitir(info, token, inicio).then(function (r) {
+          if (r.ok || r.motivo !== 'sessao_invalida') { return r; }
+          // Só repete se AINDA CABE no prazo: renovar de novo (até REFRESH_MS) mais
+          // uma emissão (piso de EMIT_MIN_MS). Sem esta conta, a repetição podia
+          // terminar por volta de 15 s, depois de o módulo já ter desistido aos 10 s:
+          // a pessoa veria "não foi possível abrir pelo portal" em vez do motivo
+          // real, e sobraria um ticket órfão.
+          if (DEADLINE_MS - (Date.now() - inicio) < REFRESH_MS + EMIT_MIN_MS) {
+            return { ok: false, motivo: 'sessao', correlacao: null };
+          }
+          // Uma repetição só, e só no 401, e só se a renovação produzir um token
+          // GENUINAMENTE novo (corrida real: o token venceu entre a checagem e a
+          // emissão). Renovação que falhou ou devolveu o mesmo token: falha direto.
+          return renovar().then(function (novo) {
+            if (!novo || novo === token) { return { ok: false, motivo: 'sessao', correlacao: null }; }
+            return emitir(info, novo, inicio).then(function (r2) {
+              return r2.ok || r2.motivo !== 'sessao_invalida' ? r2 : { ok: false, motivo: 'sessao', correlacao: null };
+            });
+          });
         });
       })
-      .then(function (res) { return res.ok ? res.json() : null; })
-      .catch(function () { return null; })
-      .then(function (data) {
-        if (timeoutId) { clearTimeout(timeoutId); }
-        // O ticket só existe dentro desta closure; nada de log dele nem da mensagem.
-        if (data && typeof data.ticket === 'string' && data.ticket) {
-          deliver(tab, origin, { type: 'cf-portal-ticket', v: 1, ticket: data.ticket }, function () { showHubError(MSG_HANDSHAKE); });
+      .catch(function () { return { ok: false, motivo: 'generico', correlacao: null }; })
+      .then(function (r) {
+        if (r.ok) {
+          // O ticket só existe dentro desta closure; nada de log dele nem da mensagem.
+          deliver(tab, origin, { type: 'cf-portal-ticket', v: 1, ticket: r.ticket }, function () { meuErro(MSG_HANDSHAKE); });
         } else {
+          // Contrato v1 intacto: em qualquer recusa a aba já aberta recebe
+          // cf-portal-fail. O aviso à aba vem ANTES de mexer na tela: se a
+          // montagem da mensagem lançasse, a aba ficaria sem ticket e sem fail,
+          // que é o único jeito de quebrar o contrato a partir daqui.
           deliver(tab, origin, { type: 'cf-portal-fail', v: 1 });
+          meuErro(mensagemDaRecusa(r, nome));
         }
-      });
+      })
+      // Só alcança isto se escrever na tela falhar (o #modules-area sumiu do
+      // DOM). A obrigação com a aba já foi cumprida acima; aqui não há nada a
+      // fazer além de não deixar virar rejeição não tratada.
+      .catch(function () {});
   }
 
-  function renderModules(rows, accessToken) {
+  function renderModules(rows) {
     var area = document.getElementById('modules-area');
     area.innerHTML = '';
     if (!rows || !rows.length) {
@@ -137,7 +307,7 @@
       card.className = 'cf-module';
       if (info.url) {
         card.type = 'button';
-        card.addEventListener('click', function () { openModule(info, accessToken); });
+        card.addEventListener('click', function () { openModule(info, svc.name); });
       }
       var h2 = document.createElement('h2');
       h2.textContent = svc.name;
@@ -169,6 +339,18 @@
       window.location.href = '/login/';
       return;
     }
+    vivo = session.access_token;
+    // O supabase-js renova a sessão sozinho em segundo plano; sem isto o hub
+    // ficaria com o token do carregamento para sempre e uma aba velha mandaria
+    // iat de dezenas de minutos, que o servidor recusa.
+    CresceForteAuth.client.auth.onAuthStateChange(function (evento, s) {
+      // Sem o ramo do SIGNED_OUT, o token da sessão encerrada continuaria em
+      // memória e ainda seria mandado ao servidor depois de um logout feito em
+      // outra aba. O servidor recusaria, mas não há motivo para transmitir.
+      if (evento === 'SIGNED_OUT') { vivo = null; return; }
+      if (s && s.access_token) { vivo = s.access_token; }
+    });
+
     var emailEl = document.getElementById('user-email');
     var name = session.user.user_metadata && session.user.user_metadata.full_name;
     emailEl.textContent = name || session.user.email || '';
@@ -188,7 +370,7 @@
         '<div class="cf-placeholder"><span class="cf-tag">Erro</span><h2>Não foi possível carregar seus módulos</h2><p>Atualize a página em instantes.</p></div>';
       return;
     }
-    renderModules(result.data, session.access_token);
+    renderModules(result.data);
   });
 
   document.getElementById('logout-btn').addEventListener('click', function () {
