@@ -65,7 +65,13 @@
   CresceForteAuth.client.auth.onAuthStateChange(function (event, session) {
     if (event === 'PASSWORD_RECOVERY') {
       recoveryReady = true;
-      subEl.textContent = 'Escolha uma nova senha para sua conta.';
+      // Mostra de QUEM é a sessão de recuperação: um link forjado com tokens
+      // de outra conta cairia aqui igual a um legítimo, e o e-mail é a única
+      // pista que a pessoa tem de que não é a conta dela.
+      var accountEmail = session && session.user && session.user.email;
+      subEl.textContent = accountEmail
+        ? 'Escolha uma nova senha para a conta ' + accountEmail + '. Se esse não é o seu e-mail, feche esta página.'
+        : 'Escolha uma nova senha para sua conta.';
       form.hidden = false;
       return;
     }
@@ -133,11 +139,12 @@
       }
       form.hidden = true;
       successBox.hidden = false;
-      successBox.textContent = 'Senha atualizada! Redirecionando...';
+      successBox.textContent = 'Senha atualizada! Entre de novo com a nova senha.';
 
-      var user = result.data && result.data.user;
-      var userType = user && user.app_metadata ? user.app_metadata.user_type : undefined;
-      setTimeout(function () { CresceForteAuth.routeForUserType(userType); }, 1500);
+      // A sessão de recuperação não deve virar login: encerra e manda para o
+      // login, nunca continua logado no painel a partir desta tela.
+      try { await CresceForteAuth.client.auth.signOut(); } catch (e) { console.error('Reset password signOut error:', e); }
+      setTimeout(function () { window.location.href = '/login/'; }, 1500);
     } catch (err) {
       console.error('Reset password error:', err);
       showError('Não foi possível salvar a nova senha agora. Tente novamente em instantes.');
