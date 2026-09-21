@@ -5,16 +5,24 @@
   // segundo login — trava troca de conta sem querer entre módulos. Sem
   // emissor central: cada destino expõe o próprio endpoint (decisão dos 3
   // repos, ver "Erro — Segundo login do Catálogo aceita conta de outra
-  // empresa" no vault). PROPOSTA (item 2, aguardando revisão Esther, não
-  // subir sem CRM/Catálogo estarem com login nativo desativado e ticket
-  // obrigatório dos dois lados): se a emissão falhar, não existe mais "URL
-  // normal sem ticket" — sem login nativo do outro lado isso vira beco sem
-  // saída. Mostra erro na própria aba e manda voltar pro painel e clicar de
-  // novo (reemissão = clique novo = ticket novo).
+  // empresa" no vault).
+  //
+  // PROPOSTA (item 2 + contrato portal-handoff v1, aprovado pela Esther; não
+  // subir sem CRM/Catálogo estarem com o lado do módulo pronto e o smoke test
+  // feito com o Alain): o ticket NUNCA vai na URL. A aba do módulo abre em
+  // "<módulo>/#portal" e o ticket chega por postMessage, só com
+  // targetOrigin = origem exata do módulo. Se a emissão falhar não existe
+  // mais "URL normal sem ticket": o módulo recebe cf-portal-fail e segue no
+  // login nativo (enquanto ele existir).
   var MODULE_INFO = {
     crm: { url: 'https://crm.cresceforte.com/', ticketUrl: 'https://crm.cresceforte.com/api/auth/portal-ticket', desc: 'Converse com clientes, gerencie seu funil de vendas e seu catálogo de produtos.' },
     catalogo: { url: 'https://catalogo.cresceforte.com/', ticketUrl: 'https://catalogo.cresceforte.com/catalog-editor-api/portal-ticket', desc: 'Monte e publique seu catálogo digital.' }
   };
+
+  var RESEND_MS = 250;
+  var HANDSHAKE_MS = 10000;
+  var MSG_BLOCKED = 'Seu navegador bloqueou a nova aba. Permita pop-ups ou abra no navegador.';
+  var MSG_HANDSHAKE = 'Não foi possível abrir pelo portal. Tente de novo ou abra pelo navegador.';
 
   // Os módulos recusam token com iat velho (~5 min) e conferem no Supabase que
   // a sessão ainda existe; renovar antes de pedir o ticket evita a recusa. Se a
@@ -28,25 +36,62 @@
     return Promise.race([refresh, timeout]);
   }
 
+  // Erro na própria página do hub: a aba do módulo já está em outra origem e
+  // não dá pra escrever nela.
+  function showHubError(message) {
+    var box = document.getElementById('portal-error');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'portal-error';
+      box.className = 'cf-placeholder';
+      box.setAttribute('role', 'alert');
+      var area = document.getElementById('modules-area');
+      area.parentNode.insertBefore(box, area);
+    }
+    box.textContent = message;
+  }
+
+  // Manda `message` para a aba do módulo a cada 250 ms (a aba ainda pode estar
+  // carregando e sem listener) até o ack, até a aba fechar ou até 10 s.
+  // targetOrigin é sempre a origem exata do módulo, nunca '*'. O ack só vale
+  // se vier dessa origem E da própria aba aberta (event.source === tab).
+  // `onTimeout` roda só se estourar os 10 s sem ack.
+  function deliver(tab, origin, message, onTimeout) {
+    var timer, limit;
+    function send() { try { tab.postMessage(message, origin); } catch (e) { /* aba já navegou/fechou */ } }
+    function stop() {
+      clearInterval(timer);
+      clearTimeout(limit);
+      window.removeEventListener('message', onMessage);
+    }
+    function onMessage(ev) {
+      if (ev.origin !== origin || ev.source !== tab) { return; }
+      var d = ev.data;
+      if (d && typeof d === 'object' && d.type === 'cf-portal-ack' && d.v === 1) { stop(); }
+    }
+    window.addEventListener('message', onMessage);
+    send();
+    timer = setInterval(function () {
+      if (tab.closed) { stop(); return; }
+      send();
+    }, RESEND_MS);
+    limit = setTimeout(function () { stop(); if (onTimeout) { onTimeout(); } }, HANDSHAKE_MS);
+  }
+
   function openModule(info, accessToken) {
     if (!info.ticketUrl || !accessToken) { window.open(info.url, '_blank', 'noopener'); return; }
-    // Abre a aba já na hora do clique (gesto síncrono do usuário) e só troca
-    // a URL depois — window.open() chamado só depois do fetch resolver
-    // (assíncrono) é bloqueado por popup blocker em navegador de verdade.
-    // 'noopener' aqui faria window.open() retornar null (spec atual), então
-    // a gente perderia a referência e cairia sempre no fallback assíncrono —
-    // abre sem a feature e zera .opener manualmente, mesmo efeito de
-    // segurança sem perder a referência à aba.
-    var tab = window.open('', '_blank');
-    if (tab) { tab.opener = null; }
+    var origin = new URL(info.url).origin;
+    // Abre a aba já na hora do clique (gesto síncrono do usuário) — window.open()
+    // chamado só depois do fetch resolver (assíncrono) é bloqueado por popup
+    // blocker em navegador de verdade. 'noopener' aqui faria window.open()
+    // retornar null (spec atual) e perderíamos a referência que o postMessage
+    // precisa; abre sem a feature e zera .opener manualmente (o módulo não
+    // alcança o hub, a referência hub→aba continua).
+    var tab = window.open(info.url + '#portal', '_blank');
+    if (!tab) { showHubError(MSG_BLOCKED); return; }
+    tab.opener = null;
     var controller = null;
     var timeoutId = null;
-
-    function showTicketError() {
-      if (!tab) { alert('Não foi possível abrir o módulo agora. Volte ao painel e tente de novo.'); return; }
-      tab.document.title = 'Não foi possível abrir';
-      tab.document.body.innerHTML = '<p style="font:16px sans-serif;max-width:28rem;margin:3rem auto;padding:0 1rem;text-align:center;line-height:1.5">Não foi possível abrir o módulo agora.<br>Feche esta aba e clique de novo no painel.</p>';
-    }
 
     freshAccessToken(accessToken)
       .then(function (token) {
@@ -59,13 +104,16 @@
         });
       })
       .then(function (res) { return res.ok ? res.json() : null; })
+      .catch(function () { return null; })
       .then(function (data) {
-        if (!data || !data.ticket) { showTicketError(); return; }
-        var dest = info.url + '?ticket=' + encodeURIComponent(data.ticket);
-        if (tab) { tab.location = dest; } else { window.open(dest, '_blank', 'noopener'); }
-      })
-      .catch(showTicketError)
-      .finally(function () { if (timeoutId) clearTimeout(timeoutId); });
+        if (timeoutId) { clearTimeout(timeoutId); }
+        // O ticket só existe dentro desta closure; nada de log dele nem da mensagem.
+        if (data && typeof data.ticket === 'string' && data.ticket) {
+          deliver(tab, origin, { type: 'cf-portal-ticket', v: 1, ticket: data.ticket }, function () { showHubError(MSG_HANDSHAKE); });
+        } else {
+          deliver(tab, origin, { type: 'cf-portal-fail', v: 1 });
+        }
+      });
   }
 
   function renderModules(rows, accessToken) {
