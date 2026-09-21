@@ -28,6 +28,14 @@
     var MSG = 'Não foi possível carregar esta página agora. Verifique sua conexão e recarregue.';
     try {
       var doc = global.document;
+      // Botão de formulário que ficou sem handler ainda envia: o <form> é
+      // method="post" para um host estático, então a pessoa digita a senha,
+      // clica, perde o que escreveu e não entende por quê. Desabilitar é o
+      // aviso mais honesto que existe. (Achado da Esther no /login/.)
+      ['submit-btn', 'forgot-btn'].forEach(function (id) {
+        var botao = doc.getElementById(id);
+        if (botao) { botao.disabled = true; }
+      });
       // Ordem: o texto que está MENTINDO em cada tela vem primeiro. No
       // /reset-password/ é o subtítulo "Confirmando seu link de recuperação...",
       // e trocar só a caixa de erro deixaria a promessa de pé embaixo do aviso.

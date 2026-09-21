@@ -431,6 +431,16 @@
     // prazo existe com ou sem AbortController (com ele o pedido também é
     // cortado); o `venceu` é uma corrida, não um substituto da resposta.
     var controller = window.AbortController ? new window.AbortController() : null;
+    // O que decide a mensagem NÃO é o nome do erro, é "o pedido pode ter chegado
+    // ao servidor?". Prazo estourado e queda de rede compartilham isso: em
+    // qualquer um dos dois o servidor pode ter criado a empresa, o usuário no
+    // Auth e mandado o convite, e a resposta é que se perdeu. Só prova que nada
+    // aconteceu o erro levantado ANTES de o pedido partir, ou uma RESPOSTA do
+    // servidor (aí ele decidiu, e a resposta diz o quê). Achado da Esther: com a
+    // checagem por `AbortError`, `TypeError: Failed to fetch` caía na moldura
+    // otimista e o admin clicava de novo, criando a duplicata.
+    var pedidoPartiu = false;
+    var houveResposta = false;
     var venceu;
     var prazo = new Promise(function (r) { venceu = r; });
     var prazoId = setTimeout(function () {
@@ -443,6 +453,7 @@
         var token = sessionResult.data && sessionResult.data.session && sessionResult.data.session.access_token;
         if (!token) throw new Error('Sessão expirada. Recarregue a página e faça login novamente.');
 
+        pedidoPartiu = true;
         return Promise.race([
           prazo.then(function () { throw new Error(MSG_SEM_RESPOSTA); }),
           fetch(PLATFORM_API_BASE + '/plataforma/empresas', {
@@ -457,6 +468,7 @@
         ]);
       })
       .then(function (res) {
+        houveResposta = true;
         return res.json().catch(function () { return {}; }).then(function (body) {
           if (!res.ok) {
             var mensagem = (body.erro && body.erro.mensagem) || ('Falha ao criar empresa (HTTP ' + res.status + ').');
@@ -483,9 +495,7 @@
       })
       .catch(function (erro) {
         console.error('Erro ao criar empresa:', erro);
-        // O abort do prazo chega como AbortError; quem ganhar a corrida, a
-        // pessoa precisa ler a mesma coisa.
-        var semResposta = erro && (erro.name === 'AbortError' || erro.message === MSG_SEM_RESPOSTA);
+        var semResposta = pedidoPartiu && !houveResposta;
         showNewCompanyMsg(semResposta ? MSG_SEM_RESPOSTA : (erro.message || 'Não foi possível criar a empresa.'), false);
       })
       .finally(function () {

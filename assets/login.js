@@ -51,13 +51,22 @@
   emailInput.addEventListener('input', clearError);
   passwordInput.addEventListener('input', clearError);
 
+  // Botão desabilitado NÃO impede o envio: Enter dentro de um campo de texto
+  // envia o formulário sem passar pelo botão. A trava tem de morar no handler,
+  // senão um envio a mais entra enquanto o primeiro está no ar ou enquanto a
+  // página já está saindo.
+  var enviando = false;
+
   form.addEventListener('submit', async function (e) {
     e.preventDefault();
+    if (enviando) { return; }
+    enviando = true;
     clearError();
 
     var email = emailInput.value.trim();
     var password = passwordInput.value;
 
+    var saindo = false;
     submitBtn.disabled = true;
     submitBtn.textContent = 'Entrando...';
 
@@ -69,13 +78,20 @@
       }
       var user = result.data && result.data.user;
       var userType = user && user.app_metadata ? user.app_metadata.user_type : undefined;
+      // A navegação é assíncrona: a página ainda fica no ar por um tempo depois
+      // desta linha. Devolver o botão para "Entrar" aqui faz a tela dizer que
+      // nada aconteceu, e um segundo clique dispara outro signInWithPassword —
+      // medido, duas chamadas. Enquanto está saindo, o botão continua travado.
+      saindo = true;
       CresceForteAuth.routeForUserType(userType);
     } catch (err) {
       console.error('Login error:', err);
       showError('Não foi possível entrar agora. Tente novamente em instantes.');
     } finally {
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Entrar';
+      if (!saindo) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Entrar';
+      }
     }
   });
 
