@@ -11,6 +11,13 @@
   // EasyPanel (que bypassa o Cloudflare).
   var PLATFORM_API_BASE = 'https://crm.cresceforte.com/api';
 
+  // Prazo do POST que cria empresa. A criação mexe em Auth e banco, então é
+  // generosa de propósito: 20 s. O texto diz que a empresa PODE ter sido criada
+  // porque cortar o pedido não desfaz o que o servidor já fez — mandar "tente de
+  // novo" aqui produziria empresa duplicada e dois convites ao mesmo e-mail.
+  var CRIAR_EMPRESA_PRAZO_MS = 20000;
+  var MSG_SEM_RESPOSTA = 'O servidor não respondeu a tempo. A empresa PODE ter sido criada: recarregue a página e confira na lista antes de tentar de novo.';
+
   // Valores reais de companies.status (supabase/migrations/0015_companies.sql
   // no repo do CRM) — sempre maiúsculo, check constraint no banco.
   var STATUS_LABELS = {
@@ -418,19 +425,36 @@
     newCompanyCancel.disabled = true;
     newCompanyMsg.hidden = true;
 
+    // Sem prazo, um pedido que nunca responde deixava os DOIS botões
+    // desabilitados para sempre e nenhuma mensagem na tela: nem criar de novo,
+    // nem cancelar, só recarregar a página — e sem saber o que aconteceu. O
+    // prazo existe com ou sem AbortController (com ele o pedido também é
+    // cortado); o `venceu` é uma corrida, não um substituto da resposta.
+    var controller = window.AbortController ? new window.AbortController() : null;
+    var venceu;
+    var prazo = new Promise(function (r) { venceu = r; });
+    var prazoId = setTimeout(function () {
+      if (controller) { controller.abort(); }
+      venceu();
+    }, CRIAR_EMPRESA_PRAZO_MS);
+
     supabase.auth.getSession()
       .then(function (sessionResult) {
         var token = sessionResult.data && sessionResult.data.session && sessionResult.data.session.access_token;
         if (!token) throw new Error('Sessão expirada. Recarregue a página e faça login novamente.');
 
-        return fetch(PLATFORM_API_BASE + '/plataforma/empresas', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-          },
-          body: JSON.stringify(payload)
-        });
+        return Promise.race([
+          prazo.then(function () { throw new Error(MSG_SEM_RESPOSTA); }),
+          fetch(PLATFORM_API_BASE + '/plataforma/empresas', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify(payload),
+            signal: controller ? controller.signal : undefined
+          })
+        ]);
       })
       .then(function (res) {
         return res.json().catch(function () { return {}; }).then(function (body) {
@@ -459,9 +483,13 @@
       })
       .catch(function (erro) {
         console.error('Erro ao criar empresa:', erro);
-        showNewCompanyMsg(erro.message || 'Não foi possível criar a empresa.', false);
+        // O abort do prazo chega como AbortError; quem ganhar a corrida, a
+        // pessoa precisa ler a mesma coisa.
+        var semResposta = erro && (erro.name === 'AbortError' || erro.message === MSG_SEM_RESPOSTA);
+        showNewCompanyMsg(semResposta ? MSG_SEM_RESPOSTA : (erro.message || 'Não foi possível criar a empresa.'), false);
       })
       .finally(function () {
+        clearTimeout(prazoId);
         newCompanySubmit.disabled = false;
         newCompanyCancel.disabled = false;
       });
