@@ -89,7 +89,9 @@
     // alcança o hub, a referência hub→aba continua).
     var tab = window.open(info.url + '#portal', '_blank');
     if (!tab) { showHubError(MSG_BLOCKED); return; }
-    tab.opener = null;
+    // Alguns motores podem lançar SecurityError aqui; sem o try/catch a função
+    // abortaria antes de entregar o ticket. O hub segue mesmo assim.
+    try { tab.opener = null; } catch (e) { /* segue para a entrega */ }
     var controller = null;
     var timeoutId = null;
 
