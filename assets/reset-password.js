@@ -110,11 +110,17 @@
     showError(ERROR_MESSAGES[hashParams.get('error_code')] || 'Link inválido ou expirado.');
   } else {
     // Give onAuthStateChange a moment to fire before assuming there is no token at all.
+    // Esta página pode ser o destino de outros links do Supabase (confirmação de
+    // troca de e-mail ou de cadastro): a confirmação já valeu no servidor, só não
+    // há o que redefinir aqui. O texto não decide nada pelo `type` do link.
     setTimeout(function () {
       if (!recoveryReady && form.hidden) {
-        titleEl.textContent = 'Link inválido';
-        subEl.textContent = 'Abra esta página a partir do link enviado por e-mail.';
-        showError('Não encontramos um link de recuperação válido nesta página.');
+        titleEl.textContent = 'Este link não redefine senha';
+        subEl.textContent = 'Este link não serve para redefinir senha. Se você estava confirmando uma alteração de e-mail ou um cadastro, ela já vale: entre pelo login. ';
+        var loginLink = document.createElement('a');
+        loginLink.href = '/login/';
+        loginLink.textContent = 'Ir para o login';
+        subEl.appendChild(loginLink);
       }
     }, 4000);
   }
