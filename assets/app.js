@@ -128,11 +128,20 @@
   function emitir(info, token, inicio) {
     var restante = DEADLINE_MS - (Date.now() - inicio);
     var ms = Math.max(EMIT_MIN_MS, Math.min(EMIT_MAX_MS, restante));
-    var controller = window.AbortController ? new AbortController() : null;
-    var timeoutId = controller ? setTimeout(function () { controller.abort(); }, ms) : null;
-    function fim(r) { if (timeoutId) { clearTimeout(timeoutId); } return r; }
+    var controller = window.AbortController ? new window.AbortController() : null;
+    // O prazo vale COM ou SEM AbortController. Sem ele o fetch continua correndo
+    // (pode virar ticket órfão, como o abort também pode), mas a aba recebe
+    // 'tempo' e nunca fica sem resposta nenhuma — que era o caso quando o prazo
+    // só existia se o AbortController existisse.
+    var venceu;
+    var prazo = new Promise(function (r) { venceu = r; });
+    var timeoutId = setTimeout(function () {
+      if (controller) { controller.abort(); }
+      venceu({ ok: false, motivo: 'tempo', correlacao: null });
+    }, ms);
+    function fim(r) { clearTimeout(timeoutId); return r; }
     function falhou(err) { return fim({ ok: false, motivo: err && err.name === 'AbortError' ? 'tempo' : 'rede', correlacao: null }); }
-    return fetch(info.ticketUrl, {
+    return Promise.race([prazo, fetch(info.ticketUrl, {
       method: 'POST',
       headers: { Authorization: 'Bearer ' + token },
       signal: controller ? controller.signal : undefined
@@ -147,7 +156,7 @@
       return res.json().then(function (b) { return b; }, function () { return null; }).then(function (b) {
         return fim(classificarRecusa(res.status, b));
       });
-    }, falhou);
+    }, falhou)]);
   }
 
   // Texto da tela para cada motivo. Sempre texto FIXO do hub: nunca a mensagem do
