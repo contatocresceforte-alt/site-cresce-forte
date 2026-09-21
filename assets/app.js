@@ -16,6 +16,18 @@
     catalogo: { url: 'https://catalogo.cresceforte.com/', ticketUrl: 'https://catalogo.cresceforte.com/catalog-editor-api/portal-ticket', desc: 'Monte e publique seu catálogo digital.' }
   };
 
+  // Os módulos recusam token com iat velho (~5 min) e conferem no Supabase que
+  // a sessão ainda existe; renovar antes de pedir o ticket evita a recusa. Se a
+  // renovação falhar ou demorar (3s), segue com o token atual — quem decide se
+  // emite ou não o ticket é o servidor do módulo, não este arquivo.
+  function freshAccessToken(current) {
+    var refresh = CresceForteAuth.client.auth.refreshSession().then(function (r) {
+      return r && r.data && r.data.session ? r.data.session.access_token : current;
+    }).catch(function () { return current; });
+    var timeout = new Promise(function (resolve) { setTimeout(function () { resolve(current); }, 3000); });
+    return Promise.race([refresh, timeout]);
+  }
+
   function openModule(info, accessToken) {
     if (!info.ticketUrl || !accessToken) { window.open(info.url, '_blank', 'noopener'); return; }
     // Abre a aba já na hora do clique (gesto síncrono do usuário) e só troca
@@ -27,8 +39,8 @@
     // segurança sem perder a referência à aba.
     var tab = window.open('', '_blank');
     if (tab) { tab.opener = null; }
-    var controller = window.AbortController ? new AbortController() : null;
-    var timeoutId = controller ? setTimeout(function () { controller.abort(); }, 4000) : null;
+    var controller = null;
+    var timeoutId = null;
 
     function showTicketError() {
       if (!tab) { alert('Não foi possível abrir o módulo agora. Volte ao painel e tente de novo.'); return; }
@@ -36,11 +48,16 @@
       tab.document.body.innerHTML = '<p style="font:16px sans-serif;max-width:28rem;margin:3rem auto;padding:0 1rem;text-align:center;line-height:1.5">Não foi possível abrir o módulo agora.<br>Feche esta aba e clique de novo no painel.</p>';
     }
 
-    fetch(info.ticketUrl, {
-      method: 'POST',
-      headers: { Authorization: 'Bearer ' + accessToken },
-      signal: controller ? controller.signal : undefined
-    })
+    freshAccessToken(accessToken)
+      .then(function (token) {
+        controller = window.AbortController ? new AbortController() : null;
+        timeoutId = controller ? setTimeout(function () { controller.abort(); }, 4000) : null;
+        return fetch(info.ticketUrl, {
+          method: 'POST',
+          headers: { Authorization: 'Bearer ' + token },
+          signal: controller ? controller.signal : undefined
+        });
+      })
       .then(function (res) { return res.ok ? res.json() : null; })
       .then(function (data) {
         if (!data || !data.ticket) { showTicketError(); return; }
