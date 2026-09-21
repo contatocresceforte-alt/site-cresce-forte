@@ -5,9 +5,12 @@
   // segundo login — trava troca de conta sem querer entre módulos. Sem
   // emissor central: cada destino expõe o próprio endpoint (decisão dos 3
   // repos, ver "Erro — Segundo login do Catálogo aceita conta de outra
-  // empresa" no vault). Se a emissão falhar por qualquer motivo, abre a URL
-  // normal sem ticket — mesmo comportamento de hoje, login pede de novo sem
-  // travar ninguém fora.
+  // empresa" no vault). PROPOSTA (item 2, aguardando revisão Esther, não
+  // subir sem CRM/Catálogo estarem com login nativo desativado e ticket
+  // obrigatório dos dois lados): se a emissão falhar, não existe mais "URL
+  // normal sem ticket" — sem login nativo do outro lado isso vira beco sem
+  // saída. Mostra erro na própria aba e manda voltar pro painel e clicar de
+  // novo (reemissão = clique novo = ticket novo).
   var MODULE_INFO = {
     crm: { url: 'https://crm.cresceforte.com/', ticketUrl: 'https://crm.cresceforte.com/api/auth/portal-ticket', desc: 'Converse com clientes, gerencie seu funil de vendas e seu catálogo de produtos.' },
     catalogo: { url: 'https://catalogo.cresceforte.com/', ticketUrl: 'https://catalogo.cresceforte.com/catalog-editor-api/portal-ticket', desc: 'Monte e publique seu catálogo digital.' }
@@ -26,6 +29,13 @@
     if (tab) { tab.opener = null; }
     var controller = window.AbortController ? new AbortController() : null;
     var timeoutId = controller ? setTimeout(function () { controller.abort(); }, 4000) : null;
+
+    function showTicketError() {
+      if (!tab) { alert('Não foi possível abrir o módulo agora. Volte ao painel e tente de novo.'); return; }
+      tab.document.title = 'Não foi possível abrir';
+      tab.document.body.innerHTML = '<p style="font:16px sans-serif;max-width:28rem;margin:3rem auto;padding:0 1rem;text-align:center;line-height:1.5">Não foi possível abrir o módulo agora.<br>Feche esta aba e clique de novo no painel.</p>';
+    }
+
     fetch(info.ticketUrl, {
       method: 'POST',
       headers: { Authorization: 'Bearer ' + accessToken },
@@ -33,12 +43,11 @@
     })
       .then(function (res) { return res.ok ? res.json() : null; })
       .then(function (data) {
-        var dest = data && data.ticket ? info.url + '?ticket=' + encodeURIComponent(data.ticket) : info.url;
+        if (!data || !data.ticket) { showTicketError(); return; }
+        var dest = info.url + '?ticket=' + encodeURIComponent(data.ticket);
         if (tab) { tab.location = dest; } else { window.open(dest, '_blank', 'noopener'); }
       })
-      .catch(function () {
-        if (tab) { tab.location = info.url; } else { window.open(info.url, '_blank', 'noopener'); }
-      })
+      .catch(showTicketError)
       .finally(function () { if (timeoutId) clearTimeout(timeoutId); });
   }
 
