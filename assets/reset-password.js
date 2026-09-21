@@ -10,6 +10,22 @@
   var successBox = document.getElementById('success-box');
   var rulesList = document.getElementById('password-rules');
 
+  // Cliente só desta tela, criado só aqui (nunca em auth.js, que roda em toda
+  // página): lê o #access_token=... da URL mas mantém a sessão de recuperação
+  // SÓ EM MEMÓRIA (persistSession: false). Se a pessoa abandonar a tela nada
+  // fica no localStorage e a sessão real dela não é tocada; storageKey próprio
+  // evita o aviso de duas instâncias na mesma chave. A barreira é a rota + a
+  // memória, NÃO o campo type do fragmento (quem escreve a URL escreve esse
+  // campo). O cliente principal (auth.js) não lê o fragmento da URL.
+  var recoveryClient = window.supabase.createClient(CresceForteAuth.SUPABASE_URL, CresceForteAuth.SUPABASE_ANON_KEY, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: true,
+      storageKey: 'cf-recovery-memory'
+    }
+  });
+
   CresceForteAuth.wirePasswordToggle(passwordInput, document.getElementById('password-toggle'));
   CresceForteAuth.wirePasswordToggle(passwordConfirmInput, document.getElementById('password-confirm-toggle'));
 
@@ -56,31 +72,25 @@
     errorBox.textContent = '';
   }
 
-  // Supabase's recovery link puts a token in the URL and, once the client
-  // library picks it up, fires PASSWORD_RECOVERY with a real (but
-  // short-lived) session — that's our cue to show the "set new password"
-  // form instead of the default "confirming..." message.
+  // Supabase's recovery link puts a token in the URL and, once the recovery
+  // client picks it up, fires PASSWORD_RECOVERY with a real (but short-lived)
+  // in-memory session — that's our cue to show the "set new password" form
+  // instead of the default "confirming..." message. Qualquer outro evento
+  // (fragmento com outro type ou sem recuperação) é ignorado: a tela cai no
+  // "link inválido" abaixo.
   var recoveryReady = false;
 
-  CresceForteAuth.client.auth.onAuthStateChange(function (event, session) {
+  recoveryClient.auth.onAuthStateChange(function (event, session) {
     if (event === 'PASSWORD_RECOVERY') {
       recoveryReady = true;
       // Mostra de QUEM é a sessão de recuperação: um link forjado com tokens
-      // de outra conta cairia aqui igual a um legítimo, e o e-mail é a única
+      // de outra conta cai aqui igual a um legítimo, e o e-mail é a única
       // pista que a pessoa tem de que não é a conta dela.
       var accountEmail = session && session.user && session.user.email;
       subEl.textContent = accountEmail
         ? 'Escolha uma nova senha para a conta ' + accountEmail + '. Se esse não é o seu e-mail, feche esta página.'
         : 'Escolha uma nova senha para sua conta.';
       form.hidden = false;
-      return;
-    }
-
-    // This page doubles as the Site URL, so any other flow that lands here
-    // with a valid session (e.g. confirming a brand-new signup) isn't a
-    // password reset — just send them where they'd normally end up.
-    if (event === 'SIGNED_IN' && !recoveryReady && session) {
-      CresceForteAuth.routeForUserType(CresceForteAuth.getUserType(session));
     }
   });
 
@@ -132,18 +142,17 @@
     submitBtn.textContent = 'Salvando...';
 
     try {
-      var result = await CresceForteAuth.client.auth.updateUser({ password: password });
+      var result = await recoveryClient.auth.updateUser({ password: password });
       if (result.error) {
         showError('Não foi possível salvar a nova senha: ' + result.error.message);
         return;
       }
       form.hidden = true;
       successBox.hidden = false;
-      successBox.textContent = 'Senha atualizada! Entre de novo com a nova senha.';
+      successBox.textContent = 'Senha atualizada! Entre com a nova senha.';
 
-      // A sessão de recuperação não deve virar login: encerra e manda para o
-      // login, nunca continua logado no painel a partir desta tela.
-      try { await CresceForteAuth.client.auth.signOut(); } catch (e) { console.error('Reset password signOut error:', e); }
+      // Sem login automático: a sessão de recuperação só existe em memória e
+      // morre com a página; a pessoa entra pelo login normal.
       setTimeout(function () { window.location.href = '/login/'; }, 1500);
     } catch (err) {
       console.error('Reset password error:', err);

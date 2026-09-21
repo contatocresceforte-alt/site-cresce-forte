@@ -20,23 +20,21 @@
     throw new Error('assets/auth.js: the @supabase/supabase-js UMD <script> tag must be included before this file.');
   }
 
-  // detectSessionInUrl (padrão: true) faz o supabase-js abrir sessão a partir
-  // de #access_token=...&refresh_token=... em QUALQUER página: um link com os
-  // tokens da conta do atacante plantaria a sessão dele no navegador da
-  // vítima (login CSRF, achado 6 da Esther). Só a rota de recuperação de
-  // senha precisa disso, e só com type=recovery.
+  // Cliente PRINCIPAL (guarda sessão em localStorage). detectSessionInUrl
+  // (padrão: true) faria o supabase-js gravar como sessão o que vier em
+  // #access_token=...&refresh_token=... em QUALQUER página: um link com os
+  // tokens da conta do atacante sobrescreveria a sessão real da vítima
+  // (login CSRF, achado 6 da Esther). Aqui fica false, sempre, em toda rota.
   //
-  // Booleano calculado uma vez aqui, não função (url, params) => boolean: o
-  // supabase-js fixado nas páginas (2.45.4) só testa `if (detectSessionInUrl)`,
-  // e uma função é sempre truthy — deixaria a detecção LIGADA em toda rota.
-  // A leitura acontece na criação do client e o client é criado uma vez por
-  // página, então o resultado é o mesmo da função.
-  var hashParams = new URLSearchParams((global.location.hash || '').replace(/^#/, ''));
-  var isRecoveryLanding = /^\/reset-password(\/|\/index\.html)?$/.test(global.location.pathname) &&
-    hashParams.get('type') === 'recovery';
-
+  // Booleano e não função (url, params) => boolean: o supabase-js fixado nas
+  // páginas (2.45.4) só testa `if (detectSessionInUrl)`, e uma função é sempre
+  // truthy — deixaria a detecção LIGADA. O booleano vale em qualquer versão.
+  //
+  // Este arquivo é compartilhado por /login/, /app/, /admin/ e /reset-password/:
+  // NUNCA criar aqui um segundo client com detecção ligada (ele rodaria em toda
+  // página). O client de recuperação de senha é criado só em reset-password.js.
   var client = global.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: { detectSessionInUrl: isRecoveryLanding }
+    auth: { detectSessionInUrl: false }
   });
 
   // Returns the current Supabase session, or null if there isn't one (or on error).
@@ -185,6 +183,8 @@
 
   global.CresceForteAuth = {
     client: client,
+    SUPABASE_URL: SUPABASE_URL,
+    SUPABASE_ANON_KEY: SUPABASE_ANON_KEY,
     getSession: getSession,
     validatedSession: validatedSession,
     getUserType: getUserType,
