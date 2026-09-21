@@ -80,7 +80,17 @@
         <div class="nb-lid">
           <span class="nb-cam"></span>
           <div class="nb-screen">
-            <img src="assets/admin-template-screenshot.webp?v=1" width="1660" height="823" fetchpriority="high" decoding="async" alt="Painel de controle da Cresce Forte com a edição de um catálogo digital">
+            <!-- srcset porque no celular esta imagem aparece com ~308px de largura
+                 e antes baixava o arquivo de 1660px (74 KB) mesmo assim, competindo
+                 com o wallpaper do topo. sizes segue o layout: ate 860px a tela do
+                 notebook ocupa 82vw, acima disso ela para em 828px (.nb tem
+                 max-width:900px e .nb-lid usa 92% dela). Medido no navegador:
+                 375px escolhe a de 830w, 1440px em tela 1x tambem (exibe 828),
+                 e so tela 2x larga pede a de 1660w. -->
+            <img src="assets/admin-template-screenshot.webp?v=1"
+                 srcset="assets/admin-template-screenshot-830.webp?v=1 830w, assets/admin-template-screenshot.webp?v=1 1660w"
+                 sizes="(max-width: 860px) 82vw, 828px"
+                 width="1660" height="823" fetchpriority="high" decoding="async" alt="Painel de controle da Cresce Forte com a edição de um catálogo digital">
           </div>
         </div>
         <div class="nb-base"><span class="nb-lip"></span></div>
