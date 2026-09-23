@@ -408,43 +408,6 @@
       card.appendChild(rodape);
       area.appendChild(card);
     });
-
-    mostrarKpis(rows.length);
-  }
-
-  // Só entra KPI cujo dado o hub TEM. O painel não mostra papel/permissão
-  // porque o hub não lê `profiles` (nenhum `.from('profiles')` nos cinco JS) e
-  // a coluna de papel nunca é escrita: seria número inventado numa tela que o
-  // usuário lê como verdade.
-  function mostrarKpis(ativos) {
-    var caixa = document.getElementById('kpis');
-    caixa.innerHTML = '';
-    caixa.appendChild(kpi('Módulos ativos', String(ativos), ativos === 1 ? 'disponível para sua empresa' : 'disponíveis para sua empresa', 'i-modulo', false));
-    caixa.hidden = false;
-  }
-
-  function kpi(rotulo, valor, apoio, nomeIcone, verde) {
-    var cartao = document.createElement('div');
-    cartao.className = 'cf-kpi';
-    var texto = document.createElement('div');
-    var r = document.createElement('span');
-    r.className = 'cf-overline';
-    r.textContent = rotulo;
-    var v = document.createElement('div');
-    v.className = 'cf-kpi-v';
-    v.textContent = valor;
-    var s = document.createElement('div');
-    s.className = 'cf-kpi-s';
-    s.textContent = apoio;
-    texto.appendChild(r);
-    texto.appendChild(v);
-    texto.appendChild(s);
-    var tile = document.createElement('span');
-    tile.className = 'cf-tile' + (verde ? ' is-green' : '');
-    tile.appendChild(icone(nomeIcone));
-    cartao.appendChild(texto);
-    cartao.appendChild(tile);
-    return cartao;
   }
 
   // validatedSession em vez de requireAuth: duas linhas abaixo, o

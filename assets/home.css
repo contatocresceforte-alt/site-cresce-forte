@@ -39,16 +39,18 @@ a{text-decoration:none}
 }
 @media (max-width:359px){.hdr-brand{display:none}}
 
-/* ---------- papel de parede do topo ---------- */
+/* ---------- fundo do topo ---------- */
+/* Antes: imagem de papel de parede. Trocado por degradê só de tons do mesmo
+   azul-marinho (#0a2035→#0d2b3e), sem foto — pedido do Alain. */
 .hero-wall{
   background-color:#0a2035;
-  background-image:linear-gradient(180deg,rgba(239,244,245,0) 84%,rgba(239,244,245,.85) 96%,#eff4f5 100%),url(/assets/wallpaper-desktop.webp?v=1);
-  background-size:100% 100%,cover;
-  background-position:center top,center center;
+  background-image:linear-gradient(180deg,rgba(239,244,245,0) 84%,rgba(239,244,245,.85) 96%,#eff4f5 100%),linear-gradient(160deg,#0a2035 0%,#0d2b3e 55%,#0a2035 100%);
+  background-size:100% 100%,100% 100%;
+  background-position:center top,center top;
   background-repeat:no-repeat
 }
 @media (max-width:860px){
-  .hero-wall{background-image:linear-gradient(180deg,rgba(239,244,245,0) 82%,rgba(239,244,245,.85) 95%,#eff4f5 100%),url(/assets/wallpaper-mobile.webp?v=1)}
+  .hero-wall{background-image:linear-gradient(180deg,rgba(239,244,245,0) 82%,rgba(239,244,245,.85) 95%,#eff4f5 100%),linear-gradient(160deg,#0a2035 0%,#0d2b3e 55%,#0a2035 100%)}
 }
 
 /* ---------- hero ---------- */
