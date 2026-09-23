@@ -1,61 +1,229 @@
-  .cf-placeholder {
-    background: #fff;
-    border: 1px solid rgba(13,43,62,0.1);
-    border-radius: 20px;
-    padding: 28px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    box-shadow: 0 2px 6px -1px rgba(13,43,62,0.06), 0 14px 32px -14px rgba(13,43,62,0.16);
-    max-width: 480px;
+/* Estilo do painel /app/ — rail navy + cartões, no estilo do OnTime Design
+   System. Autossuficiente de propósito: esta página NÃO carrega mais o
+   dashboard-shell.css, que continua sendo do /admin/ e não pode mudar junto. */
+
+:root {
+  --navy-900: #00284f;
+  --sidebar-bg: #05203d;
+  --sidebar-item: #b9c8da;
+  --ink-50: #f5f7fa;
+  --ink-100: #ebeff5;
+  --ink-200: #dce3ec;
+  --ink-300: #c3cddb;
+  --ink-500: #6b7c93;
+  --ink-600: #4e5f77;
+  --ink-700: #3a4a60;
+  --ink-900: #132639;
+  --blue-50: #eff4ff;
+  --blue-100: #dbe7fe;
+  --blue-600: #2563eb;
+  --blue-700: #1d4fd8;
+  --green-50: #ecfcea;
+  --green-100: #d6f8d1;
+  --green-600: #2aae1f;
+  --green-700: #218a19;
+  --r-md: 10px;
+  --r-lg: 12px;
+  --r-full: 999px;
+  --shadow-sm: 0 1px 2px rgba(10, 24, 38, .06), 0 1px 3px rgba(10, 24, 38, .04);
+  --shadow-md: 0 2px 4px rgba(10, 24, 38, .05), 0 4px 12px rgba(10, 24, 38, .06);
+  --ease: cubic-bezier(.16, 1, .3, 1);
+  --focus-ring: 0 0 0 3px rgba(37, 99, 235, .28);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--ink-50);
+  color: var(--ink-900);
+  font: 400 14px/1.45 Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, p { margin: 0; }
+:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+.cf-ico { width: 18px; height: 18px; flex-shrink: 0; }
+.cf-overline {
+  font: 700 11px/1.3 Inter, sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+}
+
+.cf-app { display: grid; grid-template-columns: 238px minmax(0, 1fr); min-height: 100vh; }
+
+/* ---------- rail ---------- */
+.cf-rail {
+  background: linear-gradient(180deg, var(--navy-900), var(--sidebar-bg) 40%);
+  color: var(--sidebar-item);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  box-shadow: 2px 0 12px rgba(0, 24, 47, .12);
+}
+.cf-rail-brand {
+  display: flex; align-items: center; gap: 12px;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
+.cf-rail-mark { width: 34px; height: 34px; border-radius: 9px; background: #fff; padding: 5px; display: flex; flex-shrink: 0; }
+.cf-rail-mark img { width: 100%; height: 100%; object-fit: contain; }
+.cf-rail-name { font: 600 17px 'Space Grotesk', sans-serif; color: #fff; letter-spacing: -.01em; }
+
+.cf-rail-nav { padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; flex: 1; overflow-y: auto; }
+.cf-rail-label { padding: 8px 12px; color: rgba(185, 200, 218, .6); }
+.cf-rail-label-mods { margin-top: 12px; }
+.cf-rail-item {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%; height: 40px; padding: 0 12px;
+  border: 0; border-radius: var(--r-md);
+  background: none; color: var(--sidebar-item);
+  font: 600 13.5px Inter, sans-serif; text-align: left;
+  cursor: pointer;
+  transition: background 140ms var(--ease), color 140ms var(--ease);
+}
+.cf-rail-item.is-active { background: var(--blue-600); color: #fff; box-shadow: 0 6px 16px rgba(37, 99, 235, .28); cursor: default; }
+.cf-rail-item:not(.is-active):hover { background: rgba(255, 255, 255, .07); color: #fff; }
+.cf-rail-item .cf-ext { margin-left: auto; width: 14px; height: 14px; opacity: .55; }
+
+.cf-rail-user {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px; border-top: 1px solid rgba(255, 255, 255, .08);
+}
+.cf-avatar {
+  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  font: 700 13px Inter, sans-serif; color: #fff; background: rgba(255, 255, 255, .14);
+}
+.cf-user-email {
+  flex: 1; min-width: 0;
+  font-size: 12px; color: rgba(185, 200, 218, .8);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.cf-logout {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 7px; border: 0; border-radius: 8px;
+  background: none; color: var(--sidebar-item); cursor: pointer;
+}
+.cf-logout:hover { background: rgba(255, 255, 255, .07); color: #fff; }
+
+/* ---------- topbar ---------- */
+.cf-main { min-width: 0; display: flex; flex-direction: column; }
+.cf-topbar {
+  height: 52px; display: flex; align-items: center; gap: 12px;
+  padding: 0 32px; background: #f0f5fc;
+  border-bottom: 1px solid var(--ink-200);
+  position: sticky; top: 0; z-index: 20;
+}
+.cf-area { font: 500 12.5px Inter, sans-serif; color: var(--blue-600); display: flex; align-items: center; gap: 8px; }
+.cf-area::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #6090fa; flex-shrink: 0; }
+.cf-area b { font-weight: 700; }
+.cf-menu-btn { display: none; padding: 6px; border: 0; border-radius: 8px; background: none; color: var(--ink-700); cursor: pointer; }
+
+/* ---------- conteúdo ---------- */
+.cf-content { width: 100%; max-width: 1040px; margin: 0 auto; padding: 40px 32px 64px; }
+.cf-content h1 { font: 700 30px/1.15 'Space Grotesk', sans-serif; letter-spacing: -.02em; }
+.cf-sub { color: var(--ink-500); margin-top: 8px; font-size: 14.5px; }
+
+.cf-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 32px 0; }
+.cf-kpi {
+  display: flex; justify-content: space-between; gap: 12px;
+  background: #fff; border: 1px solid var(--ink-200); border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm); padding: 20px;
+}
+.cf-kpi .cf-kpi-v {
+  font: 700 28px/1.1 'Space Grotesk', sans-serif;
+  margin: 6px 0 4px; letter-spacing: -.01em; font-variant-numeric: tabular-nums;
+}
+.cf-kpi .cf-kpi-s { font-size: 12px; color: var(--ink-500); }
+.cf-tile {
+  width: 34px; height: 34px; border-radius: var(--r-md); flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--blue-50); color: var(--blue-600);
+}
+.cf-tile.is-green { background: var(--green-50); color: var(--green-700); }
+
+.cf-section-label { display: block; margin-bottom: 12px; }
+
+/* ---------- cartões de módulo ---------- */
+.cf-modules { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+.cf-module {
+  display: flex; flex-direction: column; gap: 16px;
+  background: #fff; border: 1px solid var(--ink-200); border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm); padding: 24px;
+  font: inherit; text-align: left; width: 100%; appearance: none; cursor: pointer;
+  transition: transform 200ms var(--ease), box-shadow 200ms var(--ease), border-color 200ms var(--ease);
+}
+.cf-module:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); border-color: var(--ink-300); }
+.cf-module-head { display: flex; align-items: center; gap: 12px; }
+.cf-module-head .cf-overline { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cf-pill {
+  display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 10px;
+  border-radius: var(--r-full); font: 600 11.5px/1 Inter, sans-serif;
+  background: var(--green-50); color: var(--green-700); border: 1px solid var(--green-100);
+}
+.cf-pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--green-600); }
+.cf-module h2 { font: 600 20px/1.25 'Space Grotesk', sans-serif; letter-spacing: -.01em; }
+.cf-module p { color: var(--ink-600); font-size: 14px; line-height: 1.55; margin-top: 8px; }
+.cf-module-foot {
+  margin-top: auto; padding-top: 16px; border-top: 1px solid var(--ink-100);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.cf-module-foot small { color: var(--ink-500); font-size: 12px; display: flex; align-items: center; gap: 6px; }
+.cf-module-foot small .cf-ico { width: 14px; height: 14px; }
+.cf-open {
+  display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 16px;
+  border-radius: var(--r-md); background: var(--blue-600); color: #fff;
+  font: 600 13px/1 Inter, sans-serif;
+}
+.cf-module:hover .cf-open { background: var(--blue-700); }
+.cf-open .cf-ico { width: 16px; height: 16px; }
+.cf-open.cf-open-muted { background: var(--ink-100); color: var(--ink-600); }
+.cf-module:hover .cf-open.cf-open-muted { background: var(--ink-100); }
+
+/* Cartão sem destino (módulo ativo que o hub ainda não sabe abrir): não é
+   clicável, então não finge que é. */
+.cf-module.is-static { cursor: default; }
+.cf-module.is-static:hover { transform: none; box-shadow: var(--shadow-sm); border-color: var(--ink-200); }
+
+/* ---------- placeholder e erro (usados pelo app.js e pelo auth.js) ---------- */
+.cf-placeholder {
+  grid-column: 1 / -1;
+  background: #fff; border: 1px solid var(--ink-200); border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm); padding: 24px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.cf-placeholder .cf-tag {
+  font: 700 10.5px Inter, sans-serif; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--ink-500); background: var(--ink-100);
+  padding: 4px 9px; border-radius: var(--r-full); width: fit-content;
+}
+.cf-placeholder h2 { font: 600 17px 'Space Grotesk', sans-serif; }
+.cf-placeholder p { font-size: 13.5px; line-height: 1.6; color: var(--ink-600); }
+#portal-error { margin-bottom: 16px; border-color: #f3c6c6; background: #fff8f8; }
+
+/* ---------- mobile ---------- */
+.cf-scrim { display: none; }
+@media (max-width: 860px) {
+  .cf-app { grid-template-columns: minmax(0, 1fr); }
+  .cf-rail {
+    position: fixed; left: 0; top: 0; z-index: 60; width: 260px;
+    transform: translateX(-100%); transition: transform 220ms var(--ease);
   }
-  .cf-placeholder .cf-tag {
-    font-size: 10.5px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: #56707e;
-    background: rgba(13,43,62,0.06);
-    padding: 4px 9px;
-    border-radius: 999px;
-    width: fit-content;
-  }
-  .cf-placeholder h2 {
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 600;
-    font-size: 17px;
-    color: #0d2b3e;
-    margin: 0;
-  }
-  .cf-placeholder p { font-size: 13.5px; line-height: 1.6; color: #56707e; margin: 0; }
-  .cf-modules { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; max-width: 900px; }
-  .cf-module {
-    background: #fff;
-    border: 1px solid rgba(13,43,62,0.1);
-    border-radius: 20px;
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    box-shadow: 0 2px 6px -1px rgba(13,43,62,0.06), 0 14px 32px -14px rgba(13,43,62,0.16);
-    text-decoration: none;
-    font: inherit;
-    text-align: left;
-    cursor: pointer;
-    appearance: none;
-    width: 100%;
-  }
-  .cf-module h2 {
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 600;
-    font-size: 17px;
-    color: #0d2b3e;
-    margin: 0;
-  }
-  .cf-module p { font-size: 13.5px; line-height: 1.5; color: #56707e; margin: 0; }
-  .cf-module .cf-open {
-    font-size: 13px;
-    font-weight: 700;
-    color: #0f7c8c;
-  }
-  .cf-module .cf-open.cf-open-muted { color: #56707e; }
+  .cf-app.rail-open .cf-rail { transform: none; }
+  .cf-scrim { display: block; position: fixed; inset: 0; background: rgba(10, 24, 38, .45); z-index: 55; }
+  .cf-scrim[hidden] { display: none; }
+  .cf-menu-btn { display: inline-flex; }
+  .cf-topbar { padding: 0 16px; }
+  .cf-content { padding: 24px 16px 48px; }
+  .cf-content h1 { font-size: 26px; }
+  .cf-kpis { grid-template-columns: 1fr; gap: 12px; margin: 24px 0; }
+  .cf-modules { grid-template-columns: 1fr; }
+  .cf-module { padding: 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}

@@ -15,9 +15,22 @@
   // mais "URL normal sem ticket": o módulo recebe cf-portal-fail e segue no
   // login nativo (enquanto ele existir).
   var MODULE_INFO = {
-    crm: { url: 'https://crm.cresceforte.com/', ticketUrl: 'https://crm.cresceforte.com/api/auth/portal-ticket', desc: 'Converse com clientes, gerencie seu funil de vendas e seu catálogo de produtos.' },
-    catalogo: { url: 'https://catalogo.cresceforte.com/', ticketUrl: 'https://catalogo.cresceforte.com/catalog-editor-api/portal-ticket', desc: 'Monte e publique seu catálogo digital.' }
+    crm: { url: 'https://crm.cresceforte.com/', ticketUrl: 'https://crm.cresceforte.com/api/auth/portal-ticket', desc: 'Converse com clientes, gerencie seu funil de vendas e seu catálogo de produtos.', icone: 'i-crm' },
+    catalogo: { url: 'https://catalogo.cresceforte.com/', ticketUrl: 'https://catalogo.cresceforte.com/catalog-editor-api/portal-ticket', desc: 'Monte e publique seu catálogo digital.', icone: 'i-catalogo' }
   };
+
+  // Ícone do sprite de /app/index.html. `i-modulo` é o genérico de quem entrar
+  // em company_services sem estar no MODULE_INFO — o cartão aparece do mesmo
+  // jeito, só não abre.
+  function icone(nome, classe) {
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', classe || 'cf-ico');
+    svg.setAttribute('aria-hidden', 'true');
+    var use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+    use.setAttribute('href', '#' + nome);
+    svg.appendChild(use);
+    return svg;
+  }
 
   var RESEND_MS = 250;
   var HANDSHAKE_MS = 10000;
@@ -304,37 +317,132 @@
 
   function renderModules(rows) {
     var area = document.getElementById('modules-area');
+    var trilho = document.getElementById('rail-modules');
+    var rotuloTrilho = document.getElementById('rail-modules-label');
+    var rotuloSecao = document.getElementById('section-label');
     area.innerHTML = '';
+    trilho.innerHTML = '';
     if (!rows || !rows.length) {
+      rotuloTrilho.hidden = true;
+      rotuloSecao.hidden = true;
       area.innerHTML = '<div class="cf-placeholder"><span class="cf-tag">Nenhum módulo</span><h2>Nenhum serviço ativo</h2><p>Fale com o suporte da Cresce Forte para ativar um módulo para sua empresa.</p></div>';
       return;
     }
+    rotuloTrilho.hidden = false;
+    rotuloSecao.hidden = false;
     rows.forEach(function (row) {
       var svc = row.services;
       var info = MODULE_INFO[svc.key] || {};
+
+      // Item do trilho. É BOTÃO e passa pelo mesmo openModule, nunca um <a
+      // href> para o módulo: link direto abriria a outra ponta SEM ticket, que
+      // é exatamente o segundo login que o portal existe para evitar.
+      if (info.url) {
+        var itemTrilho = document.createElement('button');
+        itemTrilho.type = 'button';
+        itemTrilho.className = 'cf-rail-item';
+        itemTrilho.appendChild(icone(info.icone || 'i-modulo'));
+        itemTrilho.appendChild(document.createTextNode(svc.name));
+        itemTrilho.appendChild(icone('i-abrir', 'cf-ico cf-ext'));
+        itemTrilho.addEventListener('click', function () {
+          document.getElementById('app').classList.remove('rail-open');
+          openModule(info, svc.name);
+        });
+        trilho.appendChild(itemTrilho);
+      }
+
       var card = document.createElement(info.url ? 'button' : 'div');
-      card.className = 'cf-module';
+      card.className = 'cf-module' + (info.url ? '' : ' is-static');
       if (info.url) {
         card.type = 'button';
         card.addEventListener('click', function () { openModule(info, svc.name); });
       }
+
+      var cabeca = document.createElement('div');
+      cabeca.className = 'cf-module-head';
+      var tile = document.createElement('span');
+      tile.className = 'cf-tile' + (svc.key === 'catalogo' ? ' is-green' : '');
+      tile.appendChild(icone(info.icone || 'i-modulo'));
+      var chave = document.createElement('span');
+      chave.className = 'cf-overline';
+      chave.textContent = svc.key;
+      cabeca.appendChild(tile);
+      cabeca.appendChild(chave);
+      if (info.url) {
+        var pill = document.createElement('span');
+        pill.className = 'cf-pill';
+        pill.textContent = 'Ativo';
+        cabeca.appendChild(pill);
+      }
+
+      var corpo = document.createElement('div');
       var h2 = document.createElement('h2');
       h2.textContent = svc.name;
       var p = document.createElement('p');
       p.textContent = info.desc || 'Módulo ativo para sua empresa.';
+      corpo.appendChild(h2);
+      corpo.appendChild(p);
+
+      var rodape = document.createElement('div');
+      rodape.className = 'cf-module-foot';
+      var nota = document.createElement('small');
       var tag = document.createElement('span');
       tag.className = 'cf-open';
       if (info.url) {
-        tag.textContent = 'Abrir →';
+        nota.appendChild(icone('i-abrir'));
+        nota.appendChild(document.createTextNode('Abre em nova aba'));
+        tag.appendChild(document.createTextNode('Abrir ' + svc.name));
+        tag.appendChild(icone('i-abrir'));
       } else {
+        nota.textContent = 'Ainda não abre por aqui';
         tag.textContent = 'Em configuração';
         tag.classList.add('cf-open-muted');
       }
-      card.appendChild(h2);
-      card.appendChild(p);
-      card.appendChild(tag);
+      rodape.appendChild(nota);
+      rodape.appendChild(tag);
+
+      card.appendChild(cabeca);
+      card.appendChild(corpo);
+      card.appendChild(rodape);
       area.appendChild(card);
     });
+
+    mostrarKpis(rows.length);
+  }
+
+  // Só entra KPI cujo dado o hub TEM. O painel não mostra papel/permissão
+  // porque o hub não lê `profiles` (nenhum `.from('profiles')` nos cinco JS) e
+  // a coluna de papel nunca é escrita: seria número inventado numa tela que o
+  // usuário lê como verdade.
+  function mostrarKpis(ativos) {
+    var caixa = document.getElementById('kpis');
+    caixa.innerHTML = '';
+    caixa.appendChild(kpi('Módulos ativos', String(ativos), ativos === 1 ? 'disponível para sua empresa' : 'disponíveis para sua empresa', 'i-modulo', false));
+    caixa.hidden = false;
+  }
+
+  function kpi(rotulo, valor, apoio, nomeIcone, verde) {
+    var cartao = document.createElement('div');
+    cartao.className = 'cf-kpi';
+    var texto = document.createElement('div');
+    var r = document.createElement('span');
+    r.className = 'cf-overline';
+    r.textContent = rotulo;
+    var v = document.createElement('div');
+    v.className = 'cf-kpi-v';
+    v.textContent = valor;
+    var s = document.createElement('div');
+    s.className = 'cf-kpi-s';
+    s.textContent = apoio;
+    texto.appendChild(r);
+    texto.appendChild(v);
+    texto.appendChild(s);
+    var tile = document.createElement('span');
+    tile.className = 'cf-tile' + (verde ? ' is-green' : '');
+    tile.appendChild(icone(nomeIcone));
+    cartao.appendChild(texto);
+    cartao.appendChild(tile);
+    return cartao;
   }
 
   // validatedSession em vez de requireAuth: duas linhas abaixo, o
@@ -362,10 +470,15 @@
 
     var emailEl = document.getElementById('user-email');
     var name = session.user.user_metadata && session.user.user_metadata.full_name;
-    emailEl.textContent = name || session.user.email || '';
+    var identidade = name || session.user.email || '';
+    emailEl.textContent = identidade;
+    emailEl.title = identidade;
+    var avatar = document.getElementById('user-avatar');
+    avatar.textContent = (identidade.trim()[0] || '?').toUpperCase();
 
     var companyId = CresceForteAuth.getCompanyId(session);
     if (!companyId) { renderModules([]); return; }
+    nomeDaEmpresa(companyId);
 
     var result = await CresceForteAuth.client
       .from('company_services')
@@ -382,7 +495,52 @@
     renderModules(result.data);
   });
 
+  // Nome da empresa para a tarja do topo. Consulta SEPARADA e opcional de
+  // propósito: se a RLS/GRANT de `companies` não deixar o usuário comum ler, ou
+  // a rede cair, a tarja fica no texto neutro e os módulos carregam igual —
+  // esta leitura nunca pode derrubar a tela. E se não vier nome, não se inventa
+  // um: some a tarja de empresa, não aparece um rótulo genérico no lugar.
+  function nomeDaEmpresa(companyId) {
+    CresceForteAuth.client
+      .from('companies')
+      .select('trade_name, legal_name')
+      .eq('id', companyId)
+      .maybeSingle()
+      .then(function (r) {
+        var linha = r && r.data;
+        var nome = linha && (linha.trade_name || linha.legal_name);
+        if (!nome) { return; }
+        var chip = document.getElementById('area-chip');
+        chip.textContent = 'Área ativa: ';
+        var forte = document.createElement('b');
+        forte.textContent = nome;
+        chip.appendChild(forte);
+      })
+      .catch(function () { /* tarja fica no texto neutro */ });
+  }
+
   document.getElementById('logout-btn').addEventListener('click', function () {
     CresceForteAuth.logout('/login/');
   });
+
+  // Trilho em gaveta no celular. O botão e o véu só existem abaixo de 860px;
+  // acima disso o CSS os esconde e estes ouvintes nunca disparam.
+  (function () {
+    var app = document.getElementById('app');
+    var botao = document.getElementById('menu-btn');
+    var veu = document.getElementById('scrim');
+    function fechar() {
+      app.classList.remove('rail-open');
+      botao.setAttribute('aria-expanded', 'false');
+      veu.hidden = true;
+    }
+    botao.addEventListener('click', function () {
+      var abriu = !app.classList.contains('rail-open');
+      app.classList.toggle('rail-open', abriu);
+      botao.setAttribute('aria-expanded', abriu ? 'true' : 'false');
+      veu.hidden = !abriu;
+    });
+    veu.addEventListener('click', fechar);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { fechar(); } });
+  })();
 })();
