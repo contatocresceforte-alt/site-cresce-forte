@@ -391,7 +391,9 @@
       if (info.url) {
         nota.appendChild(icone('i-abrir'));
         nota.appendChild(document.createTextNode('Abre em nova aba'));
-        tag.appendChild(document.createTextNode('Abrir ' + svc.name));
+        // Só "Abrir": o nome do módulo já está no título do cartão, e repeti-lo
+        // no botão fazia o texto quebrar em duas linhas dentro do cartão.
+        tag.appendChild(document.createTextNode('Abrir'));
         tag.appendChild(icone('i-abrir'));
       } else {
         nota.textContent = 'Ainda não abre por aqui';

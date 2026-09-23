@@ -127,7 +127,9 @@ h1, h2, p { margin: 0; }
 .cf-content h1 { font: 700 30px/1.15 'Space Grotesk', sans-serif; letter-spacing: -.02em; }
 .cf-sub { color: var(--ink-500); margin-top: 8px; font-size: 14.5px; }
 
-.cf-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 32px 0; }
+/* auto-FILL, não auto-fit: com um KPI só, o auto-fit esticava o cartão pela
+   largura inteira da página e o número de 28px ficava perdido no meio dele. */
+.cf-kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin: 32px 0; }
 .cf-kpi {
   display: flex; justify-content: space-between; gap: 12px;
   background: #fff; border: 1px solid var(--ink-200); border-radius: var(--r-lg);
@@ -171,12 +173,16 @@ h1, h2, p { margin: 0; }
   margin-top: auto; padding-top: 16px; border-top: 1px solid var(--ink-100);
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
 }
-.cf-module-foot small { color: var(--ink-500); font-size: 12px; display: flex; align-items: center; gap: 6px; }
+.cf-module-foot small {
+  color: var(--ink-500); font-size: 12px;
+  display: flex; align-items: center; gap: 6px;
+  min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 .cf-module-foot small .cf-ico { width: 14px; height: 14px; }
 .cf-open {
   display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 16px;
   border-radius: var(--r-md); background: var(--blue-600); color: #fff;
-  font: 600 13px/1 Inter, sans-serif;
+  font: 600 13px/1 Inter, sans-serif; white-space: nowrap; flex-shrink: 0;
 }
 .cf-module:hover .cf-open { background: var(--blue-700); }
 .cf-open .cf-ico { width: 16px; height: 16px; }
