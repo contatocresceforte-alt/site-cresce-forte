@@ -15,8 +15,8 @@
   // mais "URL normal sem ticket": o módulo recebe cf-portal-fail e segue no
   // login nativo (enquanto ele existir).
   var MODULE_INFO = {
-    crm: { url: 'https://crm.cresceforte.com/', ticketUrl: 'https://crm.cresceforte.com/api/auth/portal-ticket', desc: 'Converse com clientes, gerencie seu funil de vendas e seu catálogo de produtos.', icone: 'i-crm' },
-    catalogo: { url: 'https://catalogo.cresceforte.com/', ticketUrl: 'https://catalogo.cresceforte.com/catalog-editor-api/portal-ticket', desc: 'Monte e publique seu catálogo digital.', icone: 'i-catalogo' }
+    crm: { url: 'https://crm.cresceforte.com/', ticketUrl: 'https://crm.cresceforte.com/api/auth/portal-ticket', titulo: 'Relacione-se com seus clientes.', desc: 'Converse com seus clientes, organize seu funil de vendas e gerencie seu relacionamento de forma simples e eficiente.', icone: 'i-crm' },
+    catalogo: { url: 'https://catalogo.cresceforte.com/', ticketUrl: 'https://catalogo.cresceforte.com/catalog-editor-api/portal-ticket', titulo: 'Monte e publique seu catálogo digital.', desc: 'Apresente seus produtos de forma profissional e aumente suas vendas com um catálogo moderno e completo.', icone: 'i-catalogo' }
   };
 
   // Ícone do sprite de /app/index.html. `i-modulo` é o genérico de quem entrar
@@ -351,61 +351,60 @@
         trilho.appendChild(itemTrilho);
       }
 
+      // O cartão inteiro continua sendo o botão (clicar em qualquer ponto abre),
+      // e o "Acessar …" é só o desenho do botão dentro dele.
       var card = document.createElement(info.url ? 'button' : 'div');
-      card.className = 'cf-module' + (info.url ? '' : ' is-static');
+      card.className = 'cf-module' + (MODULE_INFO[svc.key] ? ' is-' + svc.key : '') + (info.url ? '' : ' is-static');
       if (info.url) {
         card.type = 'button';
+        card.title = 'Abre em nova aba';
         card.addEventListener('click', function () { openModule(info, svc.name); });
       }
+
+      var corpo = document.createElement('div');
+      corpo.className = 'cf-module-body';
 
       var cabeca = document.createElement('div');
       cabeca.className = 'cf-module-head';
       var tile = document.createElement('span');
-      tile.className = 'cf-tile' + (svc.key === 'catalogo' ? ' is-green' : '');
+      tile.className = 'cf-tile';
       tile.appendChild(icone(info.icone || 'i-modulo'));
       var chave = document.createElement('span');
       chave.className = 'cf-overline';
-      chave.textContent = svc.key;
+      chave.textContent = svc.name;
       cabeca.appendChild(tile);
       cabeca.appendChild(chave);
-      if (info.url) {
-        var pill = document.createElement('span');
-        pill.className = 'cf-pill';
-        pill.textContent = 'Ativo';
-        cabeca.appendChild(pill);
-      }
 
-      var corpo = document.createElement('div');
       var h2 = document.createElement('h2');
-      h2.textContent = svc.name;
+      h2.textContent = info.titulo || svc.name;
       var p = document.createElement('p');
       p.textContent = info.desc || 'Módulo ativo para sua empresa.';
-      corpo.appendChild(h2);
-      corpo.appendChild(p);
 
-      var rodape = document.createElement('div');
-      rodape.className = 'cf-module-foot';
-      var nota = document.createElement('small');
       var tag = document.createElement('span');
       tag.className = 'cf-open';
       if (info.url) {
-        nota.appendChild(icone('i-abrir'));
-        nota.appendChild(document.createTextNode('Abre em nova aba'));
-        // Só "Abrir": o nome do módulo já está no título do cartão, e repeti-lo
-        // no botão fazia o texto quebrar em duas linhas dentro do cartão.
-        tag.appendChild(document.createTextNode('Abrir'));
-        tag.appendChild(icone('i-abrir'));
+        tag.appendChild(document.createTextNode('Acessar ' + svc.name));
+        var nova = document.createElement('span');
+        nova.className = 'cf-sr-only';
+        nova.textContent = ' (abre em nova aba)';
+        tag.appendChild(nova);
+        tag.appendChild(icone('i-seta'));
       } else {
-        nota.textContent = 'Ainda não abre por aqui';
         tag.textContent = 'Em configuração';
         tag.classList.add('cf-open-muted');
       }
-      rodape.appendChild(nota);
-      rodape.appendChild(tag);
 
-      card.appendChild(cabeca);
+      corpo.appendChild(cabeca);
+      corpo.appendChild(h2);
+      corpo.appendChild(p);
+      corpo.appendChild(tag);
       card.appendChild(corpo);
-      card.appendChild(rodape);
+
+      // Ilustração do módulo, se a página tiver uma para esta chave.
+      var modelo = document.getElementById('ilustra-' + svc.key);
+      if (modelo && modelo.content) {
+        card.appendChild(modelo.content.cloneNode(true));
+      }
       area.appendChild(card);
     });
   }
@@ -438,8 +437,9 @@
     var identidade = name || session.user.email || '';
     emailEl.textContent = identidade;
     emailEl.title = identidade;
-    var avatar = document.getElementById('user-avatar');
-    avatar.textContent = (identidade.trim()[0] || '?').toUpperCase();
+    // O avatar é o boneco do desenho (sprite i-pessoa); a identidade fica no
+    // menu que ele abre.
+    document.getElementById('user-menu-btn').title = identidade;
 
     var companyId = CresceForteAuth.getCompanyId(session);
     if (!companyId) { renderModules([]); return; }
@@ -460,11 +460,11 @@
     renderModules(result.data);
   });
 
-  // Nome da empresa para a tarja do topo. Consulta SEPARADA e opcional de
+  // Nome da empresa, no menu do usuário. Consulta SEPARADA e opcional de
   // propósito: se a RLS/GRANT de `companies` não deixar o usuário comum ler, ou
-  // a rede cair, a tarja fica no texto neutro e os módulos carregam igual —
-  // esta leitura nunca pode derrubar a tela. E se não vier nome, não se inventa
-  // um: some a tarja de empresa, não aparece um rótulo genérico no lugar.
+  // a rede cair, a linha fica escondida e os módulos carregam igual — esta
+  // leitura nunca pode derrubar a tela. E se não vier nome, não se inventa um:
+  // não aparece um rótulo genérico no lugar.
   function nomeDaEmpresa(companyId) {
     CresceForteAuth.client
       .from('companies')
@@ -480,9 +480,29 @@
         var forte = document.createElement('b');
         forte.textContent = nome;
         chip.appendChild(forte);
+        chip.hidden = false;
       })
-      .catch(function () { /* tarja fica no texto neutro */ });
+      .catch(function () { /* linha da empresa fica escondida */ });
   }
+
+  // Menu do usuário (topo à direita): e-mail, empresa e Sair. Fecha com clique
+  // fora, com Esc e ao abrir a gaveta do celular.
+  var botaoUsuario = document.getElementById('user-menu-btn');
+  var menuUsuario = document.getElementById('user-menu');
+  function menuUsuarioAberto(abrir) {
+    menuUsuario.hidden = !abrir;
+    botaoUsuario.setAttribute('aria-expanded', abrir ? 'true' : 'false');
+  }
+  botaoUsuario.addEventListener('click', function (e) {
+    e.stopPropagation();
+    menuUsuarioAberto(menuUsuario.hidden);
+  });
+  document.addEventListener('click', function (e) {
+    if (!menuUsuario.hidden && !menuUsuario.contains(e.target)) { menuUsuarioAberto(false); }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !menuUsuario.hidden) { menuUsuarioAberto(false); botaoUsuario.focus(); }
+  });
 
   document.getElementById('logout-btn').addEventListener('click', function () {
     CresceForteAuth.logout('/login/');

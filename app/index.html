@@ -9,29 +9,69 @@
 <link rel="icon" href="/assets/cresce-forte-icon.webp?v=1" type="image/webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" media="print">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print">
 <script src="/assets/font-swap.js?v=1"></script>
-<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="/assets/app-page.css?v=6">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="/assets/app-page.css?v=7">
 </head>
 <body>
 
 <!-- Ícones: SVG embutido, não biblioteca. O lucide.js do mockup pesa 95,8 KB
-     comprimidos — 6,5x a página inteira — para desenhar oito ícones. -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+     comprimidos — 6,5x a página inteira — para desenhar poucos ícones.
+     Sem atributo style em lugar nenhum da página: a CSP do Cloudflare
+     (style-src 'self') bloqueia estilo inline. -->
+<svg class="cf-sprite" width="0" height="0" aria-hidden="true" focusable="false">
   <defs>
-    <symbol id="i-painel" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></symbol>
+    <symbol id="i-painel" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></symbol>
     <!-- "clientes", não "aperto de mão": o handshake do lucide tem cinco traços
          que viram rabisco a 18px, tamanho em que este ícone sempre aparece. -->
     <symbol id="i-crm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
-    <symbol id="i-catalogo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></symbol>
+    <symbol id="i-catalogo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></symbol>
     <symbol id="i-modulo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1"/><path d="M13 7h8v14H7v-8"/></symbol>
-    <symbol id="i-empresa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4M10 10h4M10 14h4M10 18h4"/></symbol>
+    <symbol id="i-pessoa" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8.5" r="4"/><path d="M4 20.5c0-4.1 3.6-6.5 8-6.5s8 2.4 8 6.5z"/></symbol>
     <symbol id="i-sair" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></symbol>
     <symbol id="i-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
     <symbol id="i-abrir" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></symbol>
+    <symbol id="i-seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></symbol>
+    <symbol id="i-descer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-lupa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
   </defs>
 </svg>
+
+<!-- Ilustrações dos cartões, clonadas pelo app.js pela chave do serviço
+     (ilustra-<key>). Decorativas: aria-hidden e alt vazio. -->
+<template id="ilustra-crm">
+  <div class="cf-ilustra cf-ilustra-crm" aria-hidden="true">
+    <div class="cf-tela">
+      <div class="cf-tela-busca"><svg class="cf-ico"><use href="#i-lupa"></use></svg><span>Buscar conversa</span></div>
+      <div class="cf-conversa">
+        <img src="/assets/avatar-marina.webp?v=1" width="44" height="44" alt="">
+        <span class="cf-linhas"><i></i><i></i></span>
+        <span class="cf-status is-novo">Novo</span>
+      </div>
+      <div class="cf-conversa">
+        <img src="/assets/avatar-renato.webp?v=1" width="44" height="44" alt="">
+        <span class="cf-linhas"><i></i><i></i></span>
+        <span class="cf-status is-atendimento">Em atendimento</span>
+      </div>
+      <div class="cf-conversa">
+        <img src="/assets/avatar-juliana.webp?v=1" width="44" height="44" alt="">
+        <span class="cf-linhas"><i></i><i></i></span>
+        <span class="cf-status is-negociacao">Negociação</span>
+      </div>
+    </div>
+  </div>
+</template>
+<template id="ilustra-catalogo">
+  <div class="cf-ilustra cf-ilustra-catalogo" aria-hidden="true">
+    <span class="cf-bolha cf-bolha-1"></span>
+    <span class="cf-bolha cf-bolha-2"></span>
+    <div class="cf-celular">
+      <span class="cf-celular-topo"><i></i><i></i></span>
+      <img src="/assets/pilar-catalogo.webp?v=1" width="394" height="786" alt="">
+    </div>
+  </div>
+</template>
 
 <div class="cf-app" id="app">
   <aside class="cf-rail" aria-label="Navegação">
@@ -45,25 +85,33 @@
       <span class="cf-overline cf-rail-label cf-rail-label-mods" id="rail-modules-label" hidden>Módulos</span>
       <div id="rail-modules"></div>
     </nav>
-    <div class="cf-rail-user">
-      <span class="cf-avatar" id="user-avatar" aria-hidden="true"></span>
-      <span class="cf-user-email" id="user-email"></span>
-      <button type="button" class="cf-logout" id="logout-btn" aria-label="Sair" title="Sair"><svg class="cf-ico" aria-hidden="true"><use href="#i-sair"></use></svg></button>
-    </div>
+    <p class="cf-rail-lema">Mais clientes.<br>Mais vendas.<br>Mais crescimento.</p>
   </aside>
   <div class="cf-scrim" id="scrim" hidden></div>
 
   <div class="cf-main">
     <header class="cf-topbar">
       <button type="button" class="cf-menu-btn" id="menu-btn" aria-label="Abrir menu" aria-expanded="false"><svg class="cf-ico" aria-hidden="true"><use href="#i-menu"></use></svg></button>
-      <span class="cf-area" id="area-chip">Painel · Suas ferramentas</span>
+      <div class="cf-user">
+        <button type="button" class="cf-user-btn" id="user-menu-btn" aria-haspopup="true" aria-expanded="false" aria-controls="user-menu">
+          <span class="cf-avatar" id="user-avatar" aria-hidden="true"><svg class="cf-ico"><use href="#i-pessoa"></use></svg></span>
+          <span class="cf-user-ola">Olá, bem-vindo!</span>
+          <svg class="cf-ico cf-user-seta" aria-hidden="true"><use href="#i-descer"></use></svg>
+        </button>
+        <div class="cf-user-menu" id="user-menu" hidden>
+          <span class="cf-user-email" id="user-email"></span>
+          <span class="cf-area" id="area-chip" hidden></span>
+          <button type="button" class="cf-logout" id="logout-btn"><svg class="cf-ico" aria-hidden="true"><use href="#i-sair"></use></svg>Sair</button>
+        </div>
+      </div>
     </header>
 
     <main class="cf-content">
-      <h1>Suas ferramentas</h1>
-      <p class="cf-sub">Escolha o que você quer acessar.</p>
+      <span class="cf-overline cf-kicker">Seu negócio, mais forte</span>
+      <h1>Escolha o que você<br> quer acessar.</h1>
+      <p class="cf-sub">Aqui você encontra tudo o que precisa para gerenciar seu negócio de forma simples, organizada e eficiente.</p>
 
-      <span class="cf-overline cf-section-label" id="section-label" hidden>Módulos contratados</span>
+      <span class="cf-sr-only" id="section-label" hidden>Módulos contratados</span>
       <div class="cf-modules" id="modules-area" aria-live="polite">
         <div class="cf-placeholder">
           <span class="cf-tag">Carregando</span>
@@ -77,6 +125,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js" integrity="sha384-0w2KAL2YHP6wKOkUDzkCDGgVvfmHnj02DHeQ6XcHOgTfFsGyonKOpShMH1x6nk9o" crossorigin="anonymous"></script>
 <script src="/assets/auth.js?v=6"></script>
-<script src="/assets/app.js?v=9"></script>
+<script src="/assets/app.js?v=10"></script>
 </body>
 </html>
