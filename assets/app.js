@@ -460,7 +460,7 @@
     renderModules(result.data);
   });
 
-  // Nome da empresa, no menu do usuário. Consulta SEPARADA e opcional de
+  // Nome da empresa, na saudação do topo e no menu do usuário. Consulta SEPARADA e opcional de
   // propósito: se a RLS/GRANT de `companies` não deixar o usuário comum ler, ou
   // a rede cair, a linha fica escondida e os módulos carregam igual — esta
   // leitura nunca pode derrubar a tela. E se não vier nome, não se inventa um:
@@ -481,6 +481,15 @@
         forte.textContent = nome;
         chip.appendChild(forte);
         chip.hidden = false;
+        var ola = document.getElementById('user-ola');
+        // "bem-vindo(a)!" numa peça só: no celular a frase quebra em duas
+        // linhas e não pode partir no hífen.
+        ola.textContent = 'Olá, ' + nome + ', seja ';
+        var fim = document.createElement('span');
+        fim.className = 'cf-nowrap';
+        fim.textContent = 'bem-vindo(a)!';
+        ola.appendChild(fim);
+        ola.title = ola.textContent;
       })
       .catch(function () { /* linha da empresa fica escondida */ });
   }
