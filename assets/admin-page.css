@@ -233,3 +233,29 @@
 .cf-status-msg-error { color: #a13a2a; }
 
 .cf-temp-pwd-hint { font-size: 12.5px; color: #56707e; margin: 8px 0 0; }
+
+/* Usuários da empresa (painel Gerenciar) */
+.cf-users { margin-top: 18px; padding-top: 16px; border-top: 1px solid #e3ecec; }
+.cf-users-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin-bottom: 8px; }
+.cf-users-title { flex: 1 1 auto; margin: 0; font-size: 14px; font-weight: 700; color: #0d2b3e; }
+.cf-users-toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: #56707e; }
+.cf-user-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 12px 0; border-bottom: 1px solid #eef3f3; }
+.cf-user-row:last-child { border-bottom: none; }
+.cf-user-row-off { opacity: 0.65; }
+.cf-user-info { flex: 1 1 220px; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.cf-user-name { font-size: 13.5px; font-weight: 600; color: #0d2b3e; }
+.cf-user-meta { font-size: 12px; color: #56707e; overflow-wrap: anywhere; }
+.cf-user-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.cf-btn-sm { padding: 6px 12px; font-size: 12.5px; }
+.cf-btn-danger { color: #a13a2a; }
+.cf-estado-ativo { background: #eef7dc; color: #3f6f00; }
+.cf-estado-convite_pendente { background: #fff4d6; color: #7a5a00; }
+.cf-estado-bloqueado { background: #fde8e4; color: #a13a2a; }
+.cf-estado-desativado { background: #edf1f3; color: #56707e; }
+.cf-dialog { font-family: Inter, sans-serif; width: min(440px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow: auto; border: none; border-radius: 16px; padding: 24px; box-shadow: 0 20px 60px rgba(13, 43, 62, 0.25); }
+.cf-dialog::backdrop { background: rgba(13, 43, 62, 0.45); }
+.cf-dialog-title { margin: 0 0 12px; font-size: 16px; font-weight: 700; color: #0d2b3e; }
+.cf-dialog-text { margin: 0 0 12px; font-size: 13.5px; line-height: 1.5; color: #3c5566; }
+.cf-dialog-form .cf-field { margin-bottom: 12px; }
+.cf-dialog-form select { width: 100%; }
+.cf-check { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 13.5px; color: #0d2b3e; }

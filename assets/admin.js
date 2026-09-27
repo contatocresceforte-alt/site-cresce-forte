@@ -242,6 +242,8 @@
     services.forEach(function (service) {
       panel.appendChild(buildServiceToggleRow(companyId, service, !!activeMap[service.id]));
     });
+    // Usuários da empresa (Super Admin, 27/09) — módulo próprio, admin-usuarios.js.
+    if (window.CresceForteAdminUsuarios) window.CresceForteAdminUsuarios.montar(companyId, panel);
     return true;
   }
 
