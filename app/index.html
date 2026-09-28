@@ -12,7 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print">
 <script src="/assets/font-swap.js?v=1"></script>
 <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="/assets/app-page.css?v=8">
+<link rel="stylesheet" href="/assets/app-page.css?v=9">
 </head>
 <body>
 
@@ -35,6 +35,7 @@
     <symbol id="i-seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></symbol>
     <symbol id="i-descer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
     <symbol id="i-lupa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+    <symbol id="i-equipe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8" r="5"/><path d="M2 21a8 8 0 0 1 13.292-6"/><path d="m16 19 2 2 4-4"/></symbol>
   </defs>
 </svg>
 
@@ -81,7 +82,9 @@
     </div>
     <nav class="cf-rail-nav">
       <span class="cf-overline cf-rail-label">Painel</span>
-      <span class="cf-rail-item is-active" aria-current="page"><svg class="cf-ico" aria-hidden="true"><use href="#i-painel"></use></svg>Suas ferramentas</span>
+      <button type="button" class="cf-rail-item is-active" id="rail-ferramentas" aria-current="page"><svg class="cf-ico" aria-hidden="true"><use href="#i-painel"></use></svg>Suas ferramentas</button>
+      <!-- Só para Administrador (app.js liga quando /api/auth/servicos diz administrador). -->
+      <button type="button" class="cf-rail-item" id="rail-equipe" hidden><svg class="cf-ico" aria-hidden="true"><use href="#i-equipe"></use></svg>Equipe</button>
       <span class="cf-overline cf-rail-label cf-rail-label-mods" id="rail-modules-label" hidden>Módulos</span>
       <div id="rail-modules"></div>
     </nav>
@@ -107,24 +110,29 @@
     </header>
 
     <main class="cf-content">
-      <span class="cf-overline cf-kicker">Seu negócio, mais forte</span>
-      <h1>Escolha o que você<br> quer acessar.</h1>
-      <p class="cf-sub">Aqui você encontra tudo o que precisa para gerenciar seu negócio de forma simples, organizada e eficiente.</p>
+      <div id="view-ferramentas">
+        <span class="cf-overline cf-kicker">Seu negócio, mais forte</span>
+        <h1>Escolha o que você<br> quer acessar.</h1>
+        <p class="cf-sub">Aqui você encontra tudo o que precisa para gerenciar seu negócio de forma simples, organizada e eficiente.</p>
 
-      <span class="cf-sr-only" id="section-label" hidden>Módulos contratados</span>
-      <div class="cf-modules" id="modules-area" aria-live="polite">
-        <div class="cf-placeholder">
-          <span class="cf-tag">Carregando</span>
-          <h2>Módulos contratados</h2>
-          <p>Buscando os serviços ativos da sua empresa...</p>
+        <span class="cf-sr-only" id="section-label" hidden>Módulos contratados</span>
+        <div class="cf-modules" id="modules-area" aria-live="polite">
+          <div class="cf-placeholder">
+            <span class="cf-tag">Carregando</span>
+            <h2>Módulos contratados</h2>
+            <p>Buscando os serviços ativos da sua empresa...</p>
+          </div>
         </div>
       </div>
+      <!-- Tela "Equipe" (assets/app-equipe.js): o administrador escolhe os serviços de cada pessoa. -->
+      <section class="cf-equipe" id="view-equipe" aria-labelledby="equipe-titulo" hidden></section>
     </main>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js" integrity="sha384-0w2KAL2YHP6wKOkUDzkCDGgVvfmHnj02DHeQ6XcHOgTfFsGyonKOpShMH1x6nk9o" crossorigin="anonymous"></script>
 <script src="/assets/auth.js?v=6"></script>
-<script src="/assets/app.js?v=11"></script>
+<script src="/assets/app-equipe.js?v=1"></script>
+<script src="/assets/app.js?v=12"></script>
 </body>
 </html>

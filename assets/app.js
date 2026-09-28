@@ -409,12 +409,78 @@
     });
   }
 
-  // validatedSession em vez de requireAuth: duas linhas abaixo, o
-  // app_metadata.company_id desta sessão vira o filtro dos módulos exibidos.
-  // Sessão lida só do localStorage é forjável pelo console do navegador —
-  // aqui ela é confirmada com o servidor do Supabase antes de virar decisão
-  // de tela. Quem de fato impede ler os módulos de outra empresa é a RLS de
-  // company_services; isto só evita a tela mentir.
+  // Serviços por pessoa (Alain, 28/09): os cartões vêm do CRM
+  // (GET /api/auth/servicos), que cruza os serviços ativos da empresa com o
+  // que o administrador liberou para ESTA pessoa. A empresa sai do perfil, no
+  // servidor, e não mais do app_metadata desta sessão. Esconder o cartão é só
+  // tela: quem barra é cada produto. Falha nunca cai na lista da empresa inteira.
+  // window.CF_API_BASE_DUBLE só existe na prévia local (dublê da API).
+  var API_CRM = window.CF_API_BASE_DUBLE || 'https://crm.cresceforte.com/api';
+  var PRAZO_SERVICOS_MS = 15000;
+
+  function avisoNosModulos(tag, titulo, texto) {
+    var area = document.getElementById('modules-area');
+    area.textContent = '';
+    var caixa = document.createElement('div');
+    caixa.className = 'cf-placeholder';
+    [['span', 'cf-tag', tag], ['h2', null, titulo], ['p', null, texto]].forEach(function (d) {
+      var e = document.createElement(d[0]);
+      if (d[1]) { e.className = d[1]; }
+      e.textContent = d[2];
+      caixa.appendChild(e);
+    });
+    area.appendChild(caixa);
+  }
+
+  // Resolve { ok: true, dados } ou { ok: false, mensagem }; nunca rejeita.
+  function carregarServicos() {
+    var controle = window.AbortController ? new window.AbortController() : null;
+    var prazo = setTimeout(function () { if (controle) { controle.abort(); } }, PRAZO_SERVICOS_MS);
+    return fetch(API_CRM + '/auth/servicos', { headers: { Authorization: 'Bearer ' + vivo }, signal: controle ? controle.signal : undefined })
+      .then(function (res) {
+        return res.json().catch(function () { return null; }).then(function (b) {
+          if (res.ok && b && b.dados && Array.isArray(b.dados.servicos)) { return { ok: true, dados: b.dados }; }
+          var liberar = res.status === 403 && b && b.erro && b.erro.codigo === 'acesso_nao_liberado';
+          return { ok: false, mensagem: liberar ? b.erro.mensagem : null };
+        });
+      })
+      .catch(function () { return { ok: false, mensagem: null }; })
+      .then(function (r) { clearTimeout(prazo); return r; });
+  }
+
+  // Item "Equipe" do trilho, só para Administrador. A tela é montada na
+  // primeira abertura (assets/app-equipe.js).
+  function ligarEquipe(servicos) {
+    if (!window.CresceForteEquipe) { return; }
+    var botaoEquipe = document.getElementById('rail-equipe');
+    var botaoFerramentas = document.getElementById('rail-ferramentas');
+    var vistaEquipe = document.getElementById('view-equipe');
+    var vistaFerramentas = document.getElementById('view-ferramentas');
+    var montada = false;
+    function mostrar(equipe) {
+      vistaEquipe.hidden = !equipe;
+      vistaFerramentas.hidden = equipe;
+      botaoEquipe.classList.toggle('is-active', equipe);
+      botaoFerramentas.classList.toggle('is-active', !equipe);
+      if (equipe) { botaoEquipe.setAttribute('aria-current', 'page'); botaoFerramentas.removeAttribute('aria-current'); }
+      else { botaoFerramentas.setAttribute('aria-current', 'page'); botaoEquipe.removeAttribute('aria-current'); }
+      // Fecha a gaveta do celular por inteiro (trilho, véu e o botão).
+      document.getElementById('app').classList.remove('rail-open');
+      document.getElementById('scrim').hidden = true;
+      document.getElementById('menu-btn').setAttribute('aria-expanded', 'false');
+      if (equipe && !montada) {
+        montada = true;
+        window.CresceForteEquipe.montar(vistaEquipe, { apiBase: API_CRM, token: function () { return vivo; }, servicos: servicos });
+      }
+    }
+    botaoEquipe.addEventListener('click', function () { mostrar(true); });
+    botaoFerramentas.addEventListener('click', function () { mostrar(false); });
+    botaoEquipe.hidden = false;
+  }
+
+  // validatedSession em vez de requireAuth: a sessão lida só do localStorage
+  // é forjável pelo console do navegador — aqui ela é confirmada com o
+  // servidor do Supabase antes de virar decisão de tela.
   CresceForteAuth.validatedSession().then(async function (session) {
     if (!session) {
       window.location.href = '/login/';
@@ -441,23 +507,19 @@
     // menu que ele abre.
     document.getElementById('user-menu-btn').title = identidade;
 
+    // O nome da empresa continua opcional e vindo da sessão: sem company_id no
+    // app_metadata, só a saudação fica sem nome — os cartões vêm do servidor.
     var companyId = CresceForteAuth.getCompanyId(session);
-    if (!companyId) { renderModules([]); return; }
-    nomeDaEmpresa(companyId);
+    if (companyId) { nomeDaEmpresa(companyId); }
 
-    var result = await CresceForteAuth.client
-      .from('company_services')
-      .select('active, services(key, name)')
-      .eq('company_id', companyId)
-      .eq('active', true);
-
-    if (result.error) {
-      console.error('Erro ao buscar módulos:', result.error);
-      document.getElementById('modules-area').innerHTML =
-        '<div class="cf-placeholder"><span class="cf-tag">Erro</span><h2>Não foi possível carregar seus módulos</h2><p>Atualize a página em instantes.</p></div>';
+    var r = await carregarServicos();
+    if (!r.ok) {
+      if (r.mensagem) { avisoNosModulos('Aguardando', 'Acesso ainda não liberado', r.mensagem); }
+      else { avisoNosModulos('Erro', 'Não foi possível carregar seus módulos', 'Atualize a página em instantes.'); }
       return;
     }
-    renderModules(result.data);
+    renderModules(r.dados.servicos.map(function (s) { return { services: s }; }));
+    if (r.dados.administrador) { ligarEquipe(r.dados.servicos); }
   });
 
   // Nome da empresa, na saudação do topo e no menu do usuário. Consulta SEPARADA e opcional de
