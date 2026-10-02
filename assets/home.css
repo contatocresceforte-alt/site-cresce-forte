@@ -111,13 +111,25 @@ a{text-decoration:none}
 .phone-screen{border-radius:32px;overflow:hidden;aspect-ratio:394/786;background:#f6f9fa}
 .phone-screen img{width:100%;height:100%;object-fit:contain}
 
-/* caixa do CRM (sem screenshot ainda — resumo visual dos beneficios no lugar) */
+/* caixa do CRM: a mesma ilustração do cartão do CRM no painel (/app/, ilustra-crm),
+   adaptada ao verde-azulado do site (Alain, 02/10). Medidas em cqw — 1% da largura
+   do quadro escuro — para o desenho encolher junto no celular. */
 .crm-box{width:100%;max-width:520px;background:linear-gradient(150deg,rgba(15,124,150,.16),rgba(13,43,62,.06));border:1px solid rgba(13,43,62,.09);border-radius:24px;padding:14px;box-shadow:0 18px 40px -22px rgba(13,43,62,.35)}
 .crm-empty{position:relative;border-radius:14px;aspect-ratio:4/3;background:#fff}
-.crm-inner{position:absolute;inset:12px;border-radius:10px;background:linear-gradient(150deg,#0f7c8c,#0a2536);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:0 20px}
-.crm-inner svg{width:40px;height:40px;color:#fff}
-.crm-inner strong{font-family:'Space Grotesk',Inter,sans-serif;font-weight:600;font-size:15px;color:#fff}
-.crm-inner span{font-size:12.5px;line-height:1.4;color:rgba(255,255,255,.72);max-width:26ch}
+.crm-inner{position:absolute;inset:12px;border-radius:10px;overflow:hidden;container-type:inline-size;perspective:1100px;display:flex;align-items:center;justify-content:center;background:radial-gradient(90% 80% at 88% 8%,rgba(64,196,214,.30),transparent 60%),linear-gradient(150deg,#0f7c8c,#0a2536)}
+.crm-tela{width:64cqw;padding:3.2cqw;display:flex;flex-direction:column;gap:2.3cqw;background:rgba(6,24,36,.84);border:1px solid rgba(255,255,255,.1);border-radius:5cqw;box-shadow:0 30px 60px rgba(0,0,0,.4);transform:rotateY(-14deg) rotateX(8deg) rotateZ(-5deg)}
+.crm-busca{display:flex;align-items:center;gap:1.8cqw;height:8cqw;padding:0 2.8cqw;border-radius:2.3cqw;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.5);font-size:2.8cqw}
+.crm-busca svg{width:3.2cqw;height:3.2cqw;flex-shrink:0}
+.crm-conversa{display:flex;align-items:center;gap:2.4cqw;padding:2.2cqw 2.6cqw;border-radius:2.8cqw;background:rgba(255,255,255,.06)}
+.crm-conversa img{width:8cqw;height:8cqw;border-radius:50%;object-fit:cover;flex-shrink:0}
+.crm-linhas{flex:1;min-width:0;display:flex;flex-direction:column;gap:1.5cqw}
+.crm-linhas i{display:block;height:1.4cqw;border-radius:2cqw;background:rgba(255,255,255,.24)}
+.crm-linhas i+i{width:60%;background:rgba(255,255,255,.11)}
+.crm-status{display:inline-flex;align-items:center;gap:1.1cqw;height:4.9cqw;padding:0 2.1cqw;border-radius:999px;font:600 2.45cqw/1 Inter,sans-serif;white-space:nowrap}
+.crm-status.is-novo{background:rgba(34,197,94,.16);color:#5ee38f}
+.crm-status.is-novo::before{content:"";width:1.3cqw;height:1.3cqw;border-radius:50%;background:#34d27a}
+.crm-status.is-atendimento{background:rgba(47,123,255,.28);color:#a9c4ff}
+.crm-status.is-negociacao{background:rgba(124,92,255,.28);color:#c8bcff}
 
 /* ---------- como funciona ---------- */
 .how{background:linear-gradient(180deg,#f4f8f9 0%,#eaf1ee 100%);padding-top:clamp(64px,9vw,100px);padding-bottom:clamp(64px,9vw,100px)}
