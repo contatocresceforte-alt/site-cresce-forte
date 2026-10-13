@@ -7,6 +7,11 @@
 <meta name="description" content="Painel de ferramentas contratadas da sua empresa na Cresce Forte.">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="/assets/cresce-forte-icon.webp?v=1" type="image/webp">
+<!-- Abre a conexão com o CRM e o Supabase enquanto o resto carrega: os
+     cartões dependem dos dois, e cada aperto de mão a frio custa ~200 ms. -->
+<link rel="preconnect" href="https://crm.cresceforte.com" crossorigin="">
+<link rel="preconnect" href="https://snxcmrnubtcryxnkzpzc.supabase.co" crossorigin="">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin="">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print">
@@ -133,6 +138,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js" integrity="sha384-0w2KAL2YHP6wKOkUDzkCDGgVvfmHnj02DHeQ6XcHOgTfFsGyonKOpShMH1x6nk9o" crossorigin="anonymous"></script>
 <script src="/assets/auth.js?v=6"></script>
 <script src="/assets/app-equipe.js?v=1"></script>
-<script src="/assets/app.js?v=12"></script>
+<script src="/assets/app.js?v=13"></script>
 </body>
 </html>

@@ -441,7 +441,7 @@
         return res.json().catch(function () { return null; }).then(function (b) {
           if (res.ok && b && b.dados && Array.isArray(b.dados.servicos)) { return { ok: true, dados: b.dados }; }
           var liberar = res.status === 403 && b && b.erro && b.erro.codigo === 'acesso_nao_liberado';
-          return { ok: false, mensagem: liberar ? b.erro.mensagem : null };
+          return { ok: false, mensagem: liberar ? b.erro.mensagem : null, recusado: res.status === 401 || res.status === 403 };
         });
       })
       .catch(function () { return { ok: false, mensagem: null }; })
@@ -478,48 +478,87 @@
     botaoEquipe.hidden = false;
   }
 
-  // validatedSession em vez de requireAuth: a sessão lida só do localStorage
-  // é forjável pelo console do navegador — aqui ela é confirmada com o
-  // servidor do Supabase antes de virar decisão de tela.
-  CresceForteAuth.validatedSession().then(async function (session) {
-    if (!session) {
+  // Cartões da última visita, por pessoa (Alain, 13/10: "o mais rápido possível,
+  // quase sem delay"). Aparecem na hora e são trocados pela resposta do CRM
+  // quando ela chega; recusa (401/403) ou logout apagam. É só tela: quem barra
+  // o acesso é o ticket de cada produto, pedido ao servidor no clique.
+  var CHAVE_CARTOES = 'cf-cartoes:';
+  function cartoesGuardados(uid) {
+    try { var v = JSON.parse(window.localStorage.getItem(CHAVE_CARTOES + uid)); return Array.isArray(v) ? v : null; }
+    catch (e) { return null; }
+  }
+  function guardarCartoes(uid, lista) {
+    try {
+      if (lista) { window.localStorage.setItem(CHAVE_CARTOES + uid, JSON.stringify(lista)); }
+      else { window.localStorage.removeItem(CHAVE_CARTOES + uid); }
+    } catch (e) { /* sem localStorage: só não guarda */ }
+  }
+  function cartoes(lista) { return lista.map(function (s) { return { services: s }; }); }
+
+  // Os cartões não esperam o getUser: o CRM confere a assinatura do token por
+  // conta própria (JWKS) antes de responder, então pedir os dois ao mesmo tempo
+  // corta uma ida e volta inteira. Identidade e nome da empresa continuam só
+  // depois do validatedSession — a sessão lida só do localStorage é forjável
+  // pelo console do navegador e não vira decisão de tela.
+  CresceForteAuth.getSession().then(function (local) {
+    if (!local) {
       window.location.href = '/login/';
       return;
     }
-    vivo = session.access_token;
-    // O supabase-js renova a sessão sozinho em segundo plano; sem isto o hub
-    // ficaria com o token do carregamento para sempre e uma aba velha mandaria
-    // iat de dezenas de minutos, que o servidor recusa.
-    CresceForteAuth.client.auth.onAuthStateChange(function (evento, s) {
-      // Sem o ramo do SIGNED_OUT, o token da sessão encerrada continuaria em
-      // memória e ainda seria mandado ao servidor depois de um logout feito em
-      // outra aba. O servidor recusaria, mas não há motivo para transmitir.
-      if (evento === 'SIGNED_OUT') { vivo = null; return; }
-      if (s && s.access_token) { vivo = s.access_token; }
+    var uid = local.user && local.user.id;
+    vivo = local.access_token;
+    var desenhado = uid ? cartoesGuardados(uid) : null;
+    if (desenhado) { renderModules(cartoes(desenhado)); }
+    var pedido = carregarServicos();
+
+    document.getElementById('logout-btn').addEventListener('click', function () { guardarCartoes(uid, null); });
+
+    CresceForteAuth.validatedSession().then(function (session) {
+      if (!session) {
+        guardarCartoes(uid, null);
+        window.location.href = '/login/';
+        return;
+      }
+      vivo = session.access_token;
+      // O supabase-js renova a sessão sozinho em segundo plano; sem isto o hub
+      // ficaria com o token do carregamento para sempre e uma aba velha mandaria
+      // iat de dezenas de minutos, que o servidor recusa.
+      CresceForteAuth.client.auth.onAuthStateChange(function (evento, s) {
+        // Sem o ramo do SIGNED_OUT, o token da sessão encerrada continuaria em
+        // memória e ainda seria mandado ao servidor depois de um logout feito em
+        // outra aba. O servidor recusaria, mas não há motivo para transmitir.
+        if (evento === 'SIGNED_OUT') { vivo = null; return; }
+        if (s && s.access_token) { vivo = s.access_token; }
+      });
+
+      var emailEl = document.getElementById('user-email');
+      var name = session.user.user_metadata && session.user.user_metadata.full_name;
+      var identidade = name || session.user.email || '';
+      emailEl.textContent = identidade;
+      emailEl.title = identidade;
+      // O avatar é o boneco do desenho (sprite i-pessoa); a identidade fica no
+      // menu que ele abre.
+      document.getElementById('user-menu-btn').title = identidade;
+
+      // O nome da empresa continua opcional e vindo da sessão: sem company_id no
+      // app_metadata, só a saudação fica sem nome — os cartões vêm do servidor.
+      var companyId = CresceForteAuth.getCompanyId(session);
+      if (companyId) { nomeDaEmpresa(companyId); }
     });
 
-    var emailEl = document.getElementById('user-email');
-    var name = session.user.user_metadata && session.user.user_metadata.full_name;
-    var identidade = name || session.user.email || '';
-    emailEl.textContent = identidade;
-    emailEl.title = identidade;
-    // O avatar é o boneco do desenho (sprite i-pessoa); a identidade fica no
-    // menu que ele abre.
-    document.getElementById('user-menu-btn').title = identidade;
-
-    // O nome da empresa continua opcional e vindo da sessão: sem company_id no
-    // app_metadata, só a saudação fica sem nome — os cartões vêm do servidor.
-    var companyId = CresceForteAuth.getCompanyId(session);
-    if (companyId) { nomeDaEmpresa(companyId); }
-
-    var r = await carregarServicos();
-    if (!r.ok) {
-      if (r.mensagem) { avisoNosModulos('Aguardando', 'Acesso ainda não liberado', r.mensagem); }
-      else { avisoNosModulos('Erro', 'Não foi possível carregar seus módulos', 'Atualize a página em instantes.'); }
-      return;
-    }
-    renderModules(r.dados.servicos.map(function (s) { return { services: s }; }));
-    if (r.dados.administrador) { ligarEquipe(r.dados.servicos); }
+    pedido.then(function (r) {
+      if (!r.ok) {
+        if (r.recusado) { guardarCartoes(uid, null); }
+        if (r.mensagem) { avisoNosModulos('Aguardando', 'Acesso ainda não liberado', r.mensagem); }
+        else { avisoNosModulos('Erro', 'Não foi possível carregar seus módulos', 'Atualize a página em instantes.'); }
+        return;
+      }
+      var lista = r.dados.servicos;
+      // Igual ao que já está na tela: não redesenha (sem piscar).
+      if (JSON.stringify(lista) !== JSON.stringify(desenhado)) { renderModules(cartoes(lista)); }
+      if (uid) { guardarCartoes(uid, lista); }
+      if (r.dados.administrador) { ligarEquipe(lista); }
+    });
   });
 
   // Nome da empresa, na saudação do topo e no menu do usuário. Consulta SEPARADA e opcional de
