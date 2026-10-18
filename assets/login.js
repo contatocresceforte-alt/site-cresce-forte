@@ -41,6 +41,10 @@
     successBox.hidden = false;
   }
 
+  // Saiu sozinho (navegador fechado / 5 h sem uso): diz por quê, uma vez.
+  var avisoDaSessao = window.CFSessao && CFSessao.pegaMotivo();
+  if (avisoDaSessao) showSuccess(avisoDaSessao);
+
   // If already signed in, skip the form and go straight to the right place.
   CresceForteAuth.getSession().then(function (session) {
     if (session) {
@@ -79,6 +83,9 @@
     submitBtn.textContent = 'Entrando...';
 
     try {
+      // Antes de abrir a sessão (assets/sessao-do-navegador.js): o CRM e o
+      // Catálogo, abertos daqui pelo portal, entram nesta mesma abertura.
+      if (window.CFSessao) CFSessao.entrou('site');
       var result = await CresceForteAuth.client.auth.signInWithPassword({ email: email, password: password });
       if (result.error) {
         showError('E-mail ou senha incorretos.');

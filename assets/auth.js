@@ -56,6 +56,30 @@
     throw new Error('assets/auth.js: the @supabase/supabase-js UMD <script> tag must be included before this file.');
   }
 
+  // SESSÃO QUE TERMINA (Alain, 18/10): ao fechar o navegador e depois de 5 h
+  // sem uso, igual no CRM e no Catálogo (assets/sessao-do-navegador.js, o mesmo
+  // arquivo nos três). Roda ANTES de criar o cliente: o login guardado de outra
+  // abertura do navegador sai do localStorage antes que o supabase-js o leia,
+  // e toda tela já se comporta como "sem login". Depois, a vigia segue a cada
+  // minuto e a cada clique; ao vencer, sai e manda para o /login/, que diz por quê.
+  var CHAVE_DA_SESSAO = 'sb-snxcmrnubtcryxnkzpzc-auth-token';
+  var client = null;
+  (function vigiaDaSessao() {
+    var cf = global.CFSessao;
+    var guardada = false;
+    try { guardada = !!global.localStorage.getItem(CHAVE_DA_SESSAO); } catch (e) { /* sem storage */ }
+    if (!cf || !guardada) return;
+    cf.vigiar('site', function (motivo) {
+      cf.guardaMotivo(motivo);
+      try { global.localStorage.removeItem(CHAVE_DA_SESSAO); } catch (e) { /* sem storage */ }
+      var irAoLogin = function () {
+        if (!/^\/(login|reset-password)\//.test(global.location.pathname)) global.location.href = '/login/';
+      };
+      if (client) client.auth.signOut({ scope: 'local' }).then(irAoLogin, irAoLogin);
+      else irAoLogin();
+    });
+  })();
+
   // Cliente PRINCIPAL (guarda sessão em localStorage). detectSessionInUrl
   // (padrão: true) faria o supabase-js gravar como sessão o que vier em
   // #access_token=...&refresh_token=... em QUALQUER página: um link com os
@@ -69,7 +93,7 @@
   // Este arquivo é compartilhado por /login/, /app/, /admin/ e /reset-password/:
   // NUNCA criar aqui um segundo client com detecção ligada (ele rodaria em toda
   // página). O client de recuperação de senha é criado só em reset-password.js.
-  var client = global.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  client = global.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth: { detectSessionInUrl: false }
   });
 
