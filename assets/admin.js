@@ -31,11 +31,13 @@
 
   // Plano do Catálogo (Alain, 26/10): companies.plano_catalogo, migration 0058
   // do CRM. Básico = até 100 produtos, sem vídeo; PRO = até 250, vídeo de até
-  // 15 s. '' (null no banco) = empresa de antes dos planos: neutra, sem
-  // limite, até alguém escolher aqui. Quem aplica a regra é o Catálogo
-  // (server/planoDaEmpresa.ts); esta tela só grava.
+  // 15 s. Sem meio-termo (Alain, 26/10): toda empresa é Básico ou PRO — as que
+  // existiam passaram ao PRO no mesmo dia. '' (null no banco) só sobra se a
+  // gravação do plano falhar no cadastro: aparece "Sem plano" e o seletor pede
+  // a escolha, mas "Sem plano" não é opção de troca. Quem aplica a regra é o
+  // Catálogo (server/planoDaEmpresa.ts); esta tela só grava.
   var PLANO_LABELS = { '': 'Sem plano', BASICO: 'Básico', PRO: 'PRO' };
-  var PLANO_OPTIONS = ['', 'BASICO', 'PRO'];
+  var PLANO_OPTIONS = ['BASICO', 'PRO'];
   // false enquanto a coluna não existir no banco (código no ar antes da
   // migration): a lista carrega como antes e a tela não oferece o que não
   // consegue gravar.
@@ -234,8 +236,8 @@
   }
 
   // Plano do Catálogo da empresa: selo com o plano atual + seletor para trocar
-  // (Básico <-> PRO, ou de volta a "Sem plano"). Mesmo jeito do status: grava
-  // direto pelo Supabase (policy upd_companies_platform) e recarrega a lista.
+  // (Básico <-> PRO). Mesmo jeito do status: grava direto pelo Supabase
+  // (policy upd_companies_platform) e recarrega a lista.
   function buildPlanoRow(company, companyLabel) {
     var planoAtual = company.plano_catalogo || '';
 
@@ -256,6 +258,16 @@
     select.className = 'cf-status-select';
     select.title = 'Alterar o plano do catálogo';
     select.setAttribute('aria-label', 'Plano do catálogo de ' + companyLabel);
+    if (!planoAtual) {
+      // Empresa sem plano: o seletor mostra o pedido de escolha, que não se
+      // pode escolher de volta.
+      var escolha = document.createElement('option');
+      escolha.value = '';
+      escolha.textContent = 'Escolha o plano';
+      escolha.disabled = true;
+      escolha.selected = true;
+      select.appendChild(escolha);
+    }
     PLANO_OPTIONS.forEach(function (value) {
       var opt = document.createElement('option');
       opt.value = value;
@@ -278,9 +290,12 @@
       // vídeo): um clique errado no seletor não pode valer sem confirmação.
       var aviso = 'Mudar o plano do catálogo de ' + companyLabel + ' de "' + formatPlano(planoAtual) +
         '" para "' + formatPlano(novo) + '"?';
-      if (novo === 'BASICO') aviso += '\n\nNo Básico: até 100 produtos e sem vídeos (os vídeos já cadastrados saem da loja, mas ficam guardados).';
+      if (novo === 'BASICO') {
+        aviso += '\n\nNo Básico: até 100 produtos e sem vídeos (os vídeos já cadastrados saem da loja, mas ficam guardados).' +
+          '\nSe a loja tiver mais de 100 produtos, os primeiros 100 cadastrados continuam na loja; os outros ficam salvos, ' +
+          'bloqueados (em cinza) e fora da loja até ela excluir produtos ou voltar ao PRO.';
+      }
       if (novo === 'PRO') aviso += '\n\nNo PRO: até 250 produtos e vídeos de até 15 segundos.';
-      if (!novo) aviso += '\n\nSem plano: nenhum limite.';
       if (!window.confirm(aviso)) {
         select.value = planoAtual;
         return;
