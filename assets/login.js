@@ -103,7 +103,11 @@
       console.error('Login error:', err);
       showError('Não foi possível entrar agora. Tente novamente em instantes.');
     } finally {
+      // Sem soltar a trava aqui, quem errava a senha uma vez via o botão
+      // voltar para "Entrar" e o clique seguinte não fazia nada até recarregar
+      // a página (medido 26/10: a senha certa nem chegava ao Supabase).
       if (!saindo) {
+        enviando = false;
         submitBtn.disabled = false;
         submitBtn.textContent = 'Entrar';
       }

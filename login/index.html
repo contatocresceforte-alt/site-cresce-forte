@@ -14,18 +14,49 @@
 <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet"></noscript>
 <link rel="stylesheet" href="/assets/auth-card.css?v=3">
 <link rel="stylesheet" href="/assets/login-page.css?v=1">
+<link rel="stylesheet" href="/assets/login-novo.css?v=1">
 </head>
-<body>
+<body class="cf-login-novo">
+<!-- Desenho de 26/10 (pedido do Alain). Só a aparência mudou: o formulário,
+     os ids e o login.js são os mesmos. O fundo é decoração (aria-hidden). -->
+<svg class="lg-fundo" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="lg-onda" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#16376b"/>
+      <stop offset="0.55" stop-color="#2f6f9a"/>
+      <stop offset="1" stop-color="#7ec8b8" stop-opacity="0.15"/>
+    </linearGradient>
+    <linearGradient id="lg-onda-clara" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#6fb7c9" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#cfe9e2" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="lg-seta" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#9fd3f5" stop-opacity="0"/>
+      <stop offset="0.45" stop-color="#2aa2e2"/>
+      <stop offset="0.75" stop-color="#2fb39a"/>
+      <stop offset="1" stop-color="#6ccf4a"/>
+    </linearGradient>
+  </defs>
+  <!-- traços do "C" no canto de cima -->
+  <path d="M-60 70 L150 190" stroke="#bcd3e8" stroke-width="64" stroke-linecap="round" fill="none" opacity="0.75"/>
+  <path d="M-60 490 L150 370" stroke="#bcd3e8" stroke-width="64" stroke-linecap="round" fill="none" opacity="0.75"/>
+  <!-- ondas de baixo -->
+  <path d="M0 780 C 260 830, 520 900, 760 900 L0 900 Z" fill="url(#lg-onda-clara)"/>
+  <path d="M0 830 C 220 860, 420 900, 600 900 L0 900 Z" fill="url(#lg-onda)"/>
+  <!-- seta de crescimento -->
+  <!-- a ponta segue a tangente do fim do traço (45°): base centrada em (1314,686), bico em (1404,595) -->
+  <path d="M620 900 C 960 900, 1180 820, 1320 680" stroke="url(#lg-seta)" stroke-width="62" stroke-linecap="butt" fill="none"/>
+  <path d="M1261 633 L1404 595 L1367 739 Z" fill="#5cc84a"/>
+</svg>
+
 <div class="cf-page">
-  <a href="/" class="cf-logo">
-    <span class="cf-logo-mark">
-      <img src="/assets/cresce-forte-icon.webp?v=1" alt="Cresce Forte">
-    </span>
-    <span class="cf-logo-name">Cresce Forte</span>
+  <a href="/" class="lg-marca" aria-label="Cresce Forte — voltar ao site">
+    <img class="lg-marca-logo" src="/assets/cresce-forte-logo-256.png?v=1" alt="" width="128" height="128">
+    <span class="lg-marca-nome">Cresce<br>Forte</span>
   </a>
 
   <div class="cf-card">
-    <h1>Entrar no seu painel</h1>
+    <h1>Entrar no seu <span class="lg-destaque">painel</span></h1>
     <p class="cf-sub">Acesse o menu com as ferramentas da sua empresa.</p>
 
     <div class="cf-error" id="error-box" role="alert" hidden></div>
@@ -40,11 +71,15 @@
     <form class="cf-form" id="login-form" method="post" novalidate>
       <div class="cf-field">
         <label for="email">E-mail</label>
-        <input type="email" id="email" name="email" required autocomplete="username" placeholder="seuemail@empresa.com">
+        <div class="lg-campo">
+          <svg class="lg-icone" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+          <input type="email" id="email" name="email" required autocomplete="username" placeholder="seuemail@empresa.com">
+        </div>
       </div>
       <div class="cf-field">
         <label for="password">Senha</label>
-        <div class="cf-pwd-wrap">
+        <div class="cf-pwd-wrap lg-campo">
+          <svg class="lg-icone" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
           <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="••••••••">
           <button type="button" class="cf-pwd-toggle" id="password-toggle" aria-label="Mostrar senha" aria-pressed="false">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -57,12 +92,15 @@
     <button type="button" class="cf-forgot" id="forgot-btn">Esqueci minha senha</button>
   </div>
 
-  <a href="/" class="cf-back">← Voltar ao site</a>
+  <a href="/" class="cf-back">
+    <svg class="lg-voltar" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+    Voltar ao site
+  </a>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js" integrity="sha384-0w2KAL2YHP6wKOkUDzkCDGgVvfmHnj02DHeQ6XcHOgTfFsGyonKOpShMH1x6nk9o" crossorigin="anonymous"></script>
 <script src="/assets/sessao-do-navegador.js?v=1"></script>
 <script src="/assets/auth.js?v=7"></script>
-<script src="/assets/login.js?v=4"></script>
+<script src="/assets/login.js?v=5"></script>
 </body>
 </html>

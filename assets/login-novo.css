@@ -1,0 +1,159 @@
+/* assets/login-novo.css — aparência do /login/ (desenho de 26/10, pedido do
+   Alain). Tudo preso a body.cf-login-novo: auth-card.css continua servindo o
+   /reset-password/ do jeito que era. Só aparência; o formulário e o login.js
+   não mudaram. */
+
+.cf-login-novo {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f6f9fc 0%, #eef4f8 60%, #e9f2f4 100%);
+  overflow-x: hidden;
+}
+
+/* Fundo decorativo: atrás de tudo, não recebe clique. */
+.cf-login-novo .lg-fundo {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.cf-login-novo .cf-page {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+  padding: 48px 20px 56px;
+}
+
+/* Marca: logo grande + "Cresce / Forte" em duas linhas. */
+.cf-login-novo .lg-marca {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 36px;
+  text-decoration: none;
+  color: #12305e;
+}
+.cf-login-novo .lg-marca-logo { width: 116px; height: 116px; object-fit: contain; }
+.cf-login-novo .lg-marca-nome {
+  font-family: 'Space Grotesk', Inter, sans-serif;
+  font-weight: 700;
+  font-size: 52px;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+}
+.cf-login-novo .lg-marca:focus-visible { outline: 3px solid rgba(46, 170, 58, 0.5); outline-offset: 6px; border-radius: 12px; }
+
+/* Cartão. */
+.cf-login-novo .cf-card {
+  max-width: 470px;
+  padding: 44px 40px 36px;
+  border: 0;
+  border-radius: 26px;
+  box-shadow: 0 2px 8px rgba(18, 48, 94, 0.05), 0 30px 60px -24px rgba(18, 48, 94, 0.25);
+}
+.cf-login-novo .cf-card h1 {
+  font-size: 34px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: #12305e;
+  margin: 0 0 12px;
+  text-wrap: balance;
+}
+.cf-login-novo .lg-destaque { color: #2eaa3a; }
+.cf-login-novo .cf-card p.cf-sub { font-size: 17px; line-height: 1.5; color: #4a6075; margin: 0 0 28px; }
+
+.cf-login-novo form.cf-form { gap: 22px; }
+.cf-login-novo .cf-field label { font-size: 15px; font-weight: 700; color: #12305e; margin-bottom: 10px; }
+
+/* Campo com ícone à esquerda. */
+.cf-login-novo .lg-campo { position: relative; }
+.cf-login-novo .lg-icone {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: #4a6075;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+.cf-login-novo .cf-field input {
+  height: 56px;
+  padding: 0 16px 0 52px;
+  border-radius: 14px;
+  border: 1px solid #d3dde6;
+  font-size: 16px;
+  color: #12305e;
+  background: #fff;
+}
+.cf-login-novo .cf-field input::placeholder { color: #8a9bab; }
+.cf-login-novo .cf-pwd-wrap input { padding-right: 52px; }
+.cf-login-novo .cf-field input:focus {
+  border-color: #2eaa3a;
+  box-shadow: 0 0 0 3px rgba(46, 170, 58, 0.22);
+}
+.cf-login-novo .cf-pwd-toggle { right: 8px; width: 40px; height: 40px; color: #4a6075; }
+.cf-login-novo .cf-pwd-toggle svg { width: 22px; height: 22px; }
+.cf-login-novo .cf-pwd-toggle:focus-visible { outline: 2px solid rgba(46, 170, 58, 0.6); }
+
+/* Botão verde com seta. A seta vem do CSS porque o login.js troca o texto do
+   botão ("Entrando...", "Entrar") e um <svg> dentro dele sumiria. */
+.cf-login-novo .cf-submit {
+  margin-top: 8px;
+  min-height: 60px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2aa13a 0%, #4cbf3f 55%, #66cc45 100%);
+  color: #fff;
+  font-size: 19px;
+  font-weight: 700;
+  box-shadow: 0 12px 24px -12px rgba(46, 170, 58, 0.75);
+  transition: filter 0.15s, transform 0.15s;
+}
+.cf-login-novo .cf-submit:not(:disabled)::after { content: "\2192"; margin-left: 14px; font-size: 22px; }
+.cf-login-novo .cf-submit:hover:not(:disabled) { background: linear-gradient(90deg, #2aa13a 0%, #4cbf3f 55%, #66cc45 100%); filter: brightness(1.05); }
+.cf-login-novo .cf-submit:active:not(:disabled) { transform: translateY(1px); }
+.cf-login-novo .cf-submit:focus-visible { outline: 3px solid rgba(46, 170, 58, 0.45); outline-offset: 3px; }
+
+.cf-login-novo .cf-forgot {
+  margin-top: 22px;
+  font-size: 15.5px;
+  color: #1f5fbf;
+  text-underline-offset: 3px;
+}
+.cf-login-novo .cf-forgot:hover { color: #12305e; }
+
+.cf-login-novo .cf-error, .cf-login-novo .cf-success { font-size: 14px; border-radius: 12px; }
+
+.cf-login-novo .cf-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 30px;
+  font-size: 16px;
+  color: #3d5368;
+}
+.cf-login-novo .cf-back:hover { color: #12305e; }
+.cf-login-novo .lg-voltar { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Celular. */
+@media (max-width: 560px) {
+  .cf-login-novo .cf-page { padding: 28px 16px 40px; }
+  .cf-login-novo .lg-marca { margin-bottom: 24px; gap: 10px; }
+  .cf-login-novo .lg-marca-logo { width: 76px; height: 76px; }
+  .cf-login-novo .lg-marca-nome { font-size: 36px; }
+  .cf-login-novo .cf-card { padding: 30px 22px 26px; border-radius: 22px; }
+  .cf-login-novo .cf-card h1 { font-size: 27px; }
+  .cf-login-novo .cf-card p.cf-sub { font-size: 15.5px; margin-bottom: 22px; }
+  .cf-login-novo .cf-submit { min-height: 54px; font-size: 17px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cf-login-novo .cf-submit { transition: none; }
+}
