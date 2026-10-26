@@ -6,7 +6,7 @@
 .cf-login-novo {
   margin: 0;
   min-height: 100vh;
-  background: linear-gradient(180deg, #f6f9fc 0%, #eef4f8 60%, #e9f2f4 100%);
+  background: linear-gradient(180deg, #f6f9fa 0%, #eff4f5 60%, #eaf1ee 100%);
   overflow-x: hidden;
 }
 
@@ -34,7 +34,7 @@
   gap: 14px;
   margin-bottom: 36px;
   text-decoration: none;
-  color: #12305e;
+  color: #0d2b3e;
 }
 .cf-login-novo .lg-marca-logo { width: 116px; height: 116px; object-fit: contain; }
 .cf-login-novo .lg-marca-nome {
@@ -52,21 +52,21 @@
   padding: 44px 40px 36px;
   border: 0;
   border-radius: 26px;
-  box-shadow: 0 2px 8px rgba(18, 48, 94, 0.05), 0 30px 60px -24px rgba(18, 48, 94, 0.25);
+  box-shadow: 0 2px 8px rgba(13, 43, 62, 0.05), 0 30px 60px -24px rgba(13, 43, 62, 0.25);
 }
 .cf-login-novo .cf-card h1 {
   font-size: 34px;
   line-height: 1.1;
   letter-spacing: -0.02em;
-  color: #12305e;
+  color: #0d2b3e;
   margin: 0 0 12px;
   text-wrap: balance;
 }
 .cf-login-novo .lg-destaque { color: #2eaa3a; }
-.cf-login-novo .cf-card p.cf-sub { font-size: 17px; line-height: 1.5; color: #4a6075; margin: 0 0 28px; }
+.cf-login-novo .cf-card p.cf-sub { font-size: 17px; line-height: 1.5; color: #56707e; margin: 0 0 28px; }
 
 .cf-login-novo form.cf-form { gap: 22px; }
-.cf-login-novo .cf-field label { font-size: 15px; font-weight: 700; color: #12305e; margin-bottom: 10px; }
+.cf-login-novo .cf-field label { font-size: 15px; font-weight: 700; color: #0d2b3e; margin-bottom: 10px; }
 
 /* Campo com ícone à esquerda. */
 .cf-login-novo .lg-campo { position: relative; }
@@ -78,7 +78,7 @@
   width: 22px;
   height: 22px;
   fill: none;
-  stroke: #4a6075;
+  stroke: #56707e;
   stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -90,7 +90,7 @@
   border-radius: 14px;
   border: 1px solid #d3dde6;
   font-size: 16px;
-  color: #12305e;
+  color: #0d2b3e;
   background: #fff;
 }
 .cf-login-novo .cf-field input::placeholder { color: #8a9bab; }
@@ -99,7 +99,7 @@
   border-color: #2eaa3a;
   box-shadow: 0 0 0 3px rgba(46, 170, 58, 0.22);
 }
-.cf-login-novo .cf-pwd-toggle { right: 8px; width: 40px; height: 40px; color: #4a6075; }
+.cf-login-novo .cf-pwd-toggle { right: 8px; width: 40px; height: 40px; color: #56707e; }
 .cf-login-novo .cf-pwd-toggle svg { width: 22px; height: 22px; }
 .cf-login-novo .cf-pwd-toggle:focus-visible { outline: 2px solid rgba(46, 170, 58, 0.6); }
 
@@ -124,10 +124,10 @@
 .cf-login-novo .cf-forgot {
   margin-top: 22px;
   font-size: 15.5px;
-  color: #1f5fbf;
+  color: #0b6b80;
   text-underline-offset: 3px;
 }
-.cf-login-novo .cf-forgot:hover { color: #12305e; }
+.cf-login-novo .cf-forgot:hover { color: #0d2b3e; }
 
 .cf-login-novo .cf-error, .cf-login-novo .cf-success { font-size: 14px; border-radius: 12px; }
 
@@ -137,9 +137,9 @@
   gap: 10px;
   margin-top: 30px;
   font-size: 16px;
-  color: #3d5368;
+  color: #3d5768;
 }
-.cf-login-novo .cf-back:hover { color: #12305e; }
+.cf-login-novo .cf-back:hover { color: #0d2b3e; }
 .cf-login-novo .lg-voltar { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
 /* Celular. */
