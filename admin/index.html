@@ -13,7 +13,7 @@
 <script src="/assets/font-swap.js?v=1"></script>
 <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet"></noscript>
 <link rel="stylesheet" href="/assets/dashboard-shell.css?v=1">
-<link rel="stylesheet" href="/assets/admin-page.css?v=2">
+<link rel="stylesheet" href="/assets/admin-page.css?v=3">
 </head>
 <body>
 <div class="cf-page">
@@ -68,6 +68,14 @@
             <label for="nc-phone">Telefone</label>
             <input type="text" id="nc-phone" maxlength="32" autocomplete="off">
           </div>
+          <div class="cf-field" id="nc-plano-campo">
+            <label for="nc-plano">Plano do catálogo *</label>
+            <select id="nc-plano" required>
+              <option value="" selected disabled>Escolha o plano</option>
+              <option value="BASICO">Básico (até 100 produtos, sem vídeos)</option>
+              <option value="PRO">PRO (até 250 produtos, vídeos de até 15 s)</option>
+            </select>
+          </div>
         </div>
 
         <p class="cf-form-section-title">Administrador da empresa</p>
@@ -94,7 +102,7 @@
     <div class="cf-card">
       <div class="cf-card-head">
         <h2>Empresas</h2>
-        <p>Clique em "Gerenciar" para ativar ou desativar os serviços de uma empresa.</p>
+        <p>Clique em "Gerenciar" para ativar ou desativar os serviços de uma empresa. O plano do catálogo de cada uma se troca no seletor ao lado de "Catálogo".</p>
       </div>
       <div id="companies-list" aria-live="polite">
         <p class="cf-loading">Carregando empresas...</p>
@@ -107,6 +115,6 @@
 <script src="/assets/sessao-do-navegador.js?v=1"></script>
 <script src="/assets/auth.js?v=7"></script>
 <script src="/assets/admin-usuarios.js?v=1"></script>
-<script src="/assets/admin.js?v=6"></script>
+<script src="/assets/admin.js?v=7"></script>
 </body>
 </html>

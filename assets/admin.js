@@ -29,6 +29,22 @@
   };
   var STATUS_OPTIONS = ['ACTIVE', 'TRIAL', 'SUSPENDED', 'CANCELLED', 'INACTIVE'];
 
+  // Plano do Catálogo (Alain, 26/10): companies.plano_catalogo, migration 0058
+  // do CRM. Básico = até 100 produtos, sem vídeo; PRO = até 250, vídeo de até
+  // 15 s. '' (null no banco) = empresa de antes dos planos: neutra, sem
+  // limite, até alguém escolher aqui. Quem aplica a regra é o Catálogo
+  // (server/planoDaEmpresa.ts); esta tela só grava.
+  var PLANO_LABELS = { '': 'Sem plano', BASICO: 'Básico', PRO: 'PRO' };
+  var PLANO_OPTIONS = ['', 'BASICO', 'PRO'];
+  // false enquanto a coluna não existir no banco (código no ar antes da
+  // migration): a lista carrega como antes e a tela não oferece o que não
+  // consegue gravar.
+  var planosNoBanco = true;
+
+  function formatPlano(plano) {
+    return PLANO_LABELS[plano || ''] || plano;
+  }
+
   CresceForteAuth.requireRole('PLATFORM', { loginUrl: '/login/', fallbackUrl: '/app/' }).then(function (session) {
     if (!session) return; // already redirected to /login/ or /app/
     var emailEl = document.getElementById('user-email');
@@ -50,8 +66,21 @@
 
     var result = await supabase
       .from('companies')
-      .select('id, legal_name, trade_name, status')
+      .select('id, legal_name, trade_name, status, plano_catalogo')
       .order('trade_name', { ascending: true });
+
+    // 42703 = coluna inexistente (a migration 0058 ainda não rodou): carrega
+    // a lista como antes, sem a parte do plano, em vez de quebrar a tela.
+    if (result.error && result.error.code === '42703') {
+      planosNoBanco = false;
+      result = await supabase
+        .from('companies')
+        .select('id, legal_name, trade_name, status')
+        .order('trade_name', { ascending: true });
+    } else if (!result.error) {
+      planosNoBanco = true;
+    }
+    atualizaCampoDePlano();
 
     if (result.error) {
       console.error('Erro ao carregar empresas:', result.error);
@@ -162,6 +191,8 @@
     statusRow.appendChild(statusMsg);
     main.appendChild(statusRow);
 
+    if (planosNoBanco) main.appendChild(buildPlanoRow(company, companyLabel));
+
     var manageBtn = document.createElement('button');
     manageBtn.type = 'button';
     manageBtn.className = 'cf-manage-btn';
@@ -197,6 +228,85 @@
           loaded = !!ok;
         });
       }
+    });
+
+    return row;
+  }
+
+  // Plano do Catálogo da empresa: selo com o plano atual + seletor para trocar
+  // (Básico <-> PRO, ou de volta a "Sem plano"). Mesmo jeito do status: grava
+  // direto pelo Supabase (policy upd_companies_platform) e recarrega a lista.
+  function buildPlanoRow(company, companyLabel) {
+    var planoAtual = company.plano_catalogo || '';
+
+    var row = document.createElement('div');
+    row.className = 'cf-status-row cf-plano-row';
+
+    var rotulo = document.createElement('span');
+    rotulo.className = 'cf-plano-rotulo';
+    rotulo.textContent = 'Catálogo';
+    row.appendChild(rotulo);
+
+    var badge = document.createElement('span');
+    badge.className = 'cf-status-badge cf-plano-badge' + (planoAtual ? ' cf-plano-' + planoAtual.toLowerCase() : ' cf-status-muted');
+    badge.textContent = formatPlano(planoAtual);
+    row.appendChild(badge);
+
+    var select = document.createElement('select');
+    select.className = 'cf-status-select';
+    select.title = 'Alterar o plano do catálogo';
+    select.setAttribute('aria-label', 'Plano do catálogo de ' + companyLabel);
+    PLANO_OPTIONS.forEach(function (value) {
+      var opt = document.createElement('option');
+      opt.value = value;
+      opt.textContent = formatPlano(value);
+      if (value === planoAtual) opt.selected = true;
+      select.appendChild(opt);
+    });
+    row.appendChild(select);
+
+    var msg = document.createElement('span');
+    msg.className = 'cf-status-msg';
+    msg.setAttribute('role', 'status');
+    msg.setAttribute('aria-live', 'polite');
+    msg.hidden = true;
+    row.appendChild(msg);
+
+    select.addEventListener('change', function () {
+      var novo = select.value;
+      // O plano decide o que o cliente pode cadastrar (e se a loja mostra
+      // vídeo): um clique errado no seletor não pode valer sem confirmação.
+      var aviso = 'Mudar o plano do catálogo de ' + companyLabel + ' de "' + formatPlano(planoAtual) +
+        '" para "' + formatPlano(novo) + '"?';
+      if (novo === 'BASICO') aviso += '\n\nNo Básico: até 100 produtos e sem vídeos (os vídeos já cadastrados saem da loja, mas ficam guardados).';
+      if (novo === 'PRO') aviso += '\n\nNo PRO: até 250 produtos e vídeos de até 15 segundos.';
+      if (!novo) aviso += '\n\nSem plano: nenhum limite.';
+      if (!window.confirm(aviso)) {
+        select.value = planoAtual;
+        return;
+      }
+
+      select.disabled = true;
+      msg.hidden = true;
+      supabase
+        .from('companies')
+        .update({ plano_catalogo: novo || null })
+        .eq('id', company.id)
+        .select('id, plano_catalogo')
+        .then(function (result) {
+          // Mesma razão do status: sem linha devolvida, a RLS barrou em silêncio.
+          if (result.error || !result.data || !result.data.length) {
+            console.error('Erro ao atualizar o plano da empresa:', result.error || 'nenhuma linha afetada (RLS?)');
+            select.value = planoAtual;
+            select.disabled = false;
+            msg.textContent = 'Erro ao salvar. Tente novamente.';
+            msg.className = 'cf-status-msg cf-status-msg-error';
+            msg.hidden = false;
+            return;
+          }
+          company.plano_catalogo = result.data[0].plano_catalogo;
+          loadCompanies();
+        });
     });
 
     return row;
@@ -350,8 +460,52 @@
     email: document.getElementById('nc-email'),
     phone: document.getElementById('nc-phone'),
     adminNome: document.getElementById('nc-admin-nome'),
-    adminEmail: document.getElementById('nc-admin-email')
+    adminEmail: document.getElementById('nc-admin-email'),
+    plano: document.getElementById('nc-plano')
   };
+  var ncPlanoCampo = document.getElementById('nc-plano-campo');
+
+  // Sem a coluna no banco (ver planosNoBanco) o campo some e deixa de ser
+  // obrigatório: a empresa continua sendo criada como antes, neutra.
+  function atualizaCampoDePlano() {
+    if (!ncFields || !ncFields.plano || !ncPlanoCampo) return;
+    ncPlanoCampo.hidden = !planosNoBanco;
+    ncFields.plano.required = planosNoBanco;
+  }
+
+  // O plano não vai no POST da API do CRM (ela não conhece planos): depois que
+  // a empresa existe, grava direto, como a troca de plano da lista. Devolve
+  // true/false, nunca lança — a empresa já foi criada e a senha temporária
+  // tem de aparecer de qualquer jeito.
+  //
+  // Prazo próprio (8 s): sem ele, um update que trava sem falhar segurava a
+  // mensagem com a senha para sempre — e a senha não aparece de novo.
+  var GRAVAR_PLANO_PRAZO_MS = 8000;
+  function gravaPlanoDaNovaEmpresa(empresaId, plano) {
+    if (!plano) return Promise.resolve(true);
+    // Plano escolhido e resposta sem o id da empresa (resposta cortada): não
+    // dá para gravar, e dizer "salvo" deixaria a empresa sem limite calada.
+    if (!empresaId) return Promise.resolve(false);
+    var gravacao = supabase
+      .from('companies')
+      .update({ plano_catalogo: plano })
+      .eq('id', empresaId)
+      .select('id')
+      .then(function (result) {
+        if (result.error || !result.data || !result.data.length) {
+          console.error('Empresa criada, plano não gravado:', result.error || 'nenhuma linha afetada (RLS?)');
+          return false;
+        }
+        return true;
+      }, function (erro) {
+        console.error('Empresa criada, plano não gravado:', erro);
+        return false;
+      });
+    var prazo = new Promise(function (ok) {
+      setTimeout(function () { ok(false); }, GRAVAR_PLANO_PRAZO_MS);
+    });
+    return Promise.race([gravacao, prazo]);
+  }
 
   function setNewCompanyFormOpen(open) {
     newCompanyForm.hidden = !open;
@@ -422,6 +576,8 @@
     Object.keys(payload).forEach(function (key) {
       if (payload[key] === undefined) delete payload[key];
     });
+    // Lido AGORA: o form.reset() do sucesso apaga o campo antes da gravação.
+    var planoEscolhido = planosNoBanco && ncFields.plano ? ncFields.plano.value : '';
 
     newCompanySubmit.disabled = true;
     newCompanyCancel.disabled = true;
@@ -480,14 +636,23 @@
         });
       })
       .then(function (dados) {
-        var senha = dados && dados.senhaTemporaria;
-        showNewCompanyMsg(
-          senha
+        var empresaId = dados && dados.empresa && dados.empresa.id;
+        return gravaPlanoDaNovaEmpresa(empresaId, planoEscolhido).then(function (planoGravado) {
+          return { dados: dados, planoGravado: planoGravado };
+        });
+      })
+      .then(function (r) {
+        var senha = r.dados && r.dados.senhaTemporaria;
+        // A empresa existe nos dois casos; só muda o recado. Se o plano não
+        // gravou, ela ficou "Sem plano" (sem limites) até alguém escolher na
+        // lista — e a senha aparece igual, porque não há como vê-la de novo.
+        var texto = r.planoGravado
+          ? (senha
             ? 'Empresa criada. Senha temporária do administrador — copie agora, ela não aparece de novo:'
-            : 'Empresa criada com sucesso.',
-          true,
-          senha
-        );
+            : 'Empresa criada com sucesso.')
+          : 'Empresa criada, mas o plano do catálogo NÃO foi salvo: escolha o plano na lista de empresas abaixo.' +
+            (senha ? ' Senha temporária do administrador — copie agora, ela não aparece de novo:' : '');
+        showNewCompanyMsg(texto, r.planoGravado, senha);
         // form.reset() só afeta os controles (input/select), não o <p> da
         // mensagem — limpa os campos sem esconder o aviso da senha. Sem
         // isso, clicar "Criar empresa" de novo por engano reenviaria os
