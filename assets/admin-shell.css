@@ -1,0 +1,321 @@
+/* assets/admin-shell.css — moldura do Super Admin (desenho de 26/10, pedido do
+   Alain): barra lateral azul-marinho, lista de clientes em cartões, busca,
+   filtro e páginas. Os componentes de dentro (formulário, serviços, usuários)
+   continuam em admin-page.css. Sem style= em lugar nenhum: a CSP do Cloudflare
+   (style-src 'self') bloqueia. */
+
+.sa-body {
+  margin: 0;
+  background: #f3f6f9;
+  color: #0d2b3e;
+  font-family: Inter, system-ui, sans-serif;
+}
+/* Tudo o que é escondido por atributo some de verdade, mesmo com display:flex
+   numa classe (botão "Cadastrar empresa", campo de plano, paginação). */
+.sa-body [hidden] { display: none !important; }
+
+.sa-shell {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+/* ---------- barra lateral ---------- */
+.sa-side {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 26px 16px 20px;
+  background: #16294b;
+  color: #fff;
+}
+.sa-brand { display: flex; align-items: center; gap: 10px; padding: 0 8px; }
+.sa-brand-logo { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; }
+.sa-brand-name { font-family: 'Space Grotesk', Inter, sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.01em; }
+
+.sa-nav { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.sa-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 13px 16px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.82);
+  font: 600 15px Inter, system-ui, sans-serif;
+  text-align: left;
+  cursor: pointer;
+}
+.sa-nav-item svg { width: 22px; height: 22px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.sa-nav-item:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
+.sa-nav-item.sa-nav-ativo { background: rgba(255, 255, 255, 0.1); color: #fff; }
+.sa-nav-item:focus-visible { outline: 2px solid #5fd0a0; outline-offset: 2px; }
+
+.sa-user { display: flex; align-items: center; gap: 12px; padding: 0 8px; }
+.sa-user-avatar {
+  width: 40px; height: 40px; flex-shrink: 0;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  font-weight: 700; font-size: 14px;
+}
+.sa-user-info { display: flex; flex-direction: column; min-width: 0; }
+.sa-user-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sa-logout {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: rgba(255, 255, 255, 0.7);
+  font: 500 12.5px Inter, system-ui, sans-serif;
+  cursor: pointer;
+}
+.sa-logout:hover { color: #fff; text-decoration: underline; }
+
+/* ---------- área principal ---------- */
+.sa-main { padding: 36px 44px 48px; min-width: 0; }
+.sa-head h1 {
+  margin: 0 0 6px;
+  font-family: 'Space Grotesk', Inter, sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #16294b;
+  text-wrap: balance;
+}
+.sa-head p { margin: 0 0 28px; font-size: 15px; color: #56707e; }
+
+.sa-card {
+  background: #fff;
+  border: 1px solid rgba(13, 43, 62, 0.08);
+  border-radius: 18px;
+  box-shadow: 0 2px 6px -1px rgba(13, 43, 62, 0.05), 0 18px 36px -20px rgba(13, 43, 62, 0.18);
+  padding: 22px;
+}
+
+.sa-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 18px; }
+.sa-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.sa-search {
+  position: relative;
+  flex: 1 1 280px;
+  display: flex;
+  align-items: center;
+}
+.sa-search svg {
+  position: absolute; left: 16px; width: 20px; height: 20px;
+  fill: none; stroke: #56707e; stroke-width: 2; stroke-linecap: round;
+  pointer-events: none;
+}
+.sa-search input {
+  width: 100%;
+  box-sizing: border-box;
+  height: 46px;
+  padding: 0 16px 0 46px;
+  border: 1px solid rgba(13, 43, 62, 0.1);
+  border-radius: 12px;
+  background: #f4f7fa;
+  font: 14px Inter, system-ui, sans-serif;
+  color: #0d2b3e;
+}
+.sa-filtro select {
+  height: 46px;
+  min-width: 190px;
+  padding: 0 14px;
+  border: 1px solid rgba(13, 43, 62, 0.14);
+  border-radius: 12px;
+  background: #fff;
+  font: 600 14px Inter, system-ui, sans-serif;
+  color: #0d2b3e;
+  cursor: pointer;
+}
+.sa-search input:focus, .sa-filtro select:focus { outline: 2px solid rgba(19, 138, 92, 0.35); border-color: #138a5c; }
+.sa-novo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 46px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 12px;
+  background: #138a5c;
+  color: #fff;
+  font: 700 14.5px Inter, system-ui, sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.sa-novo svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
+.sa-novo:hover { background: #0f774f; }
+.sa-novo:focus-visible { outline: 2px solid #138a5c; outline-offset: 2px; }
+
+/* Formulário de nova empresa, dentro do cartão. */
+.sa-form { padding: 20px 4px 8px; margin-bottom: 18px; border-top: 1px solid rgba(13, 43, 62, 0.08); border-bottom: 1px solid rgba(13, 43, 62, 0.08); }
+.sa-form-titulo { margin: 0 0 2px; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; color: #16294b; }
+.sa-form-sub { margin: 0; font-size: 13.5px; color: #56707e; }
+.sa-form-msg { margin: 0 4px 16px; }
+
+/* ---------- lista ---------- */
+.sa-lista { display: flex; flex-direction: column; gap: 10px; }
+.sa-lista .cf-loading, .sa-lista .cf-error-text { padding: 18px 6px; }
+.sa-row {
+  border: 1px solid rgba(13, 43, 62, 0.09);
+  border-top: 1px solid rgba(13, 43, 62, 0.09);
+  border-radius: 14px;
+  background: #fff;
+  overflow: hidden;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+.sa-row:hover { border-color: rgba(13, 43, 62, 0.18); box-shadow: 0 6px 16px -10px rgba(13, 43, 62, 0.25); }
+.sa-row-aberta { border-color: rgba(19, 138, 92, 0.45); }
+
+.sa-row-head {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto auto 20px;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  padding: 14px 18px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.sa-row-head:focus-visible { outline: 2px solid #138a5c; outline-offset: -2px; border-radius: 14px; }
+
+.sa-avatar {
+  width: 52px; height: 52px;
+  display: grid; place-items: center;
+  border-radius: 12px;
+  font-family: 'Space Grotesk', Inter, sans-serif;
+  font-weight: 700; font-size: 18px;
+  color: #fff;
+}
+.sa-av-0 { background: #16294b; }
+.sa-av-1 { background: #138a5c; }
+.sa-av-2 { background: #6b3fd4; }
+.sa-av-3 { background: #e5603c; }
+.sa-av-4 { background: #c62d3f; }
+.sa-av-5 { background: #0f7c8c; }
+.sa-av-6 { background: #b7791f; }
+.sa-av-7 { background: #2b6cb0; }
+
+.sa-row-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.sa-row-info .cf-company-name { font-size: 15.5px; font-weight: 600; color: #0d2b3e; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sa-row-info .cf-company-legal { font-size: 13px; color: #6b8290; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.sa-pill {
+  justify-self: end;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  background: #eef2f5;
+  color: #56707e;
+}
+.sa-pill-active { background: #e6f5ec; color: #1a7a47; }
+.sa-pill-trial { background: #e7f0fb; color: #2b5da8; }
+.sa-pill-suspended { background: #fff3d6; color: #8a5a00; }
+.sa-pill-cancelled { background: #fde8e8; color: #a3272a; }
+.sa-pill-inactive { background: #eef2f5; color: #56707e; }
+
+.sa-row-plano {
+  min-width: 96px;
+  padding-left: 18px;
+  border-left: 1px solid rgba(13, 43, 62, 0.12);
+  font-size: 13.5px;
+  color: #6b8290;
+  white-space: nowrap;
+}
+.sa-row-plano strong { color: #0d2b3e; font-weight: 700; }
+.sa-row-sem-plano { color: #a3272a; font-weight: 600; }
+
+.sa-chevron { width: 20px; height: 20px; fill: none; stroke: #16294b; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.15s; }
+.sa-row-aberta .sa-chevron { transform: rotate(90deg); }
+
+/* Detalhes abertos: status, plano, serviços, usuários. */
+.sa-row-details { border-top: 1px solid rgba(13, 43, 62, 0.08); }
+.sa-row-controles { padding: 14px 18px; gap: 12px 28px; background: #fbfcfd; }
+.sa-row-details .cf-company-services { padding: 4px 18px 18px; }
+
+/* ---------- páginas ---------- */
+.sa-paginacao { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; padding: 0 4px; }
+.sa-pag-info { font-size: 13.5px; color: #6b8290; font-variant-numeric: tabular-nums; }
+.sa-pag-botoes { display: flex; gap: 8px; }
+.sa-pag-btn {
+  min-width: 38px; height: 38px;
+  padding: 0 10px;
+  border: 1px solid rgba(13, 43, 62, 0.14);
+  border-radius: 999px;
+  background: #fff;
+  font: 600 14px Inter, system-ui, sans-serif;
+  color: #16294b;
+  cursor: pointer;
+}
+.sa-pag-btn:hover:not(:disabled) { border-color: #16294b; }
+.sa-pag-btn:disabled { opacity: 0.4; cursor: default; }
+.sa-pag-btn.sa-pag-atual { background: #16294b; border-color: #16294b; color: #fff; }
+
+/* ---------- planos ---------- */
+.sa-planos { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
+.sa-plano-card {
+  background: #fff;
+  border: 1px solid rgba(13, 43, 62, 0.08);
+  border-radius: 18px;
+  padding: 24px 26px;
+  box-shadow: 0 18px 36px -24px rgba(13, 43, 62, 0.25);
+}
+.sa-plano-card h2 { margin: 0 0 14px; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 20px; color: #16294b; }
+.sa-plano-card ul { margin: 0 0 18px; padding-left: 18px; font-size: 14px; line-height: 1.7; color: #3d5768; }
+.sa-plano-pro { border-color: rgba(19, 138, 92, 0.4); }
+.sa-plano-conta { margin: 0; font-size: 14px; font-weight: 600; color: #138a5c; }
+
+/* ---------- celular e tablet ---------- */
+@media (max-width: 900px) {
+  .sa-shell { grid-template-columns: 1fr; }
+  .sa-side {
+    position: static;
+    height: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 16px;
+    padding: 14px 16px;
+  }
+  .sa-brand-name { font-size: 18px; }
+  .sa-brand-logo { width: 32px; height: 32px; }
+  .sa-nav { order: 3; flex: 1 1 100%; flex-direction: row; gap: 6px; }
+  .sa-nav-item { width: auto; padding: 9px 14px; font-size: 14px; }
+  .sa-nav-item svg { width: 18px; height: 18px; }
+  .sa-user { margin-left: auto; padding: 0; }
+  .sa-user-avatar { width: 32px; height: 32px; font-size: 12px; }
+  .sa-user-name { max-width: 140px; }
+  .sa-main { padding: 22px 16px 32px; }
+  .sa-head h1 { font-size: 25px; }
+  .sa-card { padding: 14px; border-radius: 16px; }
+  .sa-filtro { flex: 1 1 160px; }
+  .sa-filtro select { width: 100%; min-width: 0; }
+  .sa-novo { flex: 1 1 160px; justify-content: center; }
+  /* Linha 1: avatar, nome, seta. Linha 2 (quebra sozinha, o nome ocupa o
+     resto da 1ª): status e plano, alinhados com o texto. */
+  .sa-row-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 12px; }
+  .sa-avatar { order: 0; width: 44px; height: 44px; font-size: 15px; flex-shrink: 0; }
+  /* A base larga faz o nome ocupar a 1ª linha inteira (menos avatar, seta e
+     espaços): status e plano descem para a 2ª. */
+  .sa-row-info { order: 1; flex: 1 1 calc(100% - 44px - 18px - 24px - 8px); }
+  .sa-chevron { order: 2; flex-shrink: 0; }
+  .sa-pill { order: 3; margin-left: 56px; }
+  .sa-row-plano { order: 4; min-width: 0; padding-left: 12px; }
+  .sa-row-controles { padding: 12px; }
+  .sa-row-details .cf-company-services { padding: 4px 12px 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sa-row, .sa-chevron { transition: none; }
+}

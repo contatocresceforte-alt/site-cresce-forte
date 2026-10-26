@@ -12,41 +12,71 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" media="print">
 <script src="/assets/font-swap.js?v=1"></script>
 <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="/assets/dashboard-shell.css?v=1">
-<link rel="stylesheet" href="/assets/admin-page.css?v=3">
+<link rel="stylesheet" href="/assets/admin-page.css?v=4">
+<link rel="stylesheet" href="/assets/admin-shell.css?v=1">
 </head>
-<body>
-<div class="cf-page">
-  <header class="cf-header">
-    <div class="cf-brand">
-      <span class="cf-logo-mark">
-        <img src="/assets/cresce-forte-icon.webp?v=1" alt="Cresce Forte">
+<body class="sa-body">
+<div class="sa-shell">
+  <!-- Barra lateral (desenho de 26/10, pedido do Alain). Só itens que existem:
+       Clientes e Planos. No celular vira uma barra no topo. -->
+  <aside class="sa-side">
+    <div class="sa-brand">
+      <img class="sa-brand-logo" src="/assets/cresce-forte-logo-branco.png?v=1" alt="" width="40" height="40">
+      <span class="sa-brand-name">Cresce Forte</span>
+    </div>
+    <nav class="sa-nav" aria-label="Seções do Super Admin">
+      <button type="button" class="sa-nav-item sa-nav-ativo" id="nav-clientes" aria-current="page" data-secao="clientes">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Clientes</span>
+      </button>
+      <button type="button" class="sa-nav-item" id="nav-planos" data-secao="planos">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+        <span>Planos</span>
+      </button>
+    </nav>
+    <div class="sa-user">
+      <span class="sa-user-avatar" id="user-avatar" aria-hidden="true">SA</span>
+      <span class="sa-user-info">
+        <span class="sa-user-name" id="user-email">Super Admin</span>
+        <button type="button" class="sa-logout" id="logout-btn">Sair</button>
       </span>
-      <span class="cf-brand-name">Cresce Forte</span>
-      <span class="cf-badge">Super Admin</span>
     </div>
-    <div class="cf-user-area">
-      <span class="cf-user-email" id="user-email"></span>
-      <button type="button" class="cf-logout" id="logout-btn">Sair</button>
-    </div>
-  </header>
+  </aside>
 
-  <main class="cf-main">
-    <h1>Painel do Super Admin</h1>
-    <p class="cf-sub">Visão geral de todas as empresas na plataforma.</p>
+  <main class="sa-main">
+    <header class="sa-head">
+      <h1>Painel do Super Admin</h1>
+      <p>Gerencie o cadastro de empresas e configure os acessos de cada cliente.</p>
+    </header>
 
-    <div class="cf-card" id="new-company-card">
-      <div class="cf-card-head cf-card-head-row">
-        <div>
-          <h2>Nova empresa</h2>
-          <p>Cadastra a empresa e já cria o acesso do administrador dela.</p>
-        </div>
-        <button type="button" class="cf-primary-btn" id="new-company-toggle">Cadastrar empresa</button>
+    <!-- CLIENTES -->
+    <section class="sa-card" id="secao-clientes" aria-labelledby="nav-clientes">
+      <div class="sa-toolbar">
+        <label class="sa-search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <span class="sa-sr">Buscar empresa</span>
+          <input type="search" id="busca-empresa" placeholder="Buscar por nome da empresa..." autocomplete="off">
+        </label>
+        <label class="sa-filtro">
+          <span class="sa-sr">Filtrar por plano</span>
+          <select id="filtro-plano">
+            <option value="">Todos os planos</option>
+            <option value="BASICO">Plano Básico</option>
+            <option value="PRO">Plano PRO</option>
+          </select>
+        </label>
+        <button type="button" class="sa-novo" id="new-company-toggle">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          Cadastrar empresa
+        </button>
       </div>
+
       <!-- method="post" pelo mesmo motivo do /login/: sem ele, um submit que
            escape da interceptacao poe razao social, CNPJ e e-mail do
            administrador na query string. -->
-      <form class="cf-form-panel" id="new-company-form" method="post" hidden novalidate>
+      <form class="cf-form-panel sa-form" id="new-company-form" method="post" hidden novalidate>
+        <h2 class="sa-form-titulo">Nova empresa</h2>
+        <p class="sa-form-sub">Cadastra a empresa e já cria o acesso do administrador dela.</p>
         <div class="cf-form-grid">
           <div class="cf-field">
             <label for="nc-legal-name">Razão social *</label>
@@ -94,20 +124,39 @@
         <div class="cf-form-actions">
           <button type="submit" class="cf-primary-btn" id="new-company-submit">Criar empresa</button>
           <button type="button" class="cf-secondary-btn" id="new-company-cancel">Cancelar</button>
-          <p class="cf-form-msg" id="new-company-msg" role="status" aria-live="polite" hidden></p>
         </div>
       </form>
-    </div>
+      <p class="cf-form-msg sa-form-msg" id="new-company-msg" role="status" aria-live="polite" hidden></p>
 
-    <div class="cf-card">
-      <div class="cf-card-head">
-        <h2>Empresas</h2>
-        <p>Clique em "Gerenciar" para ativar ou desativar os serviços de uma empresa. O plano do catálogo de cada uma se troca no seletor ao lado de "Catálogo".</p>
-      </div>
-      <div id="companies-list" aria-live="polite">
+      <div id="companies-list" class="sa-lista" aria-live="polite">
         <p class="cf-loading">Carregando empresas...</p>
       </div>
-    </div>
+      <nav class="sa-paginacao" id="paginacao" aria-label="Páginas da lista de clientes" hidden>
+        <span class="sa-pag-info" id="paginacao-info"></span>
+        <span class="sa-pag-botoes" id="paginacao-botoes"></span>
+      </nav>
+    </section>
+
+    <!-- PLANOS -->
+    <section class="sa-planos" id="secao-planos" aria-labelledby="nav-planos" hidden>
+      <article class="sa-plano-card">
+        <h2>Plano Básico</h2>
+        <ul>
+          <li>Até <strong>100 produtos</strong></li>
+          <li>Sem vídeos</li>
+          <li>Produtos acima do limite (empresa rebaixada) ficam bloqueados, fora da loja</li>
+        </ul>
+        <p class="sa-plano-conta" id="conta-basico">—</p>
+      </article>
+      <article class="sa-plano-card sa-plano-pro">
+        <h2>Plano PRO</h2>
+        <ul>
+          <li>Até <strong>250 produtos</strong></li>
+          <li>Vídeos de até <strong>15 segundos</strong></li>
+        </ul>
+        <p class="sa-plano-conta" id="conta-pro">—</p>
+      </article>
+    </section>
   </main>
 </div>
 
@@ -115,6 +164,6 @@
 <script src="/assets/sessao-do-navegador.js?v=1"></script>
 <script src="/assets/auth.js?v=7"></script>
 <script src="/assets/admin-usuarios.js?v=1"></script>
-<script src="/assets/admin.js?v=8"></script>
+<script src="/assets/admin.js?v=9"></script>
 </body>
 </html>

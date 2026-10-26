@@ -52,8 +52,119 @@
     var emailEl = document.getElementById('user-email');
     var name = session.user.user_metadata && session.user.user_metadata.full_name;
     emailEl.textContent = name || session.user.email || '';
+    document.getElementById('user-avatar').textContent = iniciais(name || session.user.email || 'Super Admin');
     loadCompanies();
   });
+
+  // ---------------------------------------------------------------------
+  // Desenho de 26/10 (pedido do Alain): barra lateral com Clientes e Planos,
+  // lista com busca, filtro por plano e páginas de 8. Os dados e as ações são
+  // os mesmos de antes; muda só como aparecem. A CSP do Cloudflare
+  // (style-src 'self') não aceita style= nem element.style: toda aparência
+  // vem de classes em admin-page.css / admin-shell.css.
+  // ---------------------------------------------------------------------
+  var POR_PAGINA = 8;
+  var todasEmpresas = [];
+  var pagina = 1;
+  // Empresas com os detalhes abertos: sobrevivem ao recarregar a lista (trocar
+  // status ou plano recarrega tudo) para o painel não fechar na cara de quem
+  // acabou de mexer nele.
+  var abertas = {};
+  var buscaEl = document.getElementById('busca-empresa');
+  var filtroPlanoEl = document.getElementById('filtro-plano');
+  var paginacaoEl = document.getElementById('paginacao');
+  var paginacaoInfoEl = document.getElementById('paginacao-info');
+  var paginacaoBotoesEl = document.getElementById('paginacao-botoes');
+
+  function iniciais(nome) {
+    var partes = String(nome || '').replace(/@.*/, '').split(/[\s._-]+/).filter(Boolean);
+    var a = partes[0] ? partes[0][0] : '?';
+    var b = partes.length > 1 ? partes[partes.length - 1][0] : (partes[0] && partes[0][1]) || '';
+    return (a + b).toUpperCase();
+  }
+  // Cor do avatar fixa por empresa (o id não muda), em 8 classes de CSS.
+  function corDoAvatar(id) {
+    var h = 0;
+    String(id).split('').forEach(function (c) { h = (h * 31 + c.charCodeAt(0)) >>> 0; });
+    return 'sa-av-' + (h % 8);
+  }
+  function semAcento(t) {
+    return String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  }
+
+  buscaEl.addEventListener('input', function () { pagina = 1; renderLista(); });
+  filtroPlanoEl.addEventListener('change', function () { pagina = 1; renderLista(); });
+
+  // Seções da barra lateral.
+  var secoes = { clientes: document.getElementById('secao-clientes'), planos: document.getElementById('secao-planos') };
+  Array.prototype.forEach.call(document.querySelectorAll('.sa-nav-item'), function (botao) {
+    botao.addEventListener('click', function () {
+      var alvo = botao.getAttribute('data-secao');
+      Object.keys(secoes).forEach(function (k) { secoes[k].hidden = k !== alvo; });
+      Array.prototype.forEach.call(document.querySelectorAll('.sa-nav-item'), function (b) {
+        var ativo = b === botao;
+        b.classList.toggle('sa-nav-ativo', ativo);
+        if (ativo) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+      });
+    });
+  });
+
+  function atualizaContagemDePlanos() {
+    var conta = { BASICO: 0, PRO: 0 };
+    todasEmpresas.forEach(function (c) { if (conta[c.plano_catalogo] !== undefined) conta[c.plano_catalogo] += 1; });
+    var frase = function (n) { return n === 1 ? '1 empresa neste plano' : n + ' empresas neste plano'; };
+    document.getElementById('conta-basico').textContent = planosNoBanco ? frase(conta.BASICO) : '—';
+    document.getElementById('conta-pro').textContent = planosNoBanco ? frase(conta.PRO) : '—';
+  }
+
+  function renderLista() {
+    var termo = semAcento(buscaEl.value.trim());
+    var plano = planosNoBanco ? filtroPlanoEl.value : '';
+    var lista = todasEmpresas.filter(function (c) {
+      if (plano && c.plano_catalogo !== plano) return false;
+      if (!termo) return true;
+      return semAcento(c.trade_name).indexOf(termo) >= 0 || semAcento(c.legal_name).indexOf(termo) >= 0;
+    });
+
+    companiesListEl.innerHTML = '';
+    if (!todasEmpresas.length) {
+      companiesListEl.innerHTML = '<p class="cf-loading">Nenhuma empresa cadastrada ainda.</p>';
+      paginacaoEl.hidden = true;
+      return;
+    }
+    if (!lista.length) {
+      companiesListEl.innerHTML = '<p class="cf-loading">Nenhuma empresa encontrada com esse filtro.</p>';
+      paginacaoEl.hidden = true;
+      return;
+    }
+
+    var paginas = Math.max(1, Math.ceil(lista.length / POR_PAGINA));
+    if (pagina > paginas) pagina = paginas;
+    var inicio = (pagina - 1) * POR_PAGINA;
+    var daPagina = lista.slice(inicio, inicio + POR_PAGINA);
+    daPagina.forEach(function (company) {
+      companiesListEl.appendChild(buildCompanyRow(company));
+    });
+
+    paginacaoEl.hidden = false;
+    paginacaoInfoEl.textContent = 'Mostrando ' + (inicio + 1) + '\u2013' + (inicio + daPagina.length) + ' de ' + lista.length +
+      (lista.length === 1 ? ' cliente' : ' clientes');
+    paginacaoBotoesEl.innerHTML = '';
+    function botaoPagina(rotulo, alvo, opcoes) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'sa-pag-btn' + (opcoes.atual ? ' sa-pag-atual' : '');
+      b.textContent = rotulo;
+      b.setAttribute('aria-label', opcoes.aria || ('Página ' + alvo));
+      if (opcoes.atual) b.setAttribute('aria-current', 'page');
+      b.disabled = !!opcoes.desabilitado;
+      b.addEventListener('click', function () { pagina = alvo; renderLista(); });
+      paginacaoBotoesEl.appendChild(b);
+    }
+    botaoPagina('\u2039', pagina - 1, { aria: 'Página anterior', desabilitado: pagina === 1 });
+    for (var n = 1; n <= paginas; n++) botaoPagina(String(n), n, { atual: n === pagina });
+    botaoPagina('\u203a', pagina + 1, { aria: 'Próxima página', desabilitado: pagina === paginas });
+  }
 
   document.getElementById('logout-btn').addEventListener('click', function () {
     CresceForteAuth.logout('/login/');
@@ -90,51 +201,81 @@
       return;
     }
 
-    var companies = result.data || [];
-    if (companies.length === 0) {
-      companiesListEl.innerHTML = '<p class="cf-loading">Nenhuma empresa cadastrada ainda.</p>';
-      return;
-    }
-
-    companiesListEl.innerHTML = '';
-    companies.forEach(function (company) {
-      companiesListEl.appendChild(buildCompanyRow(company));
-    });
+    todasEmpresas = result.data || [];
+    filtroPlanoEl.parentNode.hidden = !planosNoBanco;
+    atualizaContagemDePlanos();
+    renderLista();
   }
 
   function buildCompanyRow(company) {
     var row = document.createElement('div');
-    row.className = 'cf-company-row';
+    row.className = 'cf-company-row sa-row';
+    var nomeEmpresa = company.trade_name || company.legal_name || 'Empresa sem nome';
 
-    var main = document.createElement('div');
-    main.className = 'cf-company-main';
+    // Cabeçalho: a linha inteira é o botão que abre os detalhes.
+    var head = document.createElement('button');
+    head.type = 'button';
+    head.className = 'sa-row-head';
 
-    var info = document.createElement('div');
-    info.className = 'cf-company-info';
+    var avatar = document.createElement('span');
+    avatar.className = 'sa-avatar ' + corDoAvatar(company.id);
+    avatar.setAttribute('aria-hidden', 'true');
+    avatar.textContent = iniciais(nomeEmpresa);
+    head.appendChild(avatar);
 
+    var info = document.createElement('span');
+    info.className = 'cf-company-info sa-row-info';
     var nameEl = document.createElement('span');
     nameEl.className = 'cf-company-name';
-    nameEl.textContent = company.trade_name || company.legal_name || 'Empresa sem nome';
+    nameEl.textContent = nomeEmpresa;
     info.appendChild(nameEl);
+    var legalEl = document.createElement('span');
+    legalEl.className = 'cf-company-legal';
+    legalEl.textContent = company.legal_name && company.legal_name !== company.trade_name ? company.legal_name : '\u2014';
+    info.appendChild(legalEl);
+    head.appendChild(info);
 
-    if (company.legal_name && company.legal_name !== company.trade_name) {
-      var legalEl = document.createElement('span');
-      legalEl.className = 'cf-company-legal';
-      legalEl.textContent = company.legal_name;
-      info.appendChild(legalEl);
+    var pill = document.createElement('span');
+    pill.className = 'sa-pill sa-pill-' + String(company.status || 'NONE').toLowerCase();
+    pill.textContent = formatStatus(company.status);
+    head.appendChild(pill);
+
+    if (planosNoBanco) {
+      var planoTxt = document.createElement('span');
+      planoTxt.className = 'sa-row-plano';
+      if (company.plano_catalogo) {
+        planoTxt.appendChild(document.createTextNode('Plano '));
+        var forte = document.createElement('strong');
+        forte.textContent = formatPlano(company.plano_catalogo);
+        planoTxt.appendChild(forte);
+      } else {
+        planoTxt.textContent = 'Sem plano';
+        planoTxt.className += ' sa-row-sem-plano';
+      }
+      head.appendChild(planoTxt);
     }
-    main.appendChild(info);
+
+    var chevron = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    chevron.setAttribute('viewBox', '0 0 24 24');
+    chevron.setAttribute('class', 'sa-chevron');
+    chevron.setAttribute('aria-hidden', 'true');
+    var seta = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    seta.setAttribute('d', 'm9 6 6 6-6 6');
+    chevron.appendChild(seta);
+    head.appendChild(chevron);
+    row.appendChild(head);
+
+    // Detalhes: status, plano, serviços e usuários (o antigo "Gerenciar").
+    var main = document.createElement('div');
+    main.className = 'cf-company-main sa-row-controles';
 
     var statusRow = document.createElement('div');
     statusRow.className = 'cf-status-row';
 
-    var statusEl = document.createElement('span');
-    statusEl.className = 'cf-status-badge';
-    if (company.status && company.status !== 'ACTIVE') {
-      statusEl.className += ' cf-status-muted';
-    }
-    statusEl.textContent = formatStatus(company.status);
-    statusRow.appendChild(statusEl);
+    var statusRotulo = document.createElement('span');
+    statusRotulo.className = 'cf-plano-rotulo';
+    statusRotulo.textContent = 'Status';
+    statusRow.appendChild(statusRotulo);
 
     var statusSelect = document.createElement('select');
     statusSelect.className = 'cf-status-select';
@@ -195,22 +336,21 @@
 
     if (planosNoBanco) main.appendChild(buildPlanoRow(company, companyLabel));
 
-    var manageBtn = document.createElement('button');
-    manageBtn.type = 'button';
-    manageBtn.className = 'cf-manage-btn';
-    manageBtn.textContent = 'Gerenciar';
-    manageBtn.setAttribute('aria-expanded', 'false');
-    main.appendChild(manageBtn);
-
-    row.appendChild(main);
+    var detalhes = document.createElement('div');
+    detalhes.className = 'sa-row-details';
+    detalhes.id = 'detalhes-' + company.id;
+    detalhes.hidden = true;
+    detalhes.appendChild(main);
 
     var panel = document.createElement('div');
     panel.className = 'cf-company-services';
     panel.id = 'services-panel-' + company.id;
     panel.setAttribute('aria-live', 'polite');
-    panel.hidden = true;
-    manageBtn.setAttribute('aria-controls', panel.id);
-    row.appendChild(panel);
+    detalhes.appendChild(panel);
+    row.appendChild(detalhes);
+
+    head.setAttribute('aria-expanded', 'false');
+    head.setAttribute('aria-controls', detalhes.id);
 
     // `loaded` só vira true quando a carga DEU CERTO. Marcando antes, uma falha
     // de rede deixava o painel preso em "Não foi possível carregar os serviços":
@@ -218,19 +358,21 @@
     // resolvia. `carregando` evita que dois cliques rápidos disparem duas cargas.
     var loaded = false;
     var carregando = false;
-    manageBtn.addEventListener('click', function () {
-      var willShow = panel.hidden;
-      panel.hidden = !willShow;
-      manageBtn.textContent = willShow ? 'Fechar' : 'Gerenciar';
-      manageBtn.setAttribute('aria-expanded', String(willShow));
-      if (willShow && !loaded && !carregando) {
+    function abre(mostrar) {
+      detalhes.hidden = !mostrar;
+      row.classList.toggle('sa-row-aberta', mostrar);
+      head.setAttribute('aria-expanded', String(mostrar));
+      if (mostrar) abertas[company.id] = true; else delete abertas[company.id];
+      if (mostrar && !loaded && !carregando) {
         carregando = true;
         loadServicesForCompany(company.id, panel).then(function (ok) {
           carregando = false;
           loaded = !!ok;
         });
       }
-    });
+    }
+    head.addEventListener('click', function () { abre(detalhes.hidden); });
+    if (abertas[company.id]) abre(true);
 
     return row;
   }
@@ -246,13 +388,8 @@
 
     var rotulo = document.createElement('span');
     rotulo.className = 'cf-plano-rotulo';
-    rotulo.textContent = 'Catálogo';
+    rotulo.textContent = 'Plano do catálogo';
     row.appendChild(rotulo);
-
-    var badge = document.createElement('span');
-    badge.className = 'cf-status-badge cf-plano-badge' + (planoAtual ? ' cf-plano-' + planoAtual.toLowerCase() : ' cf-status-muted');
-    badge.textContent = formatPlano(planoAtual);
-    row.appendChild(badge);
 
     var select = document.createElement('select');
     select.className = 'cf-status-select';
