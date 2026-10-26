@@ -30,11 +30,26 @@
   flex-direction: column;
   gap: 28px;
   padding: 26px 16px 20px;
-  background: #16294b;
+  /* mesmo azul do cabeçalho e do topo do site principal (home.css) */
+  background: linear-gradient(160deg, #0a2035 0%, #0d2b3e 55%, #0a2035 100%);
   color: #fff;
 }
-.sa-brand { display: flex; align-items: center; gap: 10px; padding: 0 8px; }
-.sa-brand-logo { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; }
+.sa-brand { display: flex; align-items: center; gap: 12px; padding: 0 6px; }
+/* Logo oficial colorido num quadro branco, como no cabeçalho do site (.hdr-mark):
+   o "C" do logo é azul-marinho e sumiria direto no fundo escuro. */
+.sa-brand-mark {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.35);
+}
+.sa-brand-logo { width: 100%; height: 100%; object-fit: contain; }
 .sa-brand-name { font-family: 'Space Grotesk', Inter, sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.01em; }
 
 .sa-nav { display: flex; flex-direction: column; gap: 6px; flex: 1; }
@@ -55,7 +70,7 @@
 .sa-nav-item svg { width: 22px; height: 22px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 .sa-nav-item:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
 .sa-nav-item.sa-nav-ativo { background: rgba(255, 255, 255, 0.1); color: #fff; }
-.sa-nav-item:focus-visible { outline: 2px solid #5fd0a0; outline-offset: 2px; }
+.sa-nav-item:focus-visible { outline: 2px solid #8dc90a; outline-offset: 2px; }
 
 .sa-user { display: flex; align-items: center; gap: 12px; padding: 0 8px; }
 .sa-user-avatar {
@@ -86,7 +101,7 @@
   font-size: 32px;
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: #16294b;
+  color: #0d2b3e;
   text-wrap: balance;
 }
 .sa-head p { margin: 0 0 28px; font-size: 15px; color: #56707e; }
@@ -155,7 +170,7 @@
 
 /* Formulário de nova empresa, dentro do cartão. */
 .sa-form { padding: 20px 4px 8px; margin-bottom: 18px; border-top: 1px solid rgba(13, 43, 62, 0.08); border-bottom: 1px solid rgba(13, 43, 62, 0.08); }
-.sa-form-titulo { margin: 0 0 2px; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; color: #16294b; }
+.sa-form-titulo { margin: 0 0 2px; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 18px; color: #0d2b3e; }
 .sa-form-sub { margin: 0; font-size: 13.5px; color: #56707e; }
 .sa-form-msg { margin: 0 4px 16px; }
 
@@ -197,7 +212,7 @@
   font-weight: 700; font-size: 18px;
   color: #fff;
 }
-.sa-av-0 { background: #16294b; }
+.sa-av-0 { background: #0d2b3e; }
 .sa-av-1 { background: #138a5c; }
 .sa-av-2 { background: #6b3fd4; }
 .sa-av-3 { background: #e5603c; }
@@ -237,7 +252,7 @@
 .sa-row-plano strong { color: #0d2b3e; font-weight: 700; }
 .sa-row-sem-plano { color: #a3272a; font-weight: 600; }
 
-.sa-chevron { width: 20px; height: 20px; fill: none; stroke: #16294b; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.15s; }
+.sa-chevron { width: 20px; height: 20px; fill: none; stroke: #0d2b3e; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.15s; }
 .sa-row-aberta .sa-chevron { transform: rotate(90deg); }
 
 /* Detalhes abertos: status, plano, serviços, usuários. */
@@ -256,12 +271,12 @@
   border-radius: 999px;
   background: #fff;
   font: 600 14px Inter, system-ui, sans-serif;
-  color: #16294b;
+  color: #0d2b3e;
   cursor: pointer;
 }
-.sa-pag-btn:hover:not(:disabled) { border-color: #16294b; }
+.sa-pag-btn:hover:not(:disabled) { border-color: #0d2b3e; }
 .sa-pag-btn:disabled { opacity: 0.4; cursor: default; }
-.sa-pag-btn.sa-pag-atual { background: #16294b; border-color: #16294b; color: #fff; }
+.sa-pag-btn.sa-pag-atual { background: #0d2b3e; border-color: #0d2b3e; color: #fff; }
 
 /* ---------- planos ---------- */
 .sa-planos { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
@@ -272,7 +287,7 @@
   padding: 24px 26px;
   box-shadow: 0 18px 36px -24px rgba(13, 43, 62, 0.25);
 }
-.sa-plano-card h2 { margin: 0 0 14px; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 20px; color: #16294b; }
+.sa-plano-card h2 { margin: 0 0 14px; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 20px; color: #0d2b3e; }
 .sa-plano-card ul { margin: 0 0 18px; padding-left: 18px; font-size: 14px; line-height: 1.7; color: #3d5768; }
 .sa-plano-pro { border-color: rgba(19, 138, 92, 0.4); }
 .sa-plano-conta { margin: 0; font-size: 14px; font-weight: 600; color: #138a5c; }
@@ -290,7 +305,7 @@
     padding: 14px 16px;
   }
   .sa-brand-name { font-size: 18px; }
-  .sa-brand-logo { width: 32px; height: 32px; }
+  .sa-brand-mark { width: 40px; height: 40px; border-radius: 11px; padding: 3px; }
   .sa-nav { order: 3; flex: 1 1 100%; flex-direction: row; gap: 6px; }
   .sa-nav-item { width: auto; padding: 9px 14px; font-size: 14px; }
   .sa-nav-item svg { width: 18px; height: 18px; }
