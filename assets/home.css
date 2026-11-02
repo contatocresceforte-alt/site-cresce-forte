@@ -180,3 +180,4 @@ a{text-decoration:none}
 .svg-defs{position:absolute}
 .sec-head-how{max-width:620px;margin-bottom:52px}
 .cta-center{text-align:center;margin-top:52px}
+.ftr-end a{color:inherit;text-decoration:underline;text-underline-offset:3px}.ftr-end a:hover{color:#fff}

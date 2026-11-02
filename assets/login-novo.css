@@ -159,3 +159,4 @@
 @media (prefers-reduced-motion: reduce) {
   .cf-login-novo .cf-submit { transition: none; }
 }
+.cf-login-novo .lg-legal a { color: inherit; text-underline-offset: 3px; }
