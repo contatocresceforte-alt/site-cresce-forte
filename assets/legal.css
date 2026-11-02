@@ -24,17 +24,49 @@ strong { font-weight: 700; }
 
 footer { text-align: center; color: #56707e; font-size: 13px; line-height: 1.7; padding: 0 24px 35px; }
 
+/* Versão 1.0 extensa: sumário com âncoras, subseções, tabelas, considerandos e marcação de revisão. */
+h3 { font-family: 'Space Grotesk', Inter, sans-serif; font-size: 16.5px; color: #0d2b3e; line-height: 1.35; margin: 22px 0 8px; scroll-margin-top: 22px; }
+.identificacao { margin: 0 0 24px; padding: 0 0 18px; border-bottom: 1px solid #e3ecef; }
+.identificacao p { margin: 0 0 5px; }
+.sumario { background: #f4f8f9; border: 1px solid #e3ecef; border-radius: 10px; padding: 18px 22px 14px; margin: 0 0 30px; scroll-margin-top: 22px; }
+.sumario-titulo { font-family: 'Space Grotesk', Inter, sans-serif; font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #0b6b80; margin: 0 0 10px; }
+.sumario ol { margin: 0; padding: 0 0 0 22px; columns: 2; column-gap: 32px; }
+.sumario li { font-size: 14.5px; line-height: 1.45; margin-bottom: 5px; break-inside: avoid; padding-left: 2px; }
+.sumario a { text-decoration: none; }
+.sumario a:hover, .sumario a:focus { text-decoration: underline; }
+.considerandos { border-left: 3px solid #8dc90a; padding: 2px 0 2px 18px; margin: 0 0 22px; }
+.considerandos p { margin-bottom: 9px; }
+.tabela { overflow-x: auto; margin: 6px 0 20px; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; line-height: 1.5; }
+caption { caption-side: top; text-align: left; font-weight: 700; color: #0b6b80; padding: 0 0 8px; }
+th, td { border: 1px solid #dbe6ea; padding: 8px 10px; vertical-align: top; text-align: left; }
+th { background: #f4f8f9; font-weight: 700; }
+tfoot td { background: #fbfdf2; font-size: 13.5px; }
+mark { background: #fff3b0; color: inherit; padding: 0 3px; border-radius: 3px; }
+.definicoes p { margin-bottom: 9px; }
+.topo { font-size: 13px; margin: 14px 0 0; }
+.topo a { text-decoration: none; color: #56707e; }
+.topo a:hover, .topo a:focus { text-decoration: underline; }
+
 @media (max-width: 680px) {
   .hero { padding: 31px 18px; }
   .hero h1 { font-size: 29px; }
   main { padding: 26px 18px; margin: 12px 8px 40px; border-radius: 8px; }
   body { font-size: 15px; }
+  .sumario { padding: 14px 16px 10px; }
+  .sumario ol { columns: 1; }
+  table { font-size: 13.5px; }
+  th, td { padding: 6px 8px; }
 }
 @media print {
   body { background: #fff; }
   .hero { background: #fff; color: #0d2b3e; padding: 0; }
   .hero p:last-of-type, .stamp { color: #56707e; }
   main { box-shadow: none; padding: 0; margin: 20px auto; }
-  h2 { break-after: avoid; }
+  h2, h3 { break-after: avoid; }
   p, li { orphans: 3; widows: 3; }
+  .sumario { break-inside: avoid; }
+  .sumario ol { columns: 2; }
+  tr { break-inside: avoid; }
+  .topo { display: none; }
 }
