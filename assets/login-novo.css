@@ -140,6 +140,8 @@
   color: #3d5768;
 }
 .cf-login-novo .cf-back:hover { color: #0d2b3e; }
+/* Dados da empresa no pé da página (mesmos do rodapé do site). */
+.cf-login-novo .lg-legal { margin-top: 28px; max-width: 420px; font-size: 12px; line-height: 1.6; color: #3d5768; opacity: .8; text-align: center; }
 .cf-login-novo .lg-voltar { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
 /* Celular. */
