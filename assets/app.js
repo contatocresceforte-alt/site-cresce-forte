@@ -520,6 +520,12 @@
         return;
       }
       vivo = session.access_token;
+      // Aceite dos Termos e da Política (LGPD, 02/11): só com a sessão validada.
+      if (window.CresceForteTermos) {
+        window.CresceForteTermos.conferir(API_CRM, function () { return vivo; }, function () {
+          document.getElementById('logout-btn').click();
+        });
+      }
       // O supabase-js renova a sessão sozinho em segundo plano; sem isto o hub
       // ficaria com o token do carregamento para sempre e uma aba velha mandaria
       // iat de dezenas de minutos, que o servidor recusa.

@@ -381,3 +381,17 @@ h1, h2, p { margin: 0; }
 /* Dados da empresa no pé do portal (mesmos do rodapé do site). */
 .cf-legal { margin-top: 48px; padding-top: 16px; border-top: 1px solid rgba(15, 23, 42, .08); font-size: 12px; line-height: 1.6; color: var(--ink-500); }
 .cf-legal a { color: inherit; text-underline-offset: 3px; }
+
+/* Aceite dos Termos e da Política (assets/app-termos.js). */
+.cf-termos-veu { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(10, 32, 53, .55); }
+.cf-termos { width: 100%; max-width: 460px; background: #fff; border-radius: 16px; padding: 28px; box-shadow: 0 20px 50px rgba(10, 32, 53, .25); }
+.cf-termos h2 { margin: 0 0 8px; font-size: 18px; color: #0d2b3e; }
+.cf-termos p { margin: 0 0 14px; font-size: 13.5px; line-height: 1.6; color: var(--ink-600); }
+.cf-termos-links { margin: 0 0 16px; padding-left: 18px; font-size: 14px; line-height: 1.8; }
+.cf-termos-links a { color: #0b6b80; }
+.cf-termos-marca { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 16px; font-size: 13.5px; color: #3d5768; cursor: pointer; }
+.cf-termos-marca input { margin-top: 3px; }
+.cf-termos-erro { padding: 8px 10px; border-radius: 8px; background: #fef2f2; color: #b91c1c; }
+.cf-termos-aceitar { width: 100%; padding: 11px 0; border: 0; border-radius: 10px; background: #4f8a00; color: #fff; font-weight: 600; font-size: 14px; cursor: pointer; }
+.cf-termos-aceitar:disabled { opacity: .55; cursor: default; }
+.cf-termos-sair { width: 100%; margin-top: 10px; padding: 8px 0; border: 0; border-radius: 10px; background: transparent; color: var(--ink-500); font-weight: 600; font-size: 13px; cursor: pointer; }
