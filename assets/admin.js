@@ -43,6 +43,16 @@
   // consegue gravar.
   var planosNoBanco = true;
 
+  // Domínio próprio da vitrine (Alain, 10/11): tabela "dominiosProprios" do
+  // Catálogo (drizzle/0025), um domínio por loja, só vale no plano PRO (quem
+  // aplica a regra é o Catálogo, server/dominioProprio.ts). Esta tela grava
+  // direto pelo Supabase (policies *_dominiosproprios_platform, só PLATFORM).
+  // false enquanto a tabela não existir: a linha do domínio não aparece.
+  var dominiosNoBanco = false;
+  var dominiosPorEmpresa = {};
+  // Mesmo formato do CHECK da 0025 e de server/dominioProprio.ts.
+  var FORMATO_DOMINIO = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/;
+
   function formatPlano(plano) {
     return PLANO_LABELS[plano || ''] || plano;
   }
@@ -177,6 +187,7 @@
   async function loadCompanies() {
     companiesListEl.innerHTML = '<p class="cf-loading">Carregando empresas...</p>';
 
+    var dominiosCarregados = carregaDominios();
     var result = await supabase
       .from('companies')
       .select('id, legal_name, trade_name, status, plano_catalogo')
@@ -201,6 +212,7 @@
       return;
     }
 
+    await dominiosCarregados;
     todasEmpresas = result.data || [];
     filtroPlanoEl.parentNode.hidden = !planosNoBanco;
     atualizaContagemDePlanos();
@@ -335,6 +347,7 @@
     main.appendChild(statusRow);
 
     if (planosNoBanco) main.appendChild(buildPlanoRow(company, companyLabel));
+    if (planosNoBanco && dominiosNoBanco) main.appendChild(buildDominioRow(company, companyLabel));
 
     var detalhes = document.createElement('div');
     detalhes.className = 'sa-row-details';
@@ -460,6 +473,196 @@
           loadCompanies();
         });
     });
+
+    return row;
+  }
+
+  // Lê os domínios de todas as empresas de uma vez (são poucos). Qualquer erro
+  // (tabela ainda não criada, sem acesso) esconde a linha do domínio em vez de
+  // quebrar a lista. Só o código do erro vai ao console, nunca o texto do banco.
+  async function carregaDominios() {
+    try {
+      var r = await supabase.from('dominiosProprios').select('companyId, hostname, ativo');
+      if (r.error) throw r.error;
+      var mapa = {};
+      (r.data || []).forEach(function (d) { mapa[d.companyId] = d; });
+      dominiosPorEmpresa = mapa;
+      dominiosNoBanco = true;
+    } catch (erro) {
+      console.warn('Domínio próprio indisponível nesta tela:', (erro && erro.code) || 'sem código');
+      dominiosPorEmpresa = {};
+      dominiosNoBanco = false;
+    }
+  }
+
+  // O que se cola costuma vir com https://, barra no fim ou caminho: fica só o
+  // endereço, minúsculo, como o banco guarda.
+  function normalizaDominio(texto) {
+    var h = String(texto || '').trim().toLowerCase();
+    h = h.replace(/^[a-z][a-z0-9+.-]*:\/\//, '');
+    h = h.split(/[\/?#]/)[0];
+    return h.replace(/:\d+$/, '').replace(/\.$/, '');
+  }
+
+  function erroDoDominio(h) {
+    if (!h) return 'Digite o domínio, por exemplo www.lojadocliente.com.br.';
+    if (h.length > 253 || !FORMATO_DOMINIO.test(h)) {
+      return 'Domínio inválido. Use só o endereço, sem acento, por exemplo www.lojadocliente.com.br.';
+    }
+    if (h === 'cresceforte.com' || /\.cresceforte\.com$/.test(h)) {
+      return 'Esse endereço já é da Cresce Forte. Aqui vai o domínio que o cliente comprou.';
+    }
+    return '';
+  }
+
+  // Domínio próprio da vitrine (Alain, 10/11). O Alain cadastra aqui depois de
+  // o cliente pagar e liga quando o domínio estiver Ativo no Cloudflare. Fora
+  // do PRO a vitrine não abre no domínio (regra do Catálogo); a linha só mostra
+  // o aviso e o que estiver guardado.
+  function buildDominioRow(company, companyLabel) {
+    var atual = dominiosPorEmpresa[company.id] || null;
+
+    var row = document.createElement('div');
+    row.className = 'cf-status-row cf-plano-row cf-dominio-row';
+
+    var rotulo = document.createElement('span');
+    rotulo.className = 'cf-plano-rotulo';
+    rotulo.textContent = 'Domínio próprio';
+    row.appendChild(rotulo);
+
+    if (company.plano_catalogo !== 'PRO') {
+      var fora = document.createElement('span');
+      fora.className = 'cf-dominio-fora';
+      fora.textContent = atual
+        ? atual.hostname + ' (guardado: só abre a loja se ela voltar ao plano PRO)'
+        : 'Só no plano PRO.';
+      row.appendChild(fora);
+      return row;
+    }
+
+    var idCampo = 'dominio-' + company.id;
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.id = idCampo;
+    input.className = 'cf-dominio-input';
+    input.inputMode = 'url';
+    input.autocomplete = 'off';
+    input.spellcheck = false;
+    input.placeholder = 'www.lojadocliente.com.br';
+    input.value = atual ? atual.hostname : '';
+    input.setAttribute('aria-label', 'Domínio próprio da vitrine de ' + companyLabel);
+    row.appendChild(input);
+
+    var ligadoRotulo = document.createElement('label');
+    ligadoRotulo.className = 'cf-dominio-ligado';
+    var ligado = document.createElement('input');
+    ligado.type = 'checkbox';
+    ligado.id = 'dominio-ligado-' + company.id;
+    ligado.checked = !!(atual && atual.ativo);
+    ligadoRotulo.appendChild(ligado);
+    ligadoRotulo.appendChild(document.createTextNode(' Ligado'));
+    row.appendChild(ligadoRotulo);
+
+    var salvar = document.createElement('button');
+    salvar.type = 'button';
+    salvar.className = 'cf-primary-btn cf-btn-sm';
+    salvar.textContent = 'Salvar';
+    row.appendChild(salvar);
+
+    var remover = null;
+    if (atual) {
+      remover = document.createElement('button');
+      remover.type = 'button';
+      remover.className = 'cf-secondary-btn cf-btn-sm cf-btn-danger';
+      remover.textContent = 'Remover';
+      row.appendChild(remover);
+    }
+
+    var msg = document.createElement('span');
+    msg.className = 'cf-status-msg';
+    msg.setAttribute('role', 'status');
+    msg.setAttribute('aria-live', 'polite');
+    msg.hidden = true;
+    row.appendChild(msg);
+
+    var ajuda = document.createElement('p');
+    ajuda.className = 'cf-dominio-ajuda';
+    ajuda.textContent = 'Antes de ligar: o domínio cadastrado no Cloudflare (Custom Hostnames) e aparecendo como Ativo, ' +
+      'e o cliente com o CNAME do www apontando para lojas.cresceforte.com. ' +
+      'O endereço catalogo….cresceforte.com da loja continua abrindo.';
+    row.appendChild(ajuda);
+
+    function mostra(texto, ok) {
+      msg.textContent = texto;
+      msg.className = 'cf-status-msg ' + (ok ? 'cf-status-msg-ok' : 'cf-status-msg-error');
+      msg.hidden = false;
+    }
+    function trava(sim) {
+      input.disabled = sim;
+      ligado.disabled = sim;
+      salvar.disabled = sim;
+      if (remover) remover.disabled = sim;
+    }
+
+    salvar.addEventListener('click', function () {
+      var h = normalizaDominio(input.value);
+      var erro = erroDoDominio(h);
+      if (erro) { mostra(erro, false); input.focus(); return; }
+      input.value = h;
+      var ligar = ligado.checked;
+      // Ligar põe a vitrine no ar naquele endereço: um clique errado não vale
+      // sem confirmação. Trocar o domínio de uma loja já ligada também.
+      if (ligar && !(atual && atual.ativo && atual.hostname === h)) {
+        var aviso = 'Ligar ' + h + ' para ' + companyLabel + '?\n\nA vitrine passa a abrir nesse endereço. ' +
+          'Confira antes que o domínio está Ativo no Cloudflare.';
+        if (!window.confirm(aviso)) return;
+      }
+      trava(true);
+      msg.hidden = true;
+      supabase
+        .from('dominiosProprios')
+        .upsert({ companyId: company.id, hostname: h, ativo: ligar }, { onConflict: 'companyId' })
+        .select('companyId, hostname, ativo')
+        .then(function (result) {
+          // Sem linha devolvida, a RLS barrou em silêncio (mesma razão do status).
+          if (result.error || !result.data || !result.data.length) {
+            var codigo = result.error && result.error.code;
+            console.error('Erro ao salvar o domínio próprio:', codigo || 'nenhuma linha afetada (RLS?)');
+            trava(false);
+            mostra(codigo === '23505' ? 'Esse domínio já está cadastrado em outra loja.'
+              : codigo === '23514' ? 'Domínio inválido.'
+              : 'Erro ao salvar. Tente novamente.', false);
+            return;
+          }
+          dominiosPorEmpresa[company.id] = result.data[0];
+          loadCompanies();
+        });
+    });
+
+    if (remover) {
+      remover.addEventListener('click', function () {
+        var aviso = 'Remover o domínio ' + atual.hostname + ' de ' + companyLabel + '?\n\n' +
+          'A vitrine para de abrir nesse endereço. O catalogo….cresceforte.com da loja continua abrindo.';
+        if (!window.confirm(aviso)) return;
+        trava(true);
+        msg.hidden = true;
+        supabase
+          .from('dominiosProprios')
+          .delete()
+          .eq('companyId', company.id)
+          .select('companyId')
+          .then(function (result) {
+            if (result.error || !result.data || !result.data.length) {
+              console.error('Erro ao remover o domínio próprio:', (result.error && result.error.code) || 'nenhuma linha afetada (RLS?)');
+              trava(false);
+              mostra('Erro ao remover. Tente novamente.', false);
+              return;
+            }
+            delete dominiosPorEmpresa[company.id];
+            loadCompanies();
+          });
+      });
+    }
 
     return row;
   }
