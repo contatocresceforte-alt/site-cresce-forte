@@ -16,7 +16,11 @@
   // login nativo (enquanto ele existir).
   var MODULE_INFO = {
     crm: { url: 'https://crm.cresceforte.com/', ticketUrl: 'https://crm.cresceforte.com/api/auth/portal-ticket', titulo: 'Relacione-se com seus clientes.', desc: 'Converse com seus clientes, organize seu funil de vendas e gerencie seu relacionamento de forma simples e eficiente.', icone: 'i-crm' },
-    catalogo: { url: 'https://catalogo.cresceforte.com/', ticketUrl: 'https://catalogo.cresceforte.com/catalog-editor-api/portal-ticket', titulo: 'Monte e publique seu catálogo digital.', desc: 'Apresente seus produtos de forma profissional e aumente suas vendas com um catálogo moderno e completo.', icone: 'i-catalogo' }
+    catalogo: { url: 'https://catalogo.cresceforte.com/', ticketUrl: 'https://catalogo.cresceforte.com/catalog-editor-api/portal-ticket', titulo: 'Monte e publique seu catálogo digital.', desc: 'Apresente seus produtos de forma profissional e aumente suas vendas com um catálogo moderno e completo.', icone: 'i-catalogo' },
+    // Terceiro produto (Alain, 10/11): mora no mesmo servidor do Catálogo, em
+    // /mercado, e usa o mesmo emissor de ticket (o painel de lá decide a tela
+    // pelo serviço 'supermercado' liberado no Super Admin).
+    supermercado: { url: 'https://catalogo.cresceforte.com/mercado', ticketUrl: 'https://catalogo.cresceforte.com/catalog-editor-api/portal-ticket', titulo: 'Seu supermercado com pedidos pelo WhatsApp.', desc: 'Milhares de produtos com busca, categorias, ofertas e importação por planilha, num catálogo rápido no celular.', icone: 'i-mercado' }
   };
 
   // Ícone do sprite de /app/index.html. `i-modulo` é o genérico de quem entrar

@@ -228,6 +228,12 @@ h1, h2, p { margin: 0; }
 .cf-module.is-catalogo .cf-open { background: var(--green-900); }
 .cf-module.is-catalogo:hover .cf-open { background: #0f4a3a; }
 
+/* Supermercado (terceiro produto, 10/11): cartão claro, laranja de feira. */
+.cf-module.is-supermercado { background: linear-gradient(150deg, #fffbf6 0%, #fbf1e6 100%); border-color: #f0e0cc; }
+.cf-module.is-supermercado .cf-tile { background: #ffe9d1; color: #8a3a06; }
+.cf-module.is-supermercado .cf-open { background: #b8460d; }
+.cf-module.is-supermercado:hover .cf-open { background: #93380b; }
+
 /* Cartão sem destino (módulo ativo que o hub ainda não sabe abrir): não é
    clicável, então não finge que é. */
 .cf-module.is-static { cursor: default; }
