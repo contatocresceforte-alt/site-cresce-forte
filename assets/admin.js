@@ -11,12 +11,28 @@
   // EasyPanel (que bypassa o Cloudflare).
   var PLATFORM_API_BASE = 'https://crm.cresceforte.com/api';
 
-  // Prazo do POST que cria empresa. A criação mexe em Auth e banco, então é
-  // generosa de propósito: 20 s. O texto diz que a empresa PODE ter sido criada
-  // porque cortar o pedido não desfaz o que o servidor já fez — mandar "tente de
-  // novo" aqui produziria empresa duplicada e dois convites ao mesmo e-mail.
-  var CRIAR_EMPRESA_PRAZO_MS = 20000;
-  var MSG_SEM_RESPOSTA = 'O servidor não respondeu a tempo. A empresa PODE ter sido criada: recarregue a página e confira na lista antes de tentar de novo.';
+  // Prazo do POST que cria empresa: cortar o pedido não desfaz o que o
+  // servidor já fez — por isso, sem resposta, a tela confere antes de dizer
+  // qualquer coisa (ver abaixo).
+  // CADASTRO QUE "EMPATAVA" (Alain, 12/11, e o mesmo em 10/11). Três coisas:
+  //  - o prazo de 20 s começava ANTES de a tela ler a sessão de login; se a
+  //    sessão demorava (aba aberta há horas, renovando o token), o prazo
+  //    vencia antes de o pedido sair e a tela dizia "PODE ter sido criada"
+  //    sem nada ter chegado ao servidor. Agora a sessão tem prazo próprio e,
+  //    se ele vence, a tela diz que nada foi enviado;
+  //  - o cadastro em si (empresa, usuário no Auth, perfil, acesso, funil)
+  //    tem 60 s, não 20;
+  //  - se mesmo assim a resposta se perde, a tela CONFERE sozinha se a
+  //    empresa foi criada e, se foi, gera a senha do administrador (rota de
+  //    "Nova senha" do Super Admin) — em vez de mandar recarregar e conferir.
+  //    O servidor recusa cadastro repetido (mesmo CNPJ ou e-mail), então
+  //    tentar de novo nunca duplica.
+  var CRIAR_EMPRESA_PRAZO_MS = 60000;
+  var SESSAO_PRAZO_MS = 10000;
+  var CONFERIR_TENTATIVAS = 8;
+  var CONFERIR_INTERVALO_MS = 4000;
+  var USUARIOS_PRAZO_MS = 20000;
+  var MSG_SEM_CONFIRMACAO = 'O servidor não respondeu e não consegui confirmar se a empresa foi criada. Recarregue a página e confira na lista: se ela não estiver lá, pode tentar de novo (o sistema não deixa duplicar).';
 
   // Valores reais de companies.status (supabase/migrations/0015_companies.sql
   // no repo do CRM) — sempre maiúsculo, check constraint no banco.
@@ -937,93 +953,166 @@
     newCompanySubmit.disabled = true;
     newCompanyCancel.disabled = true;
     newCompanyMsg.hidden = true;
+    // Folga de 2 min para relógio do computador adiantado: a conferência
+    // procura a empresa com este nome criada a partir daqui.
+    var desde = new Date(Date.now() - 120000).toISOString();
 
-    // Sem prazo, um pedido que nunca responde deixava os DOIS botões
-    // desabilitados para sempre e nenhuma mensagem na tela: nem criar de novo,
-    // nem cancelar, só recarregar a página — e sem saber o que aconteceu. O
-    // prazo existe com ou sem AbortController (com ele o pedido também é
-    // cortado); o `venceu` é uma corrida, não um substituto da resposta.
-    var controller = window.AbortController ? new window.AbortController() : null;
-    // O que decide a mensagem NÃO é o nome do erro, é "o pedido pode ter chegado
-    // ao servidor?". Prazo estourado e queda de rede compartilham isso: em
-    // qualquer um dos dois o servidor pode ter criado a empresa, o usuário no
-    // Auth e mandado o convite, e a resposta é que se perdeu. Só prova que nada
-    // aconteceu o erro levantado ANTES de o pedido partir, ou uma RESPOSTA do
-    // servidor (aí ele decidiu, e a resposta diz o quê). Achado da Esther: com a
-    // checagem por `AbortError`, `TypeError: Failed to fetch` caía na moldura
-    // otimista e o admin clicava de novo, criando a duplicata.
-    var pedidoPartiu = false;
-    var houveResposta = false;
-    var venceu;
-    var prazo = new Promise(function (r) { venceu = r; });
-    var prazoId = setTimeout(function () {
-      if (controller) { controller.abort(); }
-      venceu();
-    }, CRIAR_EMPRESA_PRAZO_MS);
-
-    supabase.auth.getSession()
-      .then(function (sessionResult) {
-        var token = sessionResult.data && sessionResult.data.session && sessionResult.data.session.access_token;
-        if (!token) throw new Error('Sessão expirada. Recarregue a página e faça login novamente.');
-
-        pedidoPartiu = true;
-        return Promise.race([
-          prazo.then(function () { throw new Error(MSG_SEM_RESPOSTA); }),
-          fetch(PLATFORM_API_BASE + '/plataforma/empresas', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer ' + token
-            },
-            body: JSON.stringify(payload),
-            signal: controller ? controller.signal : undefined
-          })
-        ]);
-      })
-      .then(function (res) {
-        houveResposta = true;
-        return res.json().catch(function () { return {}; }).then(function (body) {
-          if (!res.ok) {
-            var mensagem = (body.erro && body.erro.mensagem) || ('Falha ao criar empresa (HTTP ' + res.status + ').');
-            throw new Error(mensagem);
-          }
-          return body.dados;
-        });
-      })
-      .then(function (dados) {
-        var empresaId = dados && dados.empresa && dados.empresa.id;
-        return gravaPlanoDaNovaEmpresa(empresaId, planoEscolhido).then(function (planoGravado) {
-          return { dados: dados, planoGravado: planoGravado };
-        });
-      })
-      .then(function (r) {
-        var senha = r.dados && r.dados.senhaTemporaria;
-        // A empresa existe nos dois casos; só muda o recado. Se o plano não
-        // gravou, ela ficou "Sem plano" (sem limites) até alguém escolher na
-        // lista — e a senha aparece igual, porque não há como vê-la de novo.
-        var texto = r.planoGravado
-          ? (senha
-            ? 'Empresa criada. Senha temporária do administrador — copie agora, ela não aparece de novo:'
-            : 'Empresa criada com sucesso.')
-          : 'Empresa criada, mas o plano do catálogo NÃO foi salvo: escolha o plano na lista de empresas abaixo.' +
-            (senha ? ' Senha temporária do administrador — copie agora, ela não aparece de novo:' : '');
-        showNewCompanyMsg(texto, r.planoGravado, senha);
-        // form.reset() só afeta os controles (input/select), não o <p> da
-        // mensagem — limpa os campos sem esconder o aviso da senha. Sem
-        // isso, clicar "Criar empresa" de novo por engano reenviaria os
-        // mesmos dados e criaria uma empresa duplicada.
-        newCompanyForm.reset();
-        loadCompanies();
+    sessaoComPrazo()
+      .then(function (token) { return enviarCadastro(payload, token); })
+      .then(function (envio) {
+        if (envio.semResposta) return conferirSeFoiCriada(payload, desde, planoEscolhido);
+        return concluirCadastro(envio.dados, planoEscolhido);
       })
       .catch(function (erro) {
         console.error('Erro ao criar empresa:', erro);
-        var semResposta = pedidoPartiu && !houveResposta;
-        showNewCompanyMsg(semResposta ? MSG_SEM_RESPOSTA : (erro.message || 'Não foi possível criar a empresa.'), false);
+        showNewCompanyMsg(erro.message || 'Não foi possível criar a empresa.', false);
       })
       .finally(function () {
-        clearTimeout(prazoId);
         newCompanySubmit.disabled = false;
         newCompanyCancel.disabled = false;
       });
   });
+
+  var PRAZO_VENCIDO = {};
+  function comPrazo(promessa, ms) {
+    var id;
+    var prazo = new Promise(function (ok) { id = setTimeout(function () { ok(PRAZO_VENCIDO); }, ms); });
+    return Promise.race([promessa, prazo]).finally(function () { clearTimeout(id); });
+  }
+
+  // Token da sessão, com prazo próprio. Vencido = nada foi enviado ainda.
+  function sessaoComPrazo() {
+    return comPrazo(supabase.auth.getSession(), SESSAO_PRAZO_MS).then(function (r) {
+      if (r === PRAZO_VENCIDO) {
+        throw new Error('A sessão do painel não respondeu, e nada foi enviado. Recarregue a página (F5) e tente de novo.');
+      }
+      var token = r && r.data && r.data.session && r.data.session.access_token;
+      if (!token) throw new Error('Sessão expirada. Recarregue a página e faça login novamente.');
+      return token;
+    });
+  }
+
+  // { dados } quando o servidor respondeu 2xx; { semResposta: true } quando o
+  // pedido saiu e a resposta não voltou (prazo ou queda de rede: o servidor
+  // pode ter criado tudo); Error com a mensagem do servidor quando ele RECUSOU.
+  function enviarCadastro(payload, token) {
+    var controle = window.AbortController ? new window.AbortController() : null;
+    var venceu = false;
+    var id = setTimeout(function () { venceu = true; if (controle) controle.abort(); }, CRIAR_EMPRESA_PRAZO_MS);
+    var pedido = fetch(PLATFORM_API_BASE + '/plataforma/empresas', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify(payload),
+      signal: controle ? controle.signal : undefined
+    }).then(function (res) {
+      return res.json().catch(function () { return {}; }).then(function (body) {
+        if (!res.ok) {
+          throw Object.assign(new Error((body.erro && body.erro.mensagem) || ('Falha ao criar empresa (HTTP ' + res.status + ').')), { respondeu: true });
+        }
+        return { dados: body.dados };
+      });
+    }, function () {
+      return { semResposta: true };
+    });
+    // Sem AbortController, o prazo decide sozinho.
+    var prazo = new Promise(function (ok) {
+      var olhar = setInterval(function () { if (venceu) { clearInterval(olhar); ok({ semResposta: true }); } }, 500);
+      pedido.then(function () { clearInterval(olhar); }, function () { clearInterval(olhar); });
+    });
+    return Promise.race([pedido, prazo]).finally(function () { clearTimeout(id); });
+  }
+
+  function concluirCadastro(dados, plano, comoFoi) {
+    var empresaId = dados && dados.empresa && dados.empresa.id;
+    return gravaPlanoDaNovaEmpresa(empresaId, plano).then(function (planoGravado) {
+      var senha = dados && dados.senhaTemporaria;
+      var inicio = comoFoi || 'Empresa criada.';
+      var texto = planoGravado
+        ? (senha ? inicio + ' Senha temporária do administrador — copie agora, ela não aparece de novo:' : inicio)
+        : inicio + ' Mas o plano do catálogo NÃO foi salvo: escolha o plano na lista de empresas abaixo.' +
+          (senha ? ' Senha temporária do administrador — copie agora, ela não aparece de novo:' : '');
+      showNewCompanyMsg(texto, planoGravado, senha);
+      // Limpa os campos (não a mensagem): clicar "Criar empresa" de novo por
+      // engano não reenvia os mesmos dados.
+      newCompanyForm.reset();
+      loadCompanies();
+    });
+  }
+
+  function esperar(ms) { return new Promise(function (ok) { setTimeout(ok, ms); }); }
+
+  function chamarPlataforma(metodo, rota, token) {
+    var controle = window.AbortController ? new window.AbortController() : null;
+    var id = setTimeout(function () { if (controle) controle.abort(); }, USUARIOS_PRAZO_MS);
+    return fetch(PLATFORM_API_BASE + rota, {
+      method: metodo,
+      headers: { 'Authorization': 'Bearer ' + token },
+      signal: controle ? controle.signal : undefined
+    }).then(function (res) {
+      return res.json().catch(function () { return {}; }).then(function (body) { return { ok: res.ok, corpo: body }; });
+    }).finally(function () { clearTimeout(id); });
+  }
+
+  // A resposta se perdeu: a empresa com este nome, criada agora, existe? E o
+  // administrador dela? Se sim, gera a senha (a da resposta perdida não volta:
+  // o Auth guarda só o hash) e termina o cadastro como se nada tivesse havido.
+  function conferirSeFoiCriada(payload, desde, plano) {
+    showNewCompanyMsg('A resposta do servidor não chegou. Conferindo se a empresa foi criada…', true);
+    var email = String(payload.adminEmail || '').trim().toLowerCase();
+    var tentativa = 0;
+    var empresaAchada = null;
+
+    function rodada() {
+      tentativa++;
+      return supabase
+        .from('companies')
+        .select('id')
+        .eq('legal_name', payload.legalName)
+        .gte('created_at', desde)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .then(function (r) {
+          if (r.error) throw new Error(MSG_SEM_CONFIRMACAO);
+          var empresa = r.data && r.data[0];
+          if (!empresa) return null;
+          empresaAchada = empresa.id;
+          return sessaoComPrazo().then(function (token) {
+            var base = '/plataforma/empresas/' + encodeURIComponent(empresa.id) + '/usuarios';
+            return chamarPlataforma('GET', base, token).then(function (lista) {
+              var usuarios = (lista.ok && Array.isArray(lista.corpo.dados)) ? lista.corpo.dados : [];
+              var admin = usuarios.filter(function (u) { return String(u.email || '').toLowerCase() === email; })[0];
+              // Empresa ainda sem o administrador: o servidor pode estar no meio.
+              if (!admin) return null;
+              return chamarPlataforma('POST', base + '/' + encodeURIComponent(admin.id) + '/senha', token).then(function (r2) {
+                var senha = r2.ok && r2.corpo.dados ? r2.corpo.dados.senhaTemporaria : null;
+                return { empresa: { id: empresa.id }, senhaTemporaria: senha, senhaFalhou: !senha };
+              }, function () {
+                return { empresa: { id: empresa.id }, senhaTemporaria: null, senhaFalhou: true };
+              });
+            });
+          });
+        })
+        .then(function (achado) {
+          if (achado) return achado;
+          if (tentativa >= CONFERIR_TENTATIVAS) return null;
+          return esperar(CONFERIR_INTERVALO_MS).then(rodada);
+        });
+    }
+
+    return rodada().then(function (achado) {
+      if (!achado) {
+        if (empresaAchada) {
+          throw new Error('A empresa foi criada, mas o administrador ainda não apareceu. Recarregue a página em um minuto e confira na lista; não crie de novo.');
+        }
+        throw new Error('A empresa NÃO foi criada: o servidor não chegou a gravar. Pode tentar de novo.');
+      }
+      if (achado.senhaFalhou) {
+        return concluirCadastro({ empresa: achado.empresa }, plano,
+          'Empresa criada (a resposta do servidor não chegou), mas não consegui gerar a senha agora: na lista, abra os usuários da empresa e use "Nova senha".');
+      }
+      return concluirCadastro(achado, plano, 'Empresa criada (a resposta do servidor não chegou; esta é uma senha nova).');
+    }, function (erro) {
+      throw new Error(erro && erro.message ? erro.message : MSG_SEM_CONFIRMACAO);
+    });
+  }
 })();
