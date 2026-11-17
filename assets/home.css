@@ -18,11 +18,12 @@ a{text-decoration:none}
 .btn-crm:hover{background:#0b6b80}
 
 /* ---------- header ---------- */
-.hdr{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px clamp(20px,4vw,56px);background:#0a2035;border-bottom:1px solid rgba(255,255,255,.08)}
+/* Sem a linha de baixo: o cabeçalho e o topo são um fundo só. */
+.hdr{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px clamp(20px,4vw,56px);background:#0a2035}
 .hdr-logo{display:flex;align-items:center;gap:10px}
-.hdr-mark{width:32px;height:32px;border-radius:8px;flex-shrink:0;background:#fff;border:1px solid rgba(13,43,62,.1);display:flex;align-items:center;justify-content:center;padding:4px;box-shadow:0 1px 2px rgba(13,43,62,.06)}
-.hdr-mark img{width:100%;height:100%;object-fit:contain}
-.hdr-brand{font-family:'Space Grotesk',Inter,sans-serif;font-weight:600;font-size:17px;letter-spacing:-.01em;white-space:nowrap;flex-shrink:0;color:#fff}
+/* Logotipo direto no fundo, sem quadro (Alain, 17/11): versão com o "C" e o
+   nome em branco e a seta no degradê original, fundo transparente. */
+.hdr-logotipo{display:block;height:52px;width:auto;flex-shrink:0}
 .hdr-actions{display:flex;align-items:center;gap:12px}
 .hdr-login{font-size:14px;font-weight:600;color:rgba(255,255,255,.78);white-space:nowrap;transition:color .2s ease}
 .hdr-login:hover{color:#fff}
@@ -30,14 +31,14 @@ a{text-decoration:none}
 .hdr-sm{display:none}
 @media (max-width:620px){
   .hdr{gap:10px;padding:11px 16px}
-  .hdr-brand{font-size:15.5px}
+  .hdr-logotipo{height:40px}
   .hdr-actions{gap:10px}
   .hdr-login{font-size:13.5px}
   .hdr-wa{font-size:13.5px;min-height:38px;padding:0 16px}
   .hdr-lg{display:none}
   .hdr-sm{display:inline}
 }
-@media (max-width:359px){.hdr-brand{display:none}}
+@media (max-width:359px){.hdr-logotipo{height:32px}}
 
 /* ---------- fundo do topo ---------- */
 /* Antes: imagem de papel de parede. Trocado por degradê só de tons do mesmo
@@ -47,9 +48,20 @@ a{text-decoration:none}
   background-image:linear-gradient(180deg,rgba(239,244,245,0) 84%,rgba(239,244,245,.85) 96%,#eff4f5 100%),linear-gradient(160deg,#0a2035 0%,#0d2b3e 55%,#0a2035 100%);
   background-size:100% 100%,100% 100%;
   background-position:center top,center top;
-  background-repeat:no-repeat
+  background-repeat:no-repeat;
+  position:relative;isolation:isolate;overflow-x:clip
+}
+/* Símbolo da marca grande e bem suave no fundo, à direita (Alain, 17/11):
+   a logo faz parte do fundo em vez de ficar num quadro. */
+.hero-wall::before{
+  content:"";position:absolute;z-index:-1;pointer-events:none;
+  top:clamp(8px,3vw,40px);right:clamp(-160px,-8vw,-40px);
+  width:clamp(300px,42vw,600px);aspect-ratio:534/640;
+  background:url("cresce-forte-simbolo-fundo-escuro.webp?v=1") no-repeat center/contain;
+  opacity:.07
 }
 @media (max-width:860px){
+  .hero-wall::before{top:6px;right:-90px;width:300px;opacity:.06}
   .hero-wall{background-image:linear-gradient(180deg,rgba(239,244,245,0) 82%,rgba(239,244,245,.85) 95%,#eff4f5 100%),linear-gradient(160deg,#0a2035 0%,#0d2b3e 55%,#0a2035 100%)}
 }
 
