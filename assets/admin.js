@@ -47,20 +47,27 @@
 
   // Plano do Catálogo (Alain, 26/10): companies.plano_catalogo, migration 0058
   // do CRM. Básico = até 100 produtos, sem vídeo; PRO = até 250, vídeo de até
-  // 15 s. Sem meio-termo (Alain, 26/10): toda empresa é Básico ou PRO — as que
+  // 15 s. Sem meio-termo (Alain, 26/10): toda empresa tem plano — as que
   // existiam passaram ao PRO no mesmo dia. '' (null no banco) só sobra se a
   // gravação do plano falhar no cadastro: aparece "Sem plano" e o seletor pede
   // a escolha, mas "Sem plano" não é opção de troca. Quem aplica a regra é o
   // Catálogo (server/planoDaEmpresa.ts); esta tela só grava.
-  var PLANO_LABELS = { '': 'Sem plano', BASICO: 'Básico', PRO: 'PRO' };
-  var PLANO_OPTIONS = ['BASICO', 'PRO'];
+  //
+  // Premium (Alain, 17/11/2026; migration 0064 do CRM): tudo do PRO MAIS o
+  // pagamento online da loja (Pix e cartão pela InfinitePay). Em teste: o
+  // Catálogo ainda só liga o pagamento online para as lojas da lista dele
+  // (shared/pagamentoOnline.ts). Sem a 0064 no banco, gravar 'PREMIUM' é
+  // recusado (23514) e a tela avisa (ver buildPlanoRow).
+  var PLANO_LABELS = { '': 'Sem plano', BASICO: 'Básico', PRO: 'PRO', PREMIUM: 'Premium' };
+  var PLANO_OPTIONS = ['BASICO', 'PRO', 'PREMIUM'];
   // false enquanto a coluna não existir no banco (código no ar antes da
   // migration): a lista carrega como antes e a tela não oferece o que não
   // consegue gravar.
   var planosNoBanco = true;
 
   // Domínio próprio da vitrine (Alain, 10/11): tabela "dominiosProprios" do
-  // Catálogo (drizzle/0025), um domínio por loja, só vale no plano PRO (quem
+  // Catálogo (drizzle/0025), um domínio por loja, só vale nos planos PRO e
+  // Premium (quem
   // aplica a regra é o Catálogo, server/dominioProprio.ts). Esta tela grava
   // direto pelo Supabase (policies *_dominiosproprios_platform, só PLATFORM).
   // false enquanto a tabela não existir: a linha do domínio não aparece.
@@ -136,11 +143,13 @@
   });
 
   function atualizaContagemDePlanos() {
-    var conta = { BASICO: 0, PRO: 0 };
+    var conta = { BASICO: 0, PRO: 0, PREMIUM: 0 };
     todasEmpresas.forEach(function (c) { if (conta[c.plano_catalogo] !== undefined) conta[c.plano_catalogo] += 1; });
     var frase = function (n) { return n === 1 ? '1 empresa neste plano' : n + ' empresas neste plano'; };
     document.getElementById('conta-basico').textContent = planosNoBanco ? frase(conta.BASICO) : '—';
     document.getElementById('conta-pro').textContent = planosNoBanco ? frase(conta.PRO) : '—';
+    var contaPremium = document.getElementById('conta-premium');
+    if (contaPremium) contaPremium.textContent = planosNoBanco ? frase(conta.PREMIUM) : '—';
   }
 
   function renderLista() {
@@ -462,6 +471,14 @@
           'bloqueados (em cinza) e fora da loja até ela excluir produtos ou voltar ao PRO.';
       }
       if (novo === 'PRO') aviso += '\n\nNo PRO: até 250 produtos e vídeos de até 15 segundos.';
+      if (novo === 'PREMIUM') {
+        aviso += '\n\nNo Premium: tudo do PRO (até 250 produtos, vídeos de até 15 segundos e domínio próprio) ' +
+          'e mais o pagamento online na loja (Pix e cartão pela InfinitePay).' +
+          '\nO pagamento online ainda está em teste: por enquanto só funciona nas lojas liberadas pela equipe.';
+      }
+      if (planoAtual === 'PREMIUM' && novo !== 'PREMIUM') {
+        aviso += '\n\nSaindo do Premium, a loja deixa de oferecer o pagamento online (Pix e cartão).';
+      }
       if (!window.confirm(aviso)) {
         select.value = planoAtual;
         return;
@@ -480,7 +497,11 @@
             console.error('Erro ao atualizar o plano da empresa:', result.error || 'nenhuma linha afetada (RLS?)');
             select.value = planoAtual;
             select.disabled = false;
-            msg.textContent = 'Erro ao salvar. Tente novamente.';
+            // 23514 = a trava de valores do banco recusou: o plano é novo e a
+            // migration que o aceita (0064 do CRM) ainda não foi aplicada.
+            msg.textContent = result.error && result.error.code === '23514'
+              ? 'O banco ainda não aceita o plano ' + formatPlano(novo) + '. Nada foi alterado.'
+              : 'Erro ao salvar. Tente novamente.';
             msg.className = 'cf-status-msg cf-status-msg-error';
             msg.hidden = false;
             return;
@@ -533,8 +554,8 @@
 
   // Domínio próprio da vitrine (Alain, 10/11). O Alain cadastra aqui depois de
   // o cliente pagar e liga quando o domínio estiver Ativo no Cloudflare. Fora
-  // do PRO a vitrine não abre no domínio (regra do Catálogo); a linha só mostra
-  // o aviso e o que estiver guardado.
+  // do PRO e do Premium a vitrine não abre no domínio (regra do Catálogo); a
+  // linha só mostra o aviso e o que estiver guardado.
   function buildDominioRow(company, companyLabel) {
     var atual = dominiosPorEmpresa[company.id] || null;
 
@@ -546,12 +567,12 @@
     rotulo.textContent = 'Domínio próprio';
     row.appendChild(rotulo);
 
-    if (company.plano_catalogo !== 'PRO') {
+    if (company.plano_catalogo !== 'PRO' && company.plano_catalogo !== 'PREMIUM') {
       var fora = document.createElement('span');
       fora.className = 'cf-dominio-fora';
       fora.textContent = atual
-        ? atual.hostname + ' (guardado: só abre a loja se ela voltar ao plano PRO)'
-        : 'Só no plano PRO.';
+        ? atual.hostname + ' (guardado: só abre a loja se ela voltar ao plano PRO ou Premium)'
+        : 'Só nos planos PRO e Premium.';
       row.appendChild(fora);
       return row;
     }

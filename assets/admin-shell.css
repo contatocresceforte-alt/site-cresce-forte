@@ -290,6 +290,7 @@
 .sa-plano-card h2 { margin: 0 0 14px; font-family: 'Space Grotesk', Inter, sans-serif; font-size: 20px; color: #0d2b3e; }
 .sa-plano-card ul { margin: 0 0 18px; padding-left: 18px; font-size: 14px; line-height: 1.7; color: #3d5768; }
 .sa-plano-pro { border-color: rgba(19, 138, 92, 0.4); }
+.sa-plano-premium { border-color: rgba(176, 124, 20, 0.5); }
 .sa-plano-conta { margin: 0; font-size: 14px; font-weight: 600; color: #138a5c; }
 
 /* ---------- celular e tablet ---------- */
