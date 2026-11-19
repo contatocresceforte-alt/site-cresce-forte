@@ -63,7 +63,6 @@
             <option value="">Todos os planos</option>
             <option value="BASICO">Plano Básico</option>
             <option value="PRO">Plano PRO</option>
-            <option value="PREMIUM">Plano Premium</option>
           </select>
         </label>
         <button type="button" class="sa-novo" id="new-company-toggle">
@@ -104,8 +103,7 @@
             <select id="nc-plano" required>
               <option value="" selected disabled>Escolha o plano</option>
               <option value="BASICO">Básico (até 100 produtos, sem vídeos)</option>
-              <option value="PRO">PRO (até 250 produtos, vídeos de até 15 s)</option>
-              <option value="PREMIUM">Premium (tudo do PRO + pagamento online, em teste)</option>
+              <option value="PRO">PRO (até 250 produtos, vídeos, domínio próprio e pagamento online)</option>
             </select>
           </div>
         </div>
@@ -155,17 +153,10 @@
         <ul>
           <li>Até <strong>250 produtos</strong></li>
           <li>Vídeos de até <strong>15 segundos</strong></li>
+          <li>Domínio próprio</li>
+          <li>Pagamento online na loja: <strong>Pix e cartão</strong> (InfinitePay). Começa desligado: o lojista liga na aba Pagamentos</li>
         </ul>
         <p class="sa-plano-conta" id="conta-pro">—</p>
-      </article>
-      <article class="sa-plano-card sa-plano-premium">
-        <h2>Plano Premium</h2>
-        <ul>
-          <li>Tudo do PRO: até <strong>250 produtos</strong>, vídeos de até <strong>15 segundos</strong> e domínio próprio</li>
-          <li>Pagamento online na loja: <strong>Pix e cartão</strong> (InfinitePay)</li>
-          <li>Pagamento online em teste: por enquanto só nas lojas liberadas pela equipe</li>
-        </ul>
-        <p class="sa-plano-conta" id="conta-premium">—</p>
       </article>
     </section>
   </main>
@@ -175,6 +166,6 @@
 <script src="/assets/sessao-do-navegador.js?v=1"></script>
 <script src="/assets/auth.js?v=7"></script>
 <script src="/assets/admin-usuarios.js?v=1"></script>
-<script src="/assets/admin.js?v=12"></script>
+<script src="/assets/admin.js?v=13"></script>
 </body>
 </html>

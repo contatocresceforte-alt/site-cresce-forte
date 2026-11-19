@@ -53,21 +53,22 @@
   // a escolha, mas "Sem plano" não é opção de troca. Quem aplica a regra é o
   // Catálogo (server/planoDaEmpresa.ts); esta tela só grava.
   //
-  // Premium (Alain, 17/11/2026; migration 0064 do CRM): tudo do PRO MAIS o
-  // pagamento online da loja (Pix e cartão pela InfinitePay). Em teste: o
-  // Catálogo ainda só liga o pagamento online para as lojas da lista dele
-  // (shared/pagamentoOnline.ts). Sem a 0064 no banco, gravar 'PREMIUM' é
-  // recusado (23514) e a tela avisa (ver buildPlanoRow).
-  var PLANO_LABELS = { '': 'Sem plano', BASICO: 'Básico', PRO: 'PRO', PREMIUM: 'Premium' };
-  var PLANO_OPTIONS = ['BASICO', 'PRO', 'PREMIUM'];
+  // O PREMIUM ACABOU (Andryw, 19/11/2026): o PRO ganhou o pagamento online
+  // (Pix e cartão pela InfinitePay) e o Premium saiu da tela. Liberado para
+  // todo PRO, mas cada loja começa com o pagamento DESLIGADO: quem liga é o
+  // lojista, na aba Pagamentos do Catálogo. O banco ainda aceita o valor
+  // 'PREMIUM' (migration 0064 do CRM); quem estiver gravado assim aparece e
+  // conta como PRO (`comoPlanoAtual`), como o Catálogo o lê.
+  var PLANO_LABELS = { '': 'Sem plano', BASICO: 'Básico', PRO: 'PRO' };
+  var PLANO_OPTIONS = ['BASICO', 'PRO'];
+  function comoPlanoAtual(valor) { return valor === 'PREMIUM' ? 'PRO' : valor; }
   // false enquanto a coluna não existir no banco (código no ar antes da
   // migration): a lista carrega como antes e a tela não oferece o que não
   // consegue gravar.
   var planosNoBanco = true;
 
   // Domínio próprio da vitrine (Alain, 10/11): tabela "dominiosProprios" do
-  // Catálogo (drizzle/0025), um domínio por loja, só vale nos planos PRO e
-  // Premium (quem
+  // Catálogo (drizzle/0025), um domínio por loja, só vale no plano PRO (quem
   // aplica a regra é o Catálogo, server/dominioProprio.ts). Esta tela grava
   // direto pelo Supabase (policies *_dominiosproprios_platform, só PLATFORM).
   // false enquanto a tabela não existir: a linha do domínio não aparece.
@@ -143,13 +144,11 @@
   });
 
   function atualizaContagemDePlanos() {
-    var conta = { BASICO: 0, PRO: 0, PREMIUM: 0 };
+    var conta = { BASICO: 0, PRO: 0 };
     todasEmpresas.forEach(function (c) { if (conta[c.plano_catalogo] !== undefined) conta[c.plano_catalogo] += 1; });
     var frase = function (n) { return n === 1 ? '1 empresa neste plano' : n + ' empresas neste plano'; };
     document.getElementById('conta-basico').textContent = planosNoBanco ? frase(conta.BASICO) : '—';
     document.getElementById('conta-pro').textContent = planosNoBanco ? frase(conta.PRO) : '—';
-    var contaPremium = document.getElementById('conta-premium');
-    if (contaPremium) contaPremium.textContent = planosNoBanco ? frase(conta.PREMIUM) : '—';
   }
 
   function renderLista() {
@@ -238,7 +237,10 @@
     }
 
     await dominiosCarregados;
-    todasEmpresas = result.data || [];
+    todasEmpresas = (result.data || []).map(function (c) {
+      c.plano_catalogo = comoPlanoAtual(c.plano_catalogo);
+      return c;
+    });
     filtroPlanoEl.parentNode.hidden = !planosNoBanco;
     atualizaContagemDePlanos();
     renderLista();
@@ -470,14 +472,13 @@
           '\nSe a loja tiver mais de 100 produtos, os primeiros 100 cadastrados continuam na loja; os outros ficam salvos, ' +
           'bloqueados (em cinza) e fora da loja até ela excluir produtos ou voltar ao PRO.';
       }
-      if (novo === 'PRO') aviso += '\n\nNo PRO: até 250 produtos e vídeos de até 15 segundos.';
-      if (novo === 'PREMIUM') {
-        aviso += '\n\nNo Premium: tudo do PRO (até 250 produtos, vídeos de até 15 segundos e domínio próprio) ' +
-          'e mais o pagamento online na loja (Pix e cartão pela InfinitePay).' +
-          '\nO pagamento online ainda está em teste: por enquanto só funciona nas lojas liberadas pela equipe.';
+      if (novo === 'PRO') {
+        aviso += '\n\nNo PRO: até 250 produtos, vídeos de até 15 segundos, domínio próprio e o pagamento online ' +
+          'na loja (Pix e cartão pela InfinitePay). O pagamento online começa desligado: quem liga é o lojista, ' +
+          'na aba Pagamentos.';
       }
-      if (planoAtual === 'PREMIUM' && novo !== 'PREMIUM') {
-        aviso += '\n\nSaindo do Premium, a loja deixa de oferecer o pagamento online (Pix e cartão).';
+      if (planoAtual === 'PRO' && novo !== 'PRO') {
+        aviso += '\n\nSaindo do PRO, a loja deixa de oferecer o pagamento online (Pix e cartão).';
       }
       if (!window.confirm(aviso)) {
         select.value = planoAtual;
@@ -554,7 +555,7 @@
 
   // Domínio próprio da vitrine (Alain, 10/11). O Alain cadastra aqui depois de
   // o cliente pagar e liga quando o domínio estiver Ativo no Cloudflare. Fora
-  // do PRO e do Premium a vitrine não abre no domínio (regra do Catálogo); a
+  // do PRO a vitrine não abre no domínio (regra do Catálogo); a
   // linha só mostra o aviso e o que estiver guardado.
   function buildDominioRow(company, companyLabel) {
     var atual = dominiosPorEmpresa[company.id] || null;
@@ -567,12 +568,12 @@
     rotulo.textContent = 'Domínio próprio';
     row.appendChild(rotulo);
 
-    if (company.plano_catalogo !== 'PRO' && company.plano_catalogo !== 'PREMIUM') {
+    if (company.plano_catalogo !== 'PRO') {
       var fora = document.createElement('span');
       fora.className = 'cf-dominio-fora';
       fora.textContent = atual
-        ? atual.hostname + ' (guardado: só abre a loja se ela voltar ao plano PRO ou Premium)'
-        : 'Só nos planos PRO e Premium.';
+        ? atual.hostname + ' (guardado: só abre a loja se ela voltar ao plano PRO)'
+        : 'Só no plano PRO.';
       row.appendChild(fora);
       return row;
     }
