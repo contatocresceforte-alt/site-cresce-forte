@@ -13,7 +13,7 @@
 <script src="/assets/font-swap.js?v=1"></script>
 <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet"></noscript>
 <link rel="stylesheet" href="/assets/admin-page.css?v=5">
-<link rel="stylesheet" href="/assets/admin-shell.css?v=3">
+<link rel="stylesheet" href="/assets/admin-shell.css?v=4">
 </head>
 <body class="sa-body">
 <div class="sa-shell">
@@ -58,11 +58,21 @@
           <input type="search" id="busca-empresa" placeholder="Buscar por nome da empresa..." autocomplete="off">
         </label>
         <label class="sa-filtro">
-          <span class="sa-sr">Filtrar por plano</span>
+          <span class="sa-sr">Filtrar por plano do catálogo</span>
           <select id="filtro-plano">
-            <option value="">Todos os planos</option>
-            <option value="BASICO">Plano Básico</option>
-            <option value="PRO">Plano PRO</option>
+            <option value="">Catálogo: todos</option>
+            <option value="BASICO">Catálogo Básico</option>
+            <option value="PRO">Catálogo PRO</option>
+            <option value="SEM">Catálogo sem plano</option>
+          </select>
+        </label>
+        <label class="sa-filtro">
+          <span class="sa-sr">Filtrar por plano do CRM</span>
+          <select id="filtro-plano-crm">
+            <option value="">CRM: todos</option>
+            <option value="BASICO">CRM Básico</option>
+            <option value="PRO">CRM PRO</option>
+            <option value="SEM">CRM sem plano</option>
           </select>
         </label>
         <button type="button" class="sa-novo" id="new-company-toggle">
@@ -104,6 +114,14 @@
               <option value="" selected disabled>Escolha o plano</option>
               <option value="BASICO">Básico (até 100 produtos, sem vídeos)</option>
               <option value="PRO">PRO (até 250 produtos, vídeos, domínio próprio e pagamento online)</option>
+            </select>
+          </div>
+          <div class="cf-field" id="nc-plano-crm-campo">
+            <label for="nc-plano-crm">Plano do CRM *</label>
+            <select id="nc-plano-crm" required>
+              <option value="" selected disabled>Escolha o plano</option>
+              <option value="BASICO">Básico</option>
+              <option value="PRO">PRO</option>
             </select>
           </div>
         </div>
@@ -166,6 +184,6 @@
 <script src="/assets/sessao-do-navegador.js?v=1"></script>
 <script src="/assets/auth.js?v=7"></script>
 <script src="/assets/admin-usuarios.js?v=1"></script>
-<script src="/assets/admin.js?v=13"></script>
+<script src="/assets/admin.js?v=14"></script>
 </body>
 </html>

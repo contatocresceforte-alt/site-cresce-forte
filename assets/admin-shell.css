@@ -251,6 +251,9 @@
 }
 .sa-row-plano strong { color: #0d2b3e; font-weight: 700; }
 .sa-row-sem-plano { color: #a3272a; font-weight: 600; }
+/* Catálogo e CRM, um embaixo do outro, na mesma célula da grade. */
+.sa-row-plano-item { display: block; }
+.sa-row-plano-item + .sa-row-plano-item { margin-top: 2px; }
 
 .sa-chevron { width: 20px; height: 20px; fill: none; stroke: #0d2b3e; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.15s; }
 .sa-row-aberta .sa-chevron { transform: rotate(90deg); }

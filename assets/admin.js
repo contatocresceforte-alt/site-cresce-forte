@@ -62,10 +62,39 @@
   var PLANO_LABELS = { '': 'Sem plano', BASICO: 'Básico', PRO: 'PRO' };
   var PLANO_OPTIONS = ['BASICO', 'PRO'];
   function comoPlanoAtual(valor) { return valor === 'PREMIUM' ? 'PRO' : valor; }
-  // false enquanto a coluna não existir no banco (código no ar antes da
-  // migration): a lista carrega como antes e a tela não oferece o que não
-  // consegue gravar.
-  var planosNoBanco = true;
+
+  // Plano do CRM (Alain, 22/11/2026): companies.plano_crm, migration 0065 do
+  // CRM, mesmos valores ('BASICO' | 'PRO'). As empresas que já tinham o CRM
+  // ficaram SEM plano (null) de propósito: quem escolhe é a equipe, aqui.
+  //
+  // Um plano por coluna; tudo o que lista, filtra, mostra e grava plano anda
+  // por esta tabela. `noBanco` = false enquanto a coluna não existir (código
+  // no ar antes da migration): a lista carrega como antes e a tela não oferece
+  // o que não consegue gravar. Cada coluna degrada sozinha.
+  var PLANOS = {
+    plano_catalogo: { nome: 'catálogo', rotuloLista: 'Catálogo', noBanco: true, aviso: avisoPlanoCatalogo },
+    plano_crm: { nome: 'CRM', rotuloLista: 'CRM', noBanco: true, aviso: null }
+  };
+  var COLUNAS_PLANO = Object.keys(PLANOS);
+  function planoNoBanco(coluna) { return PLANOS[coluna].noBanco; }
+
+  function avisoPlanoCatalogo(planoAtual, novo) {
+    var aviso = '';
+    if (novo === 'BASICO') {
+      aviso += '\n\nNo Básico: até 100 produtos e sem vídeos (os vídeos já cadastrados saem da loja, mas ficam guardados).' +
+        '\nSe a loja tiver mais de 100 produtos, os primeiros 100 cadastrados continuam na loja; os outros ficam salvos, ' +
+        'bloqueados (em cinza) e fora da loja até ela excluir produtos ou voltar ao PRO.';
+    }
+    if (novo === 'PRO') {
+      aviso += '\n\nNo PRO: até 250 produtos, vídeos de até 15 segundos, domínio próprio e o pagamento online ' +
+        'na loja (Pix e cartão pela InfinitePay). O pagamento online começa desligado: quem liga é o lojista, ' +
+        'na aba Pagamentos.';
+    }
+    if (planoAtual === 'PRO' && novo !== 'PRO') {
+      aviso += '\n\nSaindo do PRO, a loja deixa de oferecer o pagamento online (Pix e cartão).';
+    }
+    return aviso;
+  }
 
   // Domínio próprio da vitrine (Alain, 10/11): tabela "dominiosProprios" do
   // Catálogo (drizzle/0025), um domínio por loja, só vale no plano PRO (quem
@@ -106,6 +135,9 @@
   var abertas = {};
   var buscaEl = document.getElementById('busca-empresa');
   var filtroPlanoEl = document.getElementById('filtro-plano');
+  // Um filtro por plano; '' = todos, 'SEM' = sem plano escolhido.
+  PLANOS.plano_catalogo.filtroEl = filtroPlanoEl;
+  PLANOS.plano_crm.filtroEl = document.getElementById('filtro-plano-crm');
   var paginacaoEl = document.getElementById('paginacao');
   var paginacaoInfoEl = document.getElementById('paginacao-info');
   var paginacaoBotoesEl = document.getElementById('paginacao-botoes');
@@ -127,7 +159,9 @@
   }
 
   buscaEl.addEventListener('input', function () { pagina = 1; renderLista(); });
-  filtroPlanoEl.addEventListener('change', function () { pagina = 1; renderLista(); });
+  COLUNAS_PLANO.forEach(function (coluna) {
+    PLANOS[coluna].filtroEl.addEventListener('change', function () { pagina = 1; renderLista(); });
+  });
 
   // Seções da barra lateral.
   var secoes = { clientes: document.getElementById('secao-clientes'), planos: document.getElementById('secao-planos') };
@@ -147,15 +181,22 @@
     var conta = { BASICO: 0, PRO: 0 };
     todasEmpresas.forEach(function (c) { if (conta[c.plano_catalogo] !== undefined) conta[c.plano_catalogo] += 1; });
     var frase = function (n) { return n === 1 ? '1 empresa neste plano' : n + ' empresas neste plano'; };
-    document.getElementById('conta-basico').textContent = planosNoBanco ? frase(conta.BASICO) : '—';
-    document.getElementById('conta-pro').textContent = planosNoBanco ? frase(conta.PRO) : '—';
+    document.getElementById('conta-basico').textContent = planoNoBanco('plano_catalogo') ? frase(conta.BASICO) : '—';
+    document.getElementById('conta-pro').textContent = planoNoBanco('plano_catalogo') ? frase(conta.PRO) : '—';
+  }
+
+  function passaNosFiltrosDePlano(c) {
+    return COLUNAS_PLANO.every(function (coluna) {
+      var filtro = planoNoBanco(coluna) ? PLANOS[coluna].filtroEl.value : '';
+      if (!filtro) return true;
+      return filtro === 'SEM' ? !c[coluna] : c[coluna] === filtro;
+    });
   }
 
   function renderLista() {
     var termo = semAcento(buscaEl.value.trim());
-    var plano = planosNoBanco ? filtroPlanoEl.value : '';
     var lista = todasEmpresas.filter(function (c) {
-      if (plano && c.plano_catalogo !== plano) return false;
+      if (!passaNosFiltrosDePlano(c)) return false;
       if (!termo) return true;
       return semAcento(c.trade_name).indexOf(termo) >= 0 || semAcento(c.legal_name).indexOf(termo) >= 0;
     });
@@ -212,21 +253,24 @@
     companiesListEl.innerHTML = '<p class="cf-loading">Carregando empresas...</p>';
 
     var dominiosCarregados = carregaDominios();
-    var result = await supabase
-      .from('companies')
-      .select('id, legal_name, trade_name, status, plano_catalogo')
-      .order('trade_name', { ascending: true });
-
-    // 42703 = coluna inexistente (a migration 0058 ainda não rodou): carrega
-    // a lista como antes, sem a parte do plano, em vez de quebrar a tela.
-    if (result.error && result.error.code === '42703') {
-      planosNoBanco = false;
+    // 42703 = coluna inexistente (a migration 0058 ou a 0065 ainda não rodou):
+    // tira da consulta a coluna que faltou (o PostgREST a nomeia na mensagem;
+    // sem nome, tira todas as de plano) e carrega a lista sem aquela parte,
+    // em vez de quebrar a tela.
+    var colunas = COLUNAS_PLANO.slice();
+    var result;
+    for (;;) {
       result = await supabase
         .from('companies')
-        .select('id, legal_name, trade_name, status')
+        .select(['id', 'legal_name', 'trade_name', 'status'].concat(colunas).join(', '))
         .order('trade_name', { ascending: true });
-    } else if (!result.error) {
-      planosNoBanco = true;
+      if (!result.error || result.error.code !== '42703' || !colunas.length) break;
+      var mensagem = String(result.error.message || '');
+      var faltou = colunas.filter(function (coluna) { return mensagem.indexOf(coluna) >= 0; });
+      colunas = faltou.length ? colunas.filter(function (coluna) { return faltou.indexOf(coluna) < 0; }) : [];
+    }
+    if (!result.error) {
+      COLUNAS_PLANO.forEach(function (coluna) { PLANOS[coluna].noBanco = colunas.indexOf(coluna) >= 0; });
     }
     atualizaCampoDePlano();
 
@@ -241,7 +285,7 @@
       c.plano_catalogo = comoPlanoAtual(c.plano_catalogo);
       return c;
     });
-    filtroPlanoEl.parentNode.hidden = !planosNoBanco;
+    COLUNAS_PLANO.forEach(function (coluna) { PLANOS[coluna].filtroEl.parentNode.hidden = !planoNoBanco(coluna); });
     atualizaContagemDePlanos();
     renderLista();
   }
@@ -279,18 +323,25 @@
     pill.textContent = formatStatus(company.status);
     head.appendChild(pill);
 
-    if (planosNoBanco) {
+    // Uma célula só (a grade do cabeçalho tem 5 colunas), uma linha por plano.
+    var colunasNoBanco = COLUNAS_PLANO.filter(planoNoBanco);
+    if (colunasNoBanco.length) {
       var planoTxt = document.createElement('span');
       planoTxt.className = 'sa-row-plano';
-      if (company.plano_catalogo) {
-        planoTxt.appendChild(document.createTextNode('Plano '));
-        var forte = document.createElement('strong');
-        forte.textContent = formatPlano(company.plano_catalogo);
-        planoTxt.appendChild(forte);
-      } else {
-        planoTxt.textContent = 'Sem plano';
-        planoTxt.className += ' sa-row-sem-plano';
-      }
+      colunasNoBanco.forEach(function (coluna) {
+        var item = document.createElement('span');
+        item.className = 'sa-row-plano-item';
+        if (company[coluna]) {
+          item.appendChild(document.createTextNode(PLANOS[coluna].rotuloLista + ' '));
+          var forte = document.createElement('strong');
+          forte.textContent = formatPlano(company[coluna]);
+          item.appendChild(forte);
+        } else {
+          item.textContent = PLANOS[coluna].rotuloLista + ' sem plano';
+          item.className += ' sa-row-sem-plano';
+        }
+        planoTxt.appendChild(item);
+      });
       head.appendChild(planoTxt);
     }
 
@@ -373,8 +424,10 @@
     statusRow.appendChild(statusMsg);
     main.appendChild(statusRow);
 
-    if (planosNoBanco) main.appendChild(buildPlanoRow(company, companyLabel));
-    if (planosNoBanco && dominiosNoBanco) main.appendChild(buildDominioRow(company, companyLabel));
+    COLUNAS_PLANO.forEach(function (coluna) {
+      if (planoNoBanco(coluna)) main.appendChild(buildPlanoRow(company, companyLabel, coluna));
+    });
+    if (planoNoBanco('plano_catalogo') && dominiosNoBanco) main.appendChild(buildDominioRow(company, companyLabel));
 
     var detalhes = document.createElement('div');
     detalhes.className = 'sa-row-details';
@@ -417,24 +470,26 @@
     return row;
   }
 
-  // Plano do Catálogo da empresa: selo com o plano atual + seletor para trocar
-  // (Básico <-> PRO). Mesmo jeito do status: grava direto pelo Supabase
-  // (policy upd_companies_platform) e recarrega a lista.
-  function buildPlanoRow(company, companyLabel) {
-    var planoAtual = company.plano_catalogo || '';
+  // Plano da empresa numa coluna (plano_catalogo ou plano_crm, ver PLANOS):
+  // selo com o plano atual + seletor para trocar (Básico <-> PRO). Mesmo jeito
+  // do status: grava direto pelo Supabase (policy upd_companies_platform) e
+  // recarrega a lista.
+  function buildPlanoRow(company, companyLabel, coluna) {
+    var cfg = PLANOS[coluna];
+    var planoAtual = company[coluna] || '';
 
     var row = document.createElement('div');
     row.className = 'cf-status-row cf-plano-row';
 
     var rotulo = document.createElement('span');
     rotulo.className = 'cf-plano-rotulo';
-    rotulo.textContent = 'Plano do catálogo';
+    rotulo.textContent = 'Plano do ' + cfg.nome;
     row.appendChild(rotulo);
 
     var select = document.createElement('select');
     select.className = 'cf-status-select';
-    select.title = 'Alterar o plano do catálogo';
-    select.setAttribute('aria-label', 'Plano do catálogo de ' + companyLabel);
+    select.title = 'Alterar o plano do ' + cfg.nome;
+    select.setAttribute('aria-label', 'Plano do ' + cfg.nome + ' de ' + companyLabel);
     if (!planoAtual) {
       // Empresa sem plano: o seletor mostra o pedido de escolha, que não se
       // pode escolher de volta.
@@ -463,23 +518,10 @@
 
     select.addEventListener('change', function () {
       var novo = select.value;
-      // O plano decide o que o cliente pode cadastrar (e se a loja mostra
-      // vídeo): um clique errado no seletor não pode valer sem confirmação.
-      var aviso = 'Mudar o plano do catálogo de ' + companyLabel + ' de "' + formatPlano(planoAtual) +
-        '" para "' + formatPlano(novo) + '"?';
-      if (novo === 'BASICO') {
-        aviso += '\n\nNo Básico: até 100 produtos e sem vídeos (os vídeos já cadastrados saem da loja, mas ficam guardados).' +
-          '\nSe a loja tiver mais de 100 produtos, os primeiros 100 cadastrados continuam na loja; os outros ficam salvos, ' +
-          'bloqueados (em cinza) e fora da loja até ela excluir produtos ou voltar ao PRO.';
-      }
-      if (novo === 'PRO') {
-        aviso += '\n\nNo PRO: até 250 produtos, vídeos de até 15 segundos, domínio próprio e o pagamento online ' +
-          'na loja (Pix e cartão pela InfinitePay). O pagamento online começa desligado: quem liga é o lojista, ' +
-          'na aba Pagamentos.';
-      }
-      if (planoAtual === 'PRO' && novo !== 'PRO') {
-        aviso += '\n\nSaindo do PRO, a loja deixa de oferecer o pagamento online (Pix e cartão).';
-      }
+      // O plano decide o que o cliente pode usar: um clique errado no seletor
+      // não pode valer sem confirmação.
+      var aviso = 'Mudar o plano do ' + cfg.nome + ' de ' + companyLabel + ' de "' + formatPlano(planoAtual) +
+        '" para "' + formatPlano(novo) + '"?' + (cfg.aviso ? cfg.aviso(planoAtual, novo) : '');
       if (!window.confirm(aviso)) {
         select.value = planoAtual;
         return;
@@ -487,19 +529,21 @@
 
       select.disabled = true;
       msg.hidden = true;
+      var mudanca = {};
+      mudanca[coluna] = novo || null;
       supabase
         .from('companies')
-        .update({ plano_catalogo: novo || null })
+        .update(mudanca)
         .eq('id', company.id)
-        .select('id, plano_catalogo')
+        .select('id, ' + coluna)
         .then(function (result) {
           // Mesma razão do status: sem linha devolvida, a RLS barrou em silêncio.
           if (result.error || !result.data || !result.data.length) {
-            console.error('Erro ao atualizar o plano da empresa:', result.error || 'nenhuma linha afetada (RLS?)');
+            console.error('Erro ao atualizar o plano do ' + cfg.nome + ' da empresa:', result.error || 'nenhuma linha afetada (RLS?)');
             select.value = planoAtual;
             select.disabled = false;
             // 23514 = a trava de valores do banco recusou: o plano é novo e a
-            // migration que o aceita (0064 do CRM) ainda não foi aplicada.
+            // migration que o aceita ainda não foi aplicada.
             msg.textContent = result.error && result.error.code === '23514'
               ? 'O banco ainda não aceita o plano ' + formatPlano(novo) + '. Nada foi alterado.'
               : 'Erro ao salvar. Tente novamente.';
@@ -507,7 +551,7 @@
             msg.hidden = false;
             return;
           }
-          company.plano_catalogo = result.data[0].plano_catalogo;
+          company[coluna] = result.data[0][coluna];
           loadCompanies();
         });
     });
@@ -856,14 +900,23 @@
     adminEmail: document.getElementById('nc-admin-email'),
     plano: document.getElementById('nc-plano')
   };
-  var ncPlanoCampo = document.getElementById('nc-plano-campo');
+  // Um campo por plano. Toda empresa nova nasce com o CRM ativo (a rota
+  // /plataforma/empresas da API liga o serviço 'crm'), então o plano do CRM
+  // é pedido sempre, como o do catálogo.
+  PLANOS.plano_catalogo.ncCampo = document.getElementById('nc-plano-campo');
+  PLANOS.plano_catalogo.ncSelect = ncFields.plano;
+  PLANOS.plano_crm.ncCampo = document.getElementById('nc-plano-crm-campo');
+  PLANOS.plano_crm.ncSelect = document.getElementById('nc-plano-crm');
 
-  // Sem a coluna no banco (ver planosNoBanco) o campo some e deixa de ser
-  // obrigatório: a empresa continua sendo criada como antes, neutra.
+  // Sem a coluna no banco (ver PLANOS.noBanco) o campo some e deixa de ser
+  // obrigatório: a empresa continua sendo criada como antes, sem aquele plano.
   function atualizaCampoDePlano() {
-    if (!ncFields || !ncFields.plano || !ncPlanoCampo) return;
-    ncPlanoCampo.hidden = !planosNoBanco;
-    ncFields.plano.required = planosNoBanco;
+    COLUNAS_PLANO.forEach(function (coluna) {
+      var cfg = PLANOS[coluna];
+      if (!cfg.ncCampo || !cfg.ncSelect) return;
+      cfg.ncCampo.hidden = !cfg.noBanco;
+      cfg.ncSelect.required = cfg.noBanco;
+    });
   }
 
   // O plano não vai no POST da API do CRM (ela não conhece planos): depois que
@@ -874,14 +927,15 @@
   // Prazo próprio (8 s): sem ele, um update que trava sem falhar segurava a
   // mensagem com a senha para sempre — e a senha não aparece de novo.
   var GRAVAR_PLANO_PRAZO_MS = 8000;
-  function gravaPlanoDaNovaEmpresa(empresaId, plano) {
-    if (!plano) return Promise.resolve(true);
+  // `planos` = { coluna: valor } só com os escolhidos; vão num update só.
+  function gravaPlanoDaNovaEmpresa(empresaId, planos) {
+    if (!Object.keys(planos).length) return Promise.resolve(true);
     // Plano escolhido e resposta sem o id da empresa (resposta cortada): não
     // dá para gravar, e dizer "salvo" deixaria a empresa sem limite calada.
     if (!empresaId) return Promise.resolve(false);
     var gravacao = supabase
       .from('companies')
-      .update({ plano_catalogo: plano })
+      .update(planos)
       .eq('id', empresaId)
       .select('id')
       .then(function (result) {
@@ -970,7 +1024,11 @@
       if (payload[key] === undefined) delete payload[key];
     });
     // Lido AGORA: o form.reset() do sucesso apaga o campo antes da gravação.
-    var planoEscolhido = planosNoBanco && ncFields.plano ? ncFields.plano.value : '';
+    var planoEscolhido = {};
+    COLUNAS_PLANO.forEach(function (coluna) {
+      var cfg = PLANOS[coluna];
+      if (cfg.noBanco && cfg.ncSelect && cfg.ncSelect.value) planoEscolhido[coluna] = cfg.ncSelect.value;
+    });
 
     newCompanySubmit.disabled = true;
     newCompanyCancel.disabled = true;
@@ -1051,7 +1109,8 @@
       var inicio = comoFoi || 'Empresa criada.';
       var texto = planoGravado
         ? (senha ? inicio + ' Senha temporária do administrador — copie agora, ela não aparece de novo:' : inicio)
-        : inicio + ' Mas o plano do catálogo NÃO foi salvo: escolha o plano na lista de empresas abaixo.' +
+        : inicio + ' Mas o plano (' + Object.keys(plano).map(function (coluna) { return PLANOS[coluna].nome; }).join(' e ') +
+          ') NÃO foi salvo: escolha o plano na lista de empresas abaixo.' +
           (senha ? ' Senha temporária do administrador — copie agora, ela não aparece de novo:' : '');
       showNewCompanyMsg(texto, planoGravado, senha);
       // Limpa os campos (não a mensagem): clicar "Criar empresa" de novo por
