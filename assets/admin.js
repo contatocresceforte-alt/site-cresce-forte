@@ -71,12 +71,84 @@
   // por esta tabela. `noBanco` = false enquanto a coluna não existir (código
   // no ar antes da migration): a lista carrega como antes e a tela não oferece
   // o que não consegue gravar. Cada coluna degrada sozinha.
+  // `servico` = services.key (0017) da linha de liga/desliga onde o seletor
+  // do plano aparece, ao lado do botão.
   var PLANOS = {
-    plano_catalogo: { nome: 'catálogo', rotuloLista: 'Catálogo', noBanco: true, aviso: avisoPlanoCatalogo },
-    plano_crm: { nome: 'CRM', rotuloLista: 'CRM', noBanco: true, aviso: null }
+    plano_catalogo: { nome: 'Catálogo', rotuloLista: 'Catálogo', servico: 'catalogo', noBanco: true, aviso: avisoPlanoCatalogo },
+    plano_crm: { nome: 'CRM', rotuloLista: 'CRM', servico: 'crm', noBanco: true, aviso: avisoPlanoCrm }
   };
   var COLUNAS_PLANO = Object.keys(PLANOS);
   function planoNoBanco(coluna) { return PLANOS[coluna].noBanco; }
+  function colunaDoServico(chave) {
+    return COLUNAS_PLANO.filter(function (coluna) { return PLANOS[coluna].servico === chave; })[0];
+  }
+
+  // O que cada plano do CRM tem. Cópia da aba Ajustes > Planos do próprio CRM
+  // (apps/web/src/CRM.jsx, `const [planos] = useState([`, ramo
+  // web/planos-somente-leitura, 22/11/2026): mudou lá, muda aqui. Daqui saem
+  // os cartões da seção Planos e o aviso da troca de plano.
+  var PLANOS_CRM = {
+    BASICO: {
+      nome: 'Básico', preco: 149,
+      desc: 'Pra quem tá começando a organizar o atendimento',
+      limites: ['1 atendente', '1 número de WhatsApp', '500 contatos'],
+      recursos: [
+        { t: 'Caixa de entrada (Atendimentos)', on: true },
+        { t: 'Funil de vendas (1 funil)', on: true },
+        { t: 'Etiquetas e respostas rápidas', on: true },
+        { t: 'Catálogo de produtos', on: true },
+        { t: 'Respostas automáticas', on: true },
+        { t: 'Múltiplos funis', on: false },
+        { t: 'Automações (Construtor)', on: false },
+        { t: 'Agente de IA', on: false },
+        { t: 'Painel com desempenho da equipe', on: false },
+        { t: 'Integração Instagram / TikTok / Nuvemshop', on: false }
+      ]
+    },
+    PRO: {
+      nome: 'Pro', preco: 249,
+      desc: 'Pra equipe que quer vender mais e automatizar',
+      limites: ['Até 5 atendentes', '3 números de WhatsApp', 'Contatos ilimitados'],
+      recursos: [
+        { t: 'Caixa de entrada (Atendimentos)', on: true },
+        { t: 'Funis ilimitados', on: true },
+        { t: 'Etiquetas e respostas rápidas', on: true },
+        { t: 'Catálogo de produtos', on: true },
+        { t: 'Chatbots ilimitados (fluxos)', on: true },
+        { t: 'Automações (Construtor completo)', on: true },
+        { t: 'Agente de IA', on: true },
+        { t: 'Painel com desempenho da equipe', on: true },
+        { t: 'Integração Instagram / TikTok / Nuvemshop', on: true },
+        { t: 'Suporte prioritário', on: true }
+      ]
+    }
+  };
+  function recursosCrm(plano, on) {
+    return plano.recursos.filter(function (r) { return r.on === on; }).map(function (r) { return r.t; });
+  }
+  function precoCrm(plano) {
+    return plano.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) + '/mês';
+  }
+  // Rebaixando: o que o plano novo NÃO inclui. Subindo: o que o novo tem e o
+  // atual não tinha. Sem plano antes: o plano novo inteiro.
+  function avisoPlanoCrm(planoAtual, novo) {
+    var n = PLANOS_CRM[novo];
+    var a = PLANOS_CRM[planoAtual];
+    if (!n) return '';
+    var aviso = '\n\nCRM ' + n.nome + ' (' + precoCrm(n) + '). Limites passam a: ' + n.limites.join(', ') + '.';
+    if (a && n.preco < a.preco) {
+      var perde = recursosCrm(n, false);
+      if (perde.length) aviso += '\nPerde: ' + perde.join(', ') + '.';
+    } else if (a) {
+      var tinha = recursosCrm(a, true);
+      var ganha = recursosCrm(n, true).filter(function (t) { return tinha.indexOf(t) < 0; });
+      if (ganha.length) aviso += '\nGanha: ' + ganha.join(', ') + '.';
+    } else {
+      aviso += '\nInclui: ' + recursosCrm(n, true).join(', ') + '.';
+      if (recursosCrm(n, false).length) aviso += '\nNão inclui: ' + recursosCrm(n, false).join(', ') + '.';
+    }
+    return aviso;
+  }
 
   function avisoPlanoCatalogo(planoAtual, novo) {
     var aviso = '';
@@ -177,12 +249,72 @@
     });
   });
 
+  // Cartões do CRM: montados de PLANOS_CRM (mesma fonte do aviso de troca).
+  var cartoesCrmEl = document.getElementById('planos-crm');
+  function cartaoCrm(titulo, classe, idConta, plano) {
+    var card = document.createElement('article');
+    card.className = 'sa-plano-card' + (classe ? ' ' + classe : '');
+    var h = document.createElement('h2');
+    h.textContent = titulo;
+    card.appendChild(h);
+    var linha = document.createElement('p');
+    linha.className = 'sa-plano-preco';
+    card.appendChild(linha);
+    if (plano) {
+      linha.textContent = precoCrm(plano) + ' \u2014 ' + plano.desc;
+      [['Limites', plano.limites], ['Inclui', recursosCrm(plano, true)], ['Não inclui', recursosCrm(plano, false)]].forEach(function (bloco) {
+        if (!bloco[1].length) return;
+        var sub = document.createElement('p');
+        sub.className = 'sa-plano-sub';
+        sub.textContent = bloco[0];
+        card.appendChild(sub);
+        var ul = document.createElement('ul');
+        bloco[1].forEach(function (t) {
+          var li = document.createElement('li');
+          li.textContent = t;
+          ul.appendChild(li);
+        });
+        card.appendChild(ul);
+      });
+    } else {
+      linha.textContent = 'Empresas ainda sem plano do CRM: escolha na lista de clientes, na linha do CRM.';
+    }
+    var conta = document.createElement('p');
+    conta.className = 'sa-plano-conta';
+    conta.id = idConta;
+    conta.textContent = '\u2014';
+    card.appendChild(conta);
+    return card;
+  }
+  if (cartoesCrmEl) {
+    cartoesCrmEl.appendChild(cartaoCrm('CRM ' + PLANOS_CRM.BASICO.nome, '', 'conta-crm-basico', PLANOS_CRM.BASICO));
+    cartoesCrmEl.appendChild(cartaoCrm('CRM ' + PLANOS_CRM.PRO.nome, 'sa-plano-pro', 'conta-crm-pro', PLANOS_CRM.PRO));
+    cartoesCrmEl.appendChild(cartaoCrm('CRM sem plano', 'sa-plano-sem', 'conta-crm-sem', null));
+  }
+
   function atualizaContagemDePlanos() {
-    var conta = { BASICO: 0, PRO: 0 };
-    todasEmpresas.forEach(function (c) { if (conta[c.plano_catalogo] !== undefined) conta[c.plano_catalogo] += 1; });
     var frase = function (n) { return n === 1 ? '1 empresa neste plano' : n + ' empresas neste plano'; };
-    document.getElementById('conta-basico').textContent = planoNoBanco('plano_catalogo') ? frase(conta.BASICO) : '—';
-    document.getElementById('conta-pro').textContent = planoNoBanco('plano_catalogo') ? frase(conta.PRO) : '—';
+    function contar(coluna) {
+      var conta = { BASICO: 0, PRO: 0, SEM: 0 };
+      todasEmpresas.forEach(function (c) {
+        if (!c[coluna]) conta.SEM += 1;
+        else if (conta[c[coluna]] !== undefined) conta[c[coluna]] += 1;
+      });
+      return conta;
+    }
+    function escreve(id, coluna, texto) {
+      var el = document.getElementById(id);
+      if (el) el.textContent = planoNoBanco(coluna) ? texto : '\u2014';
+    }
+    var cat = contar('plano_catalogo');
+    escreve('conta-basico', 'plano_catalogo', frase(cat.BASICO));
+    escreve('conta-pro', 'plano_catalogo', frase(cat.PRO));
+    // "Sem plano" do CRM conta toda empresa sem plano_crm, com o CRM ligado
+    // ou não (a lista não carrega company_services).
+    var crm = contar('plano_crm');
+    escreve('conta-crm-basico', 'plano_crm', frase(crm.BASICO));
+    escreve('conta-crm-pro', 'plano_crm', frase(crm.PRO));
+    escreve('conta-crm-sem', 'plano_crm', crm.SEM === 1 ? '1 empresa' : crm.SEM + ' empresas');
   }
 
   function passaNosFiltrosDePlano(c) {
@@ -424,9 +556,7 @@
     statusRow.appendChild(statusMsg);
     main.appendChild(statusRow);
 
-    COLUNAS_PLANO.forEach(function (coluna) {
-      if (planoNoBanco(coluna)) main.appendChild(buildPlanoRow(company, companyLabel, coluna));
-    });
+    // Os seletores de plano ficam na linha de cada serviço (buildServiceToggleRow).
     if (planoNoBanco('plano_catalogo') && dominiosNoBanco) main.appendChild(buildDominioRow(company, companyLabel));
 
     var detalhes = document.createElement('div');
@@ -458,7 +588,7 @@
       if (mostrar) abertas[company.id] = true; else delete abertas[company.id];
       if (mostrar && !loaded && !carregando) {
         carregando = true;
-        loadServicesForCompany(company.id, panel).then(function (ok) {
+        loadServicesForCompany(company, panel).then(function (ok) {
           carregando = false;
           loaded = !!ok;
         });
@@ -749,7 +879,8 @@
     return row;
   }
 
-  async function loadServicesForCompany(companyId, panel) {
+  async function loadServicesForCompany(company, panel) {
+    var companyId = company.id;
     panel.innerHTML = '<p class="cf-loading">Carregando serviços...</p>';
 
     var servicesResult = await supabase
@@ -787,14 +918,18 @@
     }
 
     services.forEach(function (service) {
-      panel.appendChild(buildServiceToggleRow(companyId, service, !!activeMap[service.id]));
+      panel.appendChild(buildServiceToggleRow(company, service, !!activeMap[service.id]));
     });
     // Usuários da empresa (Super Admin, 27/09) — módulo próprio, admin-usuarios.js.
     if (window.CresceForteAdminUsuarios) window.CresceForteAdminUsuarios.montar(companyId, panel);
     return true;
   }
 
-  function buildServiceToggleRow(companyId, service, isActive) {
+  // Uma linha por serviço: nome, plano daquele serviço (se ele tem plano e a
+  // coluna existe) e o liga/desliga. O plano fica ativo mesmo com o serviço
+  // desligado: dá para deixar escolhido antes de ligar.
+  function buildServiceToggleRow(company, service, isActive) {
+    var companyId = company.id;
     var row = document.createElement('div');
     row.className = 'cf-service-row';
 
@@ -802,6 +937,12 @@
     nameEl.className = 'cf-service-name';
     nameEl.textContent = service.name;
     row.appendChild(nameEl);
+
+    var coluna = colunaDoServico(service.key);
+    if (coluna && planoNoBanco(coluna)) {
+      row.className += ' cf-service-row-com-plano';
+      row.appendChild(buildPlanoRow(company, company.trade_name || company.legal_name || 'empresa sem nome', coluna));
+    }
 
     var msgEl = document.createElement('span');
     msgEl.className = 'cf-service-msg';

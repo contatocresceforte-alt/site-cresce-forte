@@ -294,6 +294,10 @@
 .sa-plano-card ul { margin: 0 0 18px; padding-left: 18px; font-size: 14px; line-height: 1.7; color: #3d5768; }
 .sa-plano-pro { border-color: rgba(19, 138, 92, 0.4); }
 .sa-plano-premium { border-color: rgba(176, 124, 20, 0.5); }
+.sa-planos-grupo { display: contents; }
+.sa-plano-preco { margin: -6px 0 14px; font-size: 13.5px; color: #3d5768; }
+.sa-plano-sub { margin: 0 0 4px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #56707e; }
+.sa-plano-sem { border-style: dashed; }
 .sa-plano-conta { margin: 0; font-size: 14px; font-weight: 600; color: #138a5c; }
 
 /* ---------- celular e tablet ---------- */

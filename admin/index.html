@@ -12,8 +12,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" media="print">
 <script src="/assets/font-swap.js?v=1"></script>
 <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="/assets/admin-page.css?v=5">
-<link rel="stylesheet" href="/assets/admin-shell.css?v=4">
+<link rel="stylesheet" href="/assets/admin-page.css?v=6">
+<link rel="stylesheet" href="/assets/admin-shell.css?v=5">
 </head>
 <body class="sa-body">
 <div class="sa-shell">
@@ -158,7 +158,7 @@
     <!-- PLANOS -->
     <section class="sa-planos" id="secao-planos" aria-labelledby="nav-planos" hidden>
       <article class="sa-plano-card">
-        <h2>Plano Básico</h2>
+        <h2>Catálogo Básico</h2>
         <ul>
           <li>Até <strong>100 produtos</strong></li>
           <li>Sem vídeos</li>
@@ -167,7 +167,7 @@
         <p class="sa-plano-conta" id="conta-basico">—</p>
       </article>
       <article class="sa-plano-card sa-plano-pro">
-        <h2>Plano PRO</h2>
+        <h2>Catálogo PRO</h2>
         <ul>
           <li>Até <strong>250 produtos</strong></li>
           <li>Vídeos de até <strong>15 segundos</strong></li>
@@ -176,6 +176,8 @@
         </ul>
         <p class="sa-plano-conta" id="conta-pro">—</p>
       </article>
+      <!-- Cartões do CRM: montados por assets/admin.js (PLANOS_CRM). -->
+      <div class="sa-planos-grupo" id="planos-crm"></div>
     </section>
   </main>
 </div>
@@ -184,6 +186,6 @@
 <script src="/assets/sessao-do-navegador.js?v=1"></script>
 <script src="/assets/auth.js?v=7"></script>
 <script src="/assets/admin-usuarios.js?v=1"></script>
-<script src="/assets/admin.js?v=14"></script>
+<script src="/assets/admin.js?v=15"></script>
 </body>
 </html>

@@ -90,6 +90,15 @@
   border-bottom: 1px solid rgba(13,43,62,0.06);
 }
 .cf-service-row:last-child { border-bottom: none; }
+/* Serviço com plano: nome, seletor do plano e liga/desliga na mesma linha;
+   no estreito o seletor desce para baixo do nome. */
+.cf-service-row-com-plano { flex-wrap: wrap; }
+.cf-service-row-com-plano .cf-plano-row { order: 3; flex-basis: 100%; }
+@media (min-width: 640px) {
+  .cf-service-row-com-plano { flex-wrap: nowrap; }
+  .cf-service-row-com-plano .cf-plano-row { order: 0; flex-basis: auto; }
+}
+.cf-service-row-com-plano .cf-status-msg { white-space: normal; min-width: 0; }
 .cf-service-name { flex: 1; font-size: 13.5px; font-weight: 600; color: #0d2b3e; }
 .cf-service-msg { font-size: 12px; color: #56707e; white-space: nowrap; }
 .cf-service-msg-ok { color: #3f6f00; }
