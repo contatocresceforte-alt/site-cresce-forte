@@ -114,6 +114,7 @@
         { t: 'Funis ilimitados', on: true },
         { t: 'Etiquetas e respostas rápidas', on: true },
         { t: 'Catálogo de produtos', on: true },
+        { t: 'Respostas automáticas', on: true },
         { t: 'Chatbots ilimitados (fluxos)', on: true },
         { t: 'Automações (Construtor completo)', on: true },
         { t: 'Agente de IA', on: true },
