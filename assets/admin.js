@@ -331,7 +331,8 @@
     var lista = todasEmpresas.filter(function (c) {
       if (!passaNosFiltrosDePlano(c)) return false;
       if (!termo) return true;
-      return semAcento(c.trade_name).indexOf(termo) >= 0 || semAcento(c.legal_name).indexOf(termo) >= 0;
+      return semAcento(c.trade_name).indexOf(termo) >= 0 || semAcento(c.legal_name).indexOf(termo) >= 0 ||
+        !!(c.loja && c.loja.grupoNome && semAcento(c.loja.grupoNome).indexOf(termo) >= 0);
     });
 
     companiesListEl.innerHTML = '';
@@ -386,6 +387,7 @@
     companiesListEl.innerHTML = '<p class="cf-loading">Carregando empresas...</p>';
 
     var dominiosCarregados = carregaDominios();
+    var lojasCarregadas = carregaLojas();
     // 42703 = coluna inexistente (a migration 0058 ou a 0065 ainda não rodou):
     // tira da consulta a coluna que faltou (o PostgREST a nomeia na mensagem;
     // sem nome, tira todas as de plano) e carrega a lista sem aquela parte,
@@ -414,8 +416,10 @@
     }
 
     await dominiosCarregados;
+    var lojas = await lojasCarregadas;
     todasEmpresas = (result.data || []).map(function (c) {
       c.plano_catalogo = comoPlanoAtual(c.plano_catalogo);
+      c.loja = lojas[c.id] || null;
       return c;
     });
     COLUNAS_PLANO.forEach(function (coluna) { PLANOS[coluna].filtroEl.parentNode.hidden = !planoNoBanco(coluna); });
@@ -449,11 +453,23 @@
     legalEl.className = 'cf-company-legal';
     legalEl.textContent = company.legal_name && company.legal_name !== company.trade_name ? company.legal_name : '\u2014';
     info.appendChild(legalEl);
+    // Várias lojas do mesmo dono: em que grupo a empresa está.
+    if (company.loja && company.loja.grupoId) {
+      var grupoEl = document.createElement('span');
+      grupoEl.className = 'cf-company-legal';
+      grupoEl.textContent = 'Grupo ' + (company.loja.grupoNome || 'sem nome') + ' · ' +
+        (company.loja.principal ? 'loja principal' : 'loja extra');
+      info.appendChild(grupoEl);
+    }
     head.appendChild(info);
 
     var pill = document.createElement('span');
     pill.className = 'sa-pill sa-pill-' + String(company.status || 'NONE').toLowerCase();
     pill.textContent = formatStatus(company.status);
+    if (company.loja && company.loja.lojaPendente) {
+      pill.className = 'sa-pill sa-pill-suspended';
+      pill.textContent = 'Aguardando liberação · adicional';
+    }
     head.appendChild(pill);
 
     // Uma célula só (a grade do cabeçalho tem 5 colunas), uma linha por plano.
@@ -556,6 +572,7 @@
     statusRow.appendChild(statusSelect);
     statusRow.appendChild(statusMsg);
     main.appendChild(statusRow);
+    if (company.loja && company.loja.lojaPendente) main.appendChild(buildLiberarLojaRow(company, companyLabel));
 
     // Os seletores de plano ficam na linha de cada serviço (buildServiceToggleRow).
     if (planoNoBanco('plano_catalogo') && dominiosNoBanco) main.appendChild(buildDominioRow(company, companyLabel));
@@ -688,6 +705,78 @@
     });
 
     return row;
+  }
+
+  // Várias lojas do mesmo dono (fase 3): grupo e "aguardando liberação" vêm
+  // da API do CRM (GET /plataforma/empresas), casados por id com a lista do
+  // Supabase. Falhou, demorou ou o banco ainda não tem grupos: {} e a lista
+  // fica exatamente como era.
+  var LOJAS_PRAZO_MS = 8000;
+  async function carregaLojas() {
+    try {
+      var sessao = await supabase.auth.getSession();
+      var token = sessao.data && sessao.data.session && sessao.data.session.access_token;
+      if (!token) return {};
+      var res = await Promise.race([
+        fetch(PLATFORM_API_BASE + '/plataforma/empresas', { headers: { 'Authorization': 'Bearer ' + token } }),
+        new Promise(function (_, falha) { setTimeout(function () { falha(new Error('prazo')); }, LOJAS_PRAZO_MS); })
+      ]);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      var corpo = await res.json();
+      var mapa = {};
+      ((corpo && corpo.dados) || []).forEach(function (e) { mapa[e.id] = e; });
+      return mapa;
+    } catch (erro) {
+      console.warn('Grupos de lojas indisponíveis nesta tela:', (erro && erro.message) || 'sem detalhe');
+      return {};
+    }
+  }
+
+  function buildLiberarLojaRow(company, companyLabel) {
+    var linha = document.createElement('div');
+    linha.className = 'cf-status-row';
+    var botao = document.createElement('button');
+    botao.type = 'button';
+    botao.className = 'cf-primary-btn cf-btn-sm';
+    botao.textContent = 'Liberar loja';
+    var msg = document.createElement('span');
+    msg.className = 'cf-status-msg';
+    msg.setAttribute('role', 'status');
+    msg.setAttribute('aria-live', 'polite');
+    msg.hidden = true;
+    botao.addEventListener('click', function () {
+      if (!window.confirm('Liberar a loja ' + companyLabel + '? Lembre de cobrar o adicional.')) return;
+      botao.disabled = true;
+      msg.hidden = true;
+      supabase.auth.getSession()
+        .then(function (sessao) {
+          var token = sessao.data && sessao.data.session && sessao.data.session.access_token;
+          if (!token) throw new Error('Sessão expirada. Recarregue a página e faça login novamente.');
+          return fetch(PLATFORM_API_BASE + '/plataforma/empresas/' + encodeURIComponent(company.id) + '/liberar-loja', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token }
+          });
+        })
+        .then(function (res) {
+          return res.json().catch(function () { return {}; }).then(function (corpo) {
+            if (!res.ok) throw new Error((corpo.erro && corpo.erro.mensagem) || ('Falha ao liberar a loja (HTTP ' + res.status + ').'));
+            loadCompanies();
+          });
+        })
+        .catch(function (erro) {
+          botao.disabled = false;
+          // Queda de rede (TypeError do fetch): a liberação pode ter chegado ao
+          // servidor. Liberar de novo é seguro (responde loja_nao_pendente).
+          msg.textContent = erro instanceof TypeError
+            ? 'Não consegui falar com o servidor. Recarregue a página e confira se a loja já foi liberada.'
+            : (erro.message || 'Não foi possível liberar a loja.');
+          msg.className = 'cf-status-msg cf-status-msg-error';
+          msg.hidden = false;
+        });
+    });
+    linha.appendChild(botao);
+    linha.appendChild(msg);
+    return linha;
   }
 
   // Lê os domínios de todas as empresas de uma vez (são poucos). Qualquer erro
